@@ -1,6 +1,6 @@
 // TODO move out to .wgsl(need wgsl loader for webpack)
 const vertexShaderWGSL = `
-@stage(vertex)
+@vertex
 fn main(@builtin(vertex_index) VertexIndex : u32)
      -> @builtin(position) vec4<f32> {
   var pos = array<vec2<f32>, 3>(
@@ -13,7 +13,7 @@ fn main(@builtin(vertex_index) VertexIndex : u32)
     `;
 
 const fragmentShaderWGSL = `
-@stage(fragment)
+@fragment
 fn main() -> @location(0) vec4<f32> {
   return vec4<f32>(1.0, 0.0, 0.0, 1.0);
 }
@@ -38,22 +38,25 @@ const init = async (canvas) => {
   if (canvas === null) return;
   const context = canvas.getContext('webgpu');
 
-  const devicePixelRatio = window.devicePixelRatio || 1;
-  const presentationSize = [
-    canvas.clientWidth * devicePixelRatio,
-    canvas.clientHeight * devicePixelRatio,
-  ];
-  const presentationFormat = context.getPreferredFormat(adapter);
+  // const devicePixelRatio = window.devicePixelRatio || 1;
+  // const presentationSize = [
+  //   canvas.clientWidth * devicePixelRatio,
+  //   canvas.clientHeight * devicePixelRatio,
+  // ];
+  const presentationFormat = navigator.gpu.getPreferredCanvasFormat();
+
 
   // https://www.w3.org/TR/webgpu/#dictdef-gpucanvasconfiguration
   context.configure({
     device,
     format: presentationFormat,
     // https://www.w3.org/TR/webgpu/#context-sizing
-    size: presentationSize,
+    // size: presentationSize,
+    alphaMode: "premultiplied"
   });
 
   const pipeline = device.createRenderPipeline({
+    layout: "auto",
     vertex: {
       module: device.createShaderModule({
         code: vertexShaderWGSL,
