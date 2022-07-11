@@ -1,0 +1,77 @@
+* TODO draw one ring
+
+use ray-tracing: screen ?
+
+AccelerationStructure:
+c, w, r
+(purpose: local = world)
+
+
+# first judge(fast)
+first judge(fast): 2d aabb
+second judge(precise)
+
+
+
+
+get first one(add z?)
+
+
+screen coordinate?
+
+
+cpu:
+
+scene buffer:
+transform: pos(c), scale
+	use 2(position) + 2(scale) instead of 16(world matrix)!
+geometry: w, r
+material: color
+
+render ArrayBuffer:  map to gpu
+
+
+1b * n byte = n GB
+
+
+* TODO draw 2 ring
+
+
+* TODO early-z
+
+
+
+
+* TODO draw 1b ring
+
+
+* TODO perf: use 2d bvh
+
+
+* TODO perf: optimize memory
+
+
+compress?
+
+...
+
+
+
+
+* TODO camera scale, move
+
+
+* TODO object rotate, move
+
+perf: 2d matrix operate!
+
+
+* TODO select object
+
+
+
+
+* TODO draw arc
+
+
+
