@@ -23,8 +23,10 @@ screen coordinate?
 cpu:
 
 scene buffer:
-transform: pos(c), scale
-	use 2(position) + 2(scale) instead of 16(world matrix)!
+# transform: pos(c), scale
+# 	use 2(position) + 2(scale) instead of 16(world matrix)!
+transform: pos(c)
+	use 2(position) instead of 16(world matrix)!
 geometry: w, r
 material: color
 
@@ -34,7 +36,8 @@ render ArrayBuffer:  map to gpu
 1b * n byte = n GB
 
 
-* TODO draw 2 ring
+* TODO draw 2 ring + camera
+
 
 
 * TODO early-z
