@@ -14,16 +14,21 @@ struct Instance {
   geometryIndex: f32;
   materialIndex: f32;
 
-  position: vec2<f32>;
+  // position: vec2<f32>;
+
+  // TODO remove pad?
+  pad_0: f32;
+  pad_1: f32;
 };
 
 
 struct Geometry {
+  c: vec2<f32>;
   w: f32;
   r: f32;
-  // TODO remove pad?
-  pad_0: f32;
-  pad_1: f32;
+  // // TODO remove pad?
+  // pad_0: f32;
+  // pad_1: f32;
 };
 
 struct Material {
@@ -32,37 +37,42 @@ struct Material {
   pad_0: f32;
 };
 
-[[block]] struct AccelerationStructures {
-  accelerationStructures : [[stride(32)]] array<AccelerationStructure>;
+ struct AccelerationStructures {
+  accelerationStructures : array<AccelerationStructure>;
 };
 
-[[block]] struct Instances {
-  instances : [[stride(16)]] array<Instance>;
+ struct Instances {
+  instances :  array<Instance>;
 };
 
-[[block]] struct Geometrys {
-  geometrys : [[stride(16)]] array<Geometry>;
+ struct Geometrys {
+  geometrys :  array<Geometry>;
 };
 
-[[block]] struct Materials {
-  material : [[stride(16)]] array<Material>;
+ struct Materials {
+  material :  array<Material>;
 };
 
-[[block]] struct Pixels {
+ struct Pixels {
   pixels : vec4<f32>
 };
 
-[[binding(0), group(0)]] var<storage> SceneAccelerationStructure : [[access(read)]] AccelerationStructures;
-[[binding(1), group(0)]] var<storage> SceneInstanceData : [[access(read)]] Instances;
-[[binding(2), group(0)]] var<storage> SceneGeometryData : [[access(read)]] Geometrys;
-[[binding(3), group(0)]] var<storage> SceneMaterialData : [[access(read)]] Materials;
+ struct ScreenDimension {
+  resolution : vec2<f32>
+};
 
-[[binding(4), group(0)]] var<storage> PixelBuffer : [[access(read_write)]] Pixels;
+@binding(0) @group(0) var<storage, read> sceneAccelerationStructure :  AccelerationStructures;
+@binding(1) @group(0) var<storage, read> sceneInstanceData :  Instances;
+@binding(2) @group(0) var<storage, read> sceneGeometryData :  Geometrys;
+@binding(3) @group(0) var<storage, read> sceneMaterialData :  Materials;
+
+@binding(4) @group(0) var<storage, read_write> pixelBuffer :  Pixels;
+
+@binding(5) @group(0) var<uniform> screenDimension : ScreenDimension;
 
 
 
-// [[stage(compute), workgroup_size(64)]]
-[[stage(compute)]]
-fn main([[builtin(global_invocation_id)]] GlobalInvocationID : vec3<u32>) {
+@compute
+fn main(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>) {
 }
 `

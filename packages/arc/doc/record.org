@@ -48,7 +48,21 @@ render ArrayBuffer:  map to gpu
 * TODO draw 1b ring
 
 
+
+* TODO camera scale, move
+
+
+* TODO draw arc
+
+
 * TODO perf: use 2d bvh
+
+
+* TODO commit to user
+
+
+
+
 
 
 * TODO perf: optimize memory
@@ -61,8 +75,6 @@ compress?
 
 
 
-* TODO camera scale, move
-
 
 * TODO object rotate, move
 
@@ -74,7 +86,6 @@ perf: 2d matrix operate!
 
 
 
-* TODO draw arc
 
 
 
