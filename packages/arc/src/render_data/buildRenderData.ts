@@ -15,6 +15,8 @@ export let buildSceneAccelerationStructureBufferData = (state, device) => {
 		let r = getR(geometry, state)
 
 		let { min, max } = computeRingAABB(c, r, w)
+		// console.log(c, w, r, { min, max });
+		
 
 		bufferDataArr.push(
 			min[0],

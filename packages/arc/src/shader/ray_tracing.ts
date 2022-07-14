@@ -108,7 +108,9 @@ fn _isIntersectWithRing(ray: Ray, geometry: Geometry) -> bool {
   var w = geometry.w;
   var r = geometry.r;
 
-return target.x > c.x - r - w && target.x < c.x - r && target.y > c.y + r && target.y < c.y + r + w;
+  var distanceSquare = pow(target.x - c.x, 2.0) + pow( target.y - c.y, 2.0);
+
+  return distanceSquare >= pow(r, 2) && distanceSquare <= pow(r + w, 2);
 }
 
 
@@ -141,7 +143,6 @@ var geometryIndex = u32(instance.geometryIndex);
   return intersectResult;
 }
 
-// fn _handleRayClosestHit(payload: ptr<private,RayPayload>, ray: Ray, intersectResult: RingIntersect)->bool {
 fn _handleRayClosestHit(payload: ptr<function,RayPayload>, ray: Ray, intersectResult: RingIntersect)->bool {
 var instance: Instance = sceneInstanceData.instances[u32(intersectResult.instanceIndex)];
 var materialIndex = u32(instance.materialIndex);
@@ -153,14 +154,13 @@ var materialIndex = u32(instance.materialIndex);
 return false;
 }
 
-// fn _handleRayMiss(payload: ptr<private,RayPayload>)->bool {
 fn _handleRayMiss(payload: ptr<function,RayPayload>)->bool {
 (*payload).radiance = vec3<f32>(0.0, 0.0, 0.0);
+// (*payload).radiance = vec3<f32>(1.0, 1.0, 0.0);
 
 return false;
 }
 
-// fn _traceRay(ray: Ray, payload: ptr<private,RayPayload>)->bool {
 fn _traceRay(ray: Ray, payload: ptr<function,RayPayload>)->bool {
   var intersectResult: RingIntersect = _intersectScene(ray);
 
@@ -173,44 +173,6 @@ fn _traceRay(ray: Ray, payload: ptr<function,RayPayload>)->bool {
 
 @compute @workgroup_size(1, 1, 1)
 fn main(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>) {
-//   var vec2<u32> ipos = vec2(GlobalInvocationID.x, GlobalInvocationID.y);
-
-//   var resolution = vec2<f32>(screenDimension.resolution)
-
-//   vec3 pixelColor = vec3<f32>(0.0, 0.0, 0.0);
-
-
-//     // vec4 origin = uCamera.viewInverse * vec4(0, 0, 0, 1);
-//     vec4<f32> origin = vec4<f32>(0, 0, 0, 1);
-
-//     var vec2<f32> sampledPixel = vec2<f32>(ipos.x + 0.5, ipos.y + 0.5);
-
-//     var vec2<f32> uv = (sampledPixel / resolution) * 2.0 - 1.0;
-
-//     // vec4 target = uCamera.projectionInverse * (vec4(uv.x, uv.y, -1, 1));
-//     vec4<f32> target = vec4<f32>(uv.x, uv.y, -1, 1);
-
-//     vec4<f32> direction =
-//         // normalize(uCamera.viewInverse * vec4(normalize(target.xyz), 0));
-//         vec4<f32>(normalize(target.xyz), 0);
-
-//     vec3<f32> wi = direction.xyz;
-
-
-//   RayPayload payload;
-//     payload.radiance = vec3<f32>(0.0, 0.0, 0.0);
-
-// _traceRay( Ray(origin.xyz, wi, uCamera.near, uCamera.far), payload);
-
-
-//     pixelColor = payload.radiance;
-
-//   var u32 pixelIndex = ipos.y * i32(resolution.x) + ipos.x;
-//   pixelBuffer.pixels[pixelIndex] = vec4<f32>(pixelColor, 1.0);
-
-
-
-
   var ipos = vec2<u32>(GlobalInvocationID.x, GlobalInvocationID.y);
 
   var resolution = vec2<f32>(screenDimension.resolution);
@@ -236,14 +198,6 @@ fn main(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>) {
     // var wi = direction.xyz;
 
 
-  // let payload: ptr<private, RayPayload>;
-  //   payload.radiance = vec3<f32>(0.0, 0.0, 0.0);
-  // let payload: ptr<private, RayPayload> = {
-  //   radiance: vec3<f32>(0.0, 0.0, 0.0)
-  // }
-
-  // var payload: ptr<function, RayPayload>;
-  //   (*payload).radiance = vec3<f32>(0.0, 0.0, 0.0);
   var payload: RayPayload;
     payload.radiance = vec3<f32>(0.0, 0.0, 0.0);
 
@@ -251,10 +205,10 @@ fn main(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>) {
 var isContinueBounce = _traceRay( Ray(target.xy), &payload);
 
 
-    // pixelColor = (*payload).radiance;
     pixelColor = payload.radiance;
 
   var pixelIndex = ipos.y * u32(resolution.x) + ipos.x;
   pixelBuffer.pixels[pixelIndex] = vec4<f32>(pixelColor, 1.0);
+  // pixelBuffer.pixels[pixelIndex] = vec4<f32>(1.0,0.0,0.0, 1.0);
 }
 `

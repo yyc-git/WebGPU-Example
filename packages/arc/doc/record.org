@@ -1,4 +1,4 @@
-* TODO draw one ring
+* DONE draw one ring
 
 use ray-tracing: screen ?
 
@@ -36,7 +36,7 @@ render ArrayBuffer:  map to gpu
 1b * n byte = n GB
 
 
-* TODO draw 2 ring + camera
+* TODO draw 2 ring
 
 
 
@@ -53,6 +53,8 @@ render ArrayBuffer:  map to gpu
 
 
 * TODO camera scale, move
+
+
 
 
 * TODO draw arc

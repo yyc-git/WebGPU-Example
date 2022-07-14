@@ -42,6 +42,8 @@ fn main(
   var pixelColor = pixelBuffer.pixels[pixelIndex].rgb;
 
   return vec4<f32>(pixelColor, 1.0);
+  // return vec4<f32>(1.0, 0.0, 0.0, 1.0);
+  // return vec4<f32>(uv, 0.0, 1.0);
 }
 `;
 
