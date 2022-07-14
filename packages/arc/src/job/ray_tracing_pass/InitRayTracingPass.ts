@@ -58,19 +58,12 @@ export let exec = (state) => {
 			{
 				binding: 4,
 				resource: {
-					buffer: geometryDataBuffer,
-					size: geometryDataBufferSize
-				},
-			},
-			{
-				binding: 5,
-				resource: {
 					buffer: pixelBuffer,
 					size: pixelBufferSize
 				},
 			},
 			{
-				binding: 6,
+				binding: 5,
 				resource: {
 					buffer: resolutionBuffer,
 					size: resolutionData.byteLength

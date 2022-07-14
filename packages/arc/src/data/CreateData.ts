@@ -20,25 +20,28 @@ type state = {
 	context: GPUCanvasContext | null,
 	format: GPUTextureFormat | null,
 
-	transformBuffer: Float32Array,
-	geometryBuffer: Float32Array,
-	materialBuffer: Float32Array,
+	transformBuffer: Float32Array | null,
+	geometryBuffer: Float32Array | null,
+	materialBuffer: Float32Array | null,
 
 	pass: pass,
 	rayTracingPass: rayTracingPass,
 	screenPass: screenPass
 }
 
-let createState = (count) => {
+export let createState = () => {
 	return {
 		canvas: null,
 		adapter: null,
 		device: null,
 		context: null,
 		format: null,
-		transformBuffer: new Float32Array(count * 2),
-		geometryBuffer: new Float32Array(count * 4),
-		materialBuffer: new Float32Array(count * 3),
+		// transformBuffer: new Float32Array(count * 2),
+		// geometryBuffer: new Float32Array(count * 4),
+		// materialBuffer: new Float32Array(count * 3),
+		transformBuffer: null,
+		geometryBuffer: null,
+		materialBuffer: null,
 		pass: {
 			pixelBufferData: null,
 			resolutionBufferData: null

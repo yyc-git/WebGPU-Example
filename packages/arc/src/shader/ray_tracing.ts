@@ -1,99 +1,87 @@
 export var computeShader = `
 struct RayPayload {
-  vec3<f32> radiance;
-  // vec3 scatterDirection;
-  // vec3 throughput;
-  // uint seed;
-  // vec3 worldHitPoint;
-};
+   radiance: vec3<f32>,
+}
 
 struct Ray {
-  // vec3<f32> origin;
-  // vec3<f32> direction;
-  // f32 tMin;
-  // f32 tMax;
-
-  vec2<f32> target;
-};
+   target: vec2<f32>,
+}
 
 
 struct RingIntersect {
-  // f32 t;
-  // vec3 barycentric;
-  bool isClosestHit;
-  // float primitiveIndex;
-  f32 instanceIndex;
-};
+  isClosestHit: bool,
+  instanceIndex: f32,
+}
 
-struct 2DAABB {
-  min : vec2<f32>;
-  max : vec2<f32>;
-};
+struct AABB2D {
+  min : vec2<f32>,
+  max : vec2<f32>,
+}
 
 
 
 
 struct AccelerationStructure {
-  worldMin : vec2<f32>;
-  worldMax : vec2<f32>;
+  worldMin : vec2<f32>,
+  worldMax : vec2<f32>,
 
-  instanceIndex: f32;
+  instanceIndex: f32,
   // TODO remove pad?
-  pad_0: f32;
-  pad_1: f32;
-  pad_2: f32;
-};
+  pad_0: f32,
+  pad_1: f32,
+  pad_2: f32,
+}
 
 struct Instance {
-  geometryIndex: f32;
-  materialIndex: f32;
+  geometryIndex: f32,
+  materialIndex: f32,
 
-  // position: vec2<f32>;
+  // position: vec2<f32>,
 
   // TODO remove pad?
-  pad_0: f32;
-  pad_1: f32;
-};
+  pad_0: f32,
+  pad_1: f32,
+}
 
 
 struct Geometry {
-  c: vec2<f32>;
-  w: f32;
-  r: f32;
+  c: vec2<f32>,
+  w: f32,
+  r: f32,
   // // TODO remove pad?
-  // pad_0: f32;
-  // pad_1: f32;
-};
+  // pad_0: f32,
+  // pad_1: f32,
+}
 
 struct Material {
-  color: vec3<f32>;
+  color: vec3<f32>,
   // TODO remove pad?
-  pad_0: f32;
-};
+  pad_0: f32,
+}
 
  struct AccelerationStructures {
-  accelerationStructures : array<AccelerationStructure>;
-};
+  accelerationStructures : array<AccelerationStructure>,
+}
 
  struct Instances {
-  instances :  array<Instance>;
-};
+  instances :  array<Instance>,
+}
 
  struct Geometrys {
-  geometrys :  array<Geometry>;
-};
+  geometrys :  array<Geometry>,
+}
 
  struct Materials {
-  materials :  array<Material>;
-};
+  materials :  array<Material>,
+}
 
  struct Pixels {
-  pixels : vec4<f32>
-};
+  pixels : array<vec4<f32>>
+}
 
  struct ScreenDimension {
   resolution : vec2<f32>
-};
+}
 
 @binding(0) @group(0) var<storage, read> sceneAccelerationStructure :  AccelerationStructures;
 @binding(1) @group(0) var<storage, read> sceneInstanceData :  Instances;
@@ -104,7 +92,7 @@ struct Material {
 
 @binding(5) @group(0) var<uniform> screenDimension : ScreenDimension;
 
-fn _isIntersectWithAABB(ray: Ray, aabb: 2DAABB) -> bool {
+fn _isIntersectWithAABB2D(ray: Ray, aabb: AABB2D) -> bool {
   var target = ray.target;
   var min = aabb.min;
   var max = aabb.max;
@@ -125,22 +113,21 @@ return target.x > c.x - r - w && target.x < c.x - r && target.y > c.y + r && tar
 
 
 fn _intersectScene(ray: Ray)->RingIntersect {
-  RingIntersect intersectResult;
+  var intersectResult: RingIntersect;
 
   intersectResult.isClosestHit = false;
-  // intersectResult.t = POSITIVE_INFINITY;
 
   var as: AccelerationStructure;
 
   for (var i : u32 = 0u; i < arrayLength(&sceneAccelerationStructure.accelerationStructures); i = i + 1u) {
     as = sceneAccelerationStructure.accelerationStructures[i];
 
-    if (_isIntersectWithAABB(ray, 2DAABB(as.worldMin, as.worldMax))) {
-var instance: Instance = sceneInstanceData.instances[as.instanceIndex]
-var geometryIndex = u32(instance.geometryIndex)
+    if (_isIntersectWithAABB2D(ray, AABB2D(as.worldMin, as.worldMax))) {
+var instance: Instance = sceneInstanceData.instances[u32(as.instanceIndex)];
+var geometryIndex = u32(instance.geometryIndex);
 
 
- var geometry:Geometry = Geometrys.geometrys[geometryIndex]
+ var geometry:Geometry = sceneGeometryData.geometrys[geometryIndex];
 
       if (_isIntersectWithRing(ray, geometry)) {
         if (!intersectResult.isClosestHit) {
@@ -150,27 +137,32 @@ var geometryIndex = u32(instance.geometryIndex)
       }
     }
   }
+
+  return intersectResult;
 }
 
-fn _handleRayClosestHit(payload: ptr<private,RayPayload>, ray: Ray, intersectResult: RingIntersect)->bool {
-var instance: Instance = sceneInstanceData.instances[intersectResult.instanceIndex];
+// fn _handleRayClosestHit(payload: ptr<private,RayPayload>, ray: Ray, intersectResult: RingIntersect)->bool {
+fn _handleRayClosestHit(payload: ptr<function,RayPayload>, ray: Ray, intersectResult: RingIntersect)->bool {
+var instance: Instance = sceneInstanceData.instances[u32(intersectResult.instanceIndex)];
 var materialIndex = u32(instance.materialIndex);
 
- var material:Material = Materials.materials[materialIndex];
+ var material:Material = sceneMaterialData.materials[materialIndex];
 
 (*payload).radiance = material.color;
 
-return false
+return false;
 }
 
-fn _handleRayMiss(payload: ptr<private,RayPayload>)->bool {
+// fn _handleRayMiss(payload: ptr<private,RayPayload>)->bool {
+fn _handleRayMiss(payload: ptr<function,RayPayload>)->bool {
 (*payload).radiance = vec3<f32>(0.0, 0.0, 0.0);
 
-return false
+return false;
 }
 
-fn _traceRay(ray: Ray, payload: ptr<private,RayPayload>, isCameraRay: bool)->bool {
-  RingIntersect intersectResult = _intersectScene(ray);
+// fn _traceRay(ray: Ray, payload: ptr<private,RayPayload>)->bool {
+fn _traceRay(ray: Ray, payload: ptr<function,RayPayload>)->bool {
+  var intersectResult: RingIntersect = _intersectScene(ray);
 
   if (intersectResult.isClosestHit) {
     return _handleRayClosestHit(payload, ray, intersectResult);
@@ -179,7 +171,7 @@ fn _traceRay(ray: Ray, payload: ptr<private,RayPayload>, isCameraRay: bool)->boo
   return _handleRayMiss(payload);
 }
 
-@compute
+@compute @workgroup_size(1, 1, 1)
 fn main(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>) {
 //   var vec2<u32> ipos = vec2(GlobalInvocationID.x, GlobalInvocationID.y);
 
@@ -221,7 +213,7 @@ fn main(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>) {
 
   var ipos = vec2<u32>(GlobalInvocationID.x, GlobalInvocationID.y);
 
-  var resolution = vec2<f32>(screenDimension.resolution)
+  var resolution = vec2<f32>(screenDimension.resolution);
 
   var pixelColor = vec3<f32>(0.0, 0.0, 0.0);
 
@@ -229,7 +221,7 @@ fn main(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>) {
     // vec4 origin = uCamera.viewInverse * vec4(0, 0, 0, 1);
     var origin = vec4<f32>(0, 0, 0, 1);
 
-    var sampledPixel = vec2<f32>(ipos.x + 0.5, ipos.y + 0.5);
+    var sampledPixel = vec2<f32>(f32(ipos.x) + 0.5, f32(ipos.y) + 0.5);
 
     var uv = (sampledPixel / resolution) * 2.0 - 1.0;
 
@@ -244,14 +236,23 @@ fn main(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>) {
     // var wi = direction.xyz;
 
 
-  RayPayload payload;
+  // let payload: ptr<private, RayPayload>;
+  //   payload.radiance = vec3<f32>(0.0, 0.0, 0.0);
+  // let payload: ptr<private, RayPayload> = {
+  //   radiance: vec3<f32>(0.0, 0.0, 0.0)
+  // }
+
+  // var payload: ptr<function, RayPayload>;
+  //   (*payload).radiance = vec3<f32>(0.0, 0.0, 0.0);
+  var payload: RayPayload;
     payload.radiance = vec3<f32>(0.0, 0.0, 0.0);
 
-// _traceRay( Ray(origin.xyz, wi, uCamera.near, uCamera.far), payload);
-var isContinueBounce = _traceRay( Ray(target.xy), payload);
+
+var isContinueBounce = _traceRay( Ray(target.xy), &payload);
 
 
-    pixelColor = (*payload).radiance;
+    // pixelColor = (*payload).radiance;
+    pixelColor = payload.radiance;
 
   var pixelIndex = ipos.y * u32(resolution.x) + ipos.x;
   pixelBuffer.pixels[pixelIndex] = vec4<f32>(pixelColor, 1.0);

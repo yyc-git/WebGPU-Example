@@ -1,13 +1,13 @@
 import { create } from "../math/Vector2"
 
-export let createTransformBuffer = (): Float32Array => {
+export let createTransformBuffer = (count): Float32Array => {
 	return new Float32Array([
 		0.0,
 		0.0
 	])
 }
 
-export let createGeometryBuffer = (): Float32Array => {
+export let createGeometryBuffer = (count): Float32Array => {
 	let c = create(0, 0)
 	// let w = 2.0
 	// let r = 5.0
@@ -22,7 +22,7 @@ export let createGeometryBuffer = (): Float32Array => {
 	])
 }
 
-export let createMaterialBuffer = (): Float32Array => {
+export let createMaterialBuffer = (count): Float32Array => {
 	let color = [
 		1.0, 0.0, 0.0
 	]

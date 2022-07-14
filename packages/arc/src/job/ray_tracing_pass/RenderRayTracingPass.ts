@@ -15,4 +15,6 @@ export let exec = (state) => {
 	passEncoder.end();
 
 	device.queue.submit([commandEncoder.finish()]);
+
+	return state
 }

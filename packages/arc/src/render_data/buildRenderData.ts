@@ -1,6 +1,6 @@
 import { getAllRenderGameObjectData } from "../scene/Scene";
 import { getC, getR, getW } from "../scene/Geometry"
-import { computeRingAABB } from "../math/2DAABB";
+import { computeRingAABB } from "../math/AABB2D";
 import { createBuffer } from "../webgpu/Buffer";
 import { getColor } from "../scene/Material";
 
