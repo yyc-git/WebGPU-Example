@@ -48,6 +48,9 @@ render ArrayBuffer:  map to gpu
 * TODO draw 1b ring
 
 
+# * TODO perf: implement AABB
+
+
 
 * TODO camera scale, move
 

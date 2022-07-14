@@ -8,6 +8,11 @@ type rayTracingPass = {
 	pipeline: GPUComputePipeline | null
 }
 
+type screenPass = {
+	bindGroup: GPUBindGroup | null,
+	pipeline: GPUComputePipeline | null
+}
+
 type state = {
 	canvas: HTMLCanvasElement | null,
 	adapter: GPUAdapter | null,
@@ -20,7 +25,8 @@ type state = {
 	materialBuffer: Float32Array,
 
 	pass: pass,
-	rayTracingPass: rayTracingPass
+	rayTracingPass: rayTracingPass,
+	screenPass: screenPass
 }
 
 let createState = (count) => {
@@ -38,6 +44,10 @@ let createState = (count) => {
 			resolutionBufferData: null
 		},
 		rayTracingPass: {
+			bindGroup: null,
+			pipeline: null
+		},
+		screenPass: {
 			bindGroup: null,
 			pipeline: null
 		}

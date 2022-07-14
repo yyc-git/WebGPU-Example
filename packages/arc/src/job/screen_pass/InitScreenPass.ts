@@ -64,7 +64,9 @@ export let exec = (state) => {
 
 	return {
 		...state,
-		bindGroup,
-		pipeline
+		screenPass: {
+			bindGroup,
+			pipeline
+		}
 	}
 }

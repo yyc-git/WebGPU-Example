@@ -1,4 +1,4 @@
-const vertexShader = `
+var vertexShader = `
 struct VertexOutput {
   @builtin(position) Position : vec4<f32>,
   @location(0) uv: vec3<f32>,  
@@ -16,7 +16,7 @@ fn main(
 }
 `;
 
-const fragmentShader = `
+var fragmentShader = `
  struct Pixels {
   pixels : vec4<f32>
 };
@@ -33,13 +33,14 @@ const fragmentShader = `
 fn main(
   @location(0) uv : vec2<f32>
 ) -> @location(0) vec4<f32> {
-  const ivec2<f32> resolution = ivec2<f32>(screenDimension.resolution)
+  // var vec2<u32> resolution = vec2<u32>(screenDimension.resolution)
+  var resolution = vec2<f32>(screenDimension.resolution)
 
-  const ivec2<f32> bufferCoord = ivec2<f32>(floor(uv * resolution));
-  const uint pixelIndex = bufferCoord.y * uint(resolution.x) + bufferCoord.x;
+  var bufferCoord = vec2<u32>(floor(uv * resolution));
+  var pixelIndex = bufferCoord.y * u32(resolution.x) + bufferCoord.x;
 
 //   vec3<f32> pixelColor = pixelBuffer.pixels[pixelIndex].rgb / pushC.totalSampleCount;
-  vec3<f32> pixelColor = pixelBuffer.pixels[pixelIndex].rgb;
+  var pixelColor = pixelBuffer.pixels[pixelIndex].rgb;
 
   return vec4<f32>(pixelColor, 1.0);
 }
