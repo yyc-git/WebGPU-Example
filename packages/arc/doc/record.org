@@ -49,8 +49,31 @@ transform: pos(c)
 
 * TODO draw 1b ring
 
+perf hots:
 
-# * TODO perf: implement AABB
+arrayLength
+
+_intersectScene
+
+_isIntersectWithAABB2D
+
+
+
+solution:
+use fixed accelerationStructures count;
+use bvh;
+optimize _isIntersectWithAABB2D;
+
+
+should at least draw 10m ring at 60fps!
+
+
+** TODO perf: workgroup_size?
+
+** TODO perf: compute! in _intersectScene
+
+
+** TODO perf: use 2d bvh
 
 
 
@@ -64,7 +87,6 @@ transform: pos(c)
 * TODO draw arc
 
 
-* TODO perf: use 2d bvh
 
 
 * TODO commit to user
