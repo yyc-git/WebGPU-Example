@@ -14,8 +14,8 @@ struct RingIntersect {
 }
 
 struct AABB2D {
-  min : vec2<f32>,
-  max : vec2<f32>,
+  worldMin : vec2<f32>,
+  worldMax : vec2<f32>,
 }
 
 
@@ -36,11 +36,7 @@ struct Instance {
   geometryIndex: f32,
   materialIndex: f32,
 
-  // position: vec2<f32>,
-
-  // TODO remove pad?
-  pad_0: f32,
-  pad_1: f32,
+  localPosition: vec2<f32>,
 }
 
 
@@ -94,21 +90,25 @@ struct Material {
 
 fn _isIntersectWithAABB2D(ray: Ray, aabb: AABB2D) -> bool {
   var target = ray.target;
-  var min = aabb.min;
-  var max = aabb.max;
+  var worldMin = aabb.worldMin;
+  var worldMax = aabb.worldMax;
 
-return target.x > min.x && target.x < max.x && target.y > min.y && target.y < max.y;
+return target.x > worldMin.x && target.x < worldMax.x && target.y > worldMin.y && target.y < worldMax.y;
 }
 
 
-fn _isIntersectWithRing(ray: Ray, geometry: Geometry) -> bool {
+fn _isIntersectWithRing(ray: Ray, instance: Instance, geometry: Geometry) -> bool {
   var target = ray.target;
+
+var localPosition = instance.localPosition;
 
   var c = geometry.c;
   var w = geometry.w;
   var r = geometry.r;
 
-  var distanceSquare = pow(target.x - c.x, 2.0) + pow( target.y - c.y, 2.0);
+  var worldPosition = localPosition + c;
+
+  var distanceSquare = pow(target.x - worldPosition.x, 2.0) + pow( target.y - worldPosition.y, 2.0);
 
   return distanceSquare >= pow(r, 2) && distanceSquare <= pow(r + w, 2);
 }
@@ -131,7 +131,7 @@ var geometryIndex = u32(instance.geometryIndex);
 
  var geometry:Geometry = sceneGeometryData.geometrys[geometryIndex];
 
-      if (_isIntersectWithRing(ray, geometry)) {
+      if (_isIntersectWithRing(ray,instance, geometry)) {
         if (!intersectResult.isClosestHit) {
           intersectResult.isClosestHit = true;
           intersectResult.instanceIndex = as.instanceIndex;

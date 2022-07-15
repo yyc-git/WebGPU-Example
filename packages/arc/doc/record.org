@@ -36,14 +36,16 @@ render ArrayBuffer:  map to gpu
 1b * n byte = n GB
 
 
-* TODO draw 2 ring
+* DONE draw 2 ring
 
+one geometry, one material, two transforms
 
+* DONE object move
 
-* TODO early-z
+# perf: 2d matrix operate!
 
-
-
+transform: pos(c)
+	use 2(position) instead of 16(world matrix)!
 
 * TODO draw 1b ring
 
@@ -51,6 +53,8 @@ render ArrayBuffer:  map to gpu
 # * TODO perf: implement AABB
 
 
+
+* TODO perf: remove pad?
 
 * TODO camera scale, move
 

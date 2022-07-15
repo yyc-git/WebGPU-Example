@@ -3,28 +3,27 @@ import { getC, getR, getW } from "../scene/Geometry"
 import { computeRingAABB } from "../math/AABB2D";
 import { createBuffer } from "../webgpu/Buffer";
 import { getColor } from "../scene/Material";
+import { getLocalPosition } from "../scene/Transform";
 
 export let buildSceneAccelerationStructureBufferData = (state, device) => {
-	// let { transformBuffer, geometryBuffer, materialBuffer } = state
-
-	let bufferDataArr = getAllRenderGameObjectData(state).reduce((bufferDataArr, [gameObject, transform, geometry, material], geometryIndex) => {
-		let instanceIndex = geometryIndex
-
+	let bufferDataArr = getAllRenderGameObjectData(state).reduce((bufferDataArr, [gameObject, transform, geometry, material], instanceIndex) => {
 		let c = getC(geometry, state)
 		let w = getW(geometry, state)
 		let r = getR(geometry, state)
 
-		let { min, max } = computeRingAABB(c, r, w)
-		// console.log(c, w, r, { min, max });
-		
+		let localPosition = getLocalPosition(transform, state)
+
+		let { worldMin, worldMax } = computeRingAABB(localPosition, c, r, w)
+		// console.log(c, w, r, { worldMin, worldMax });
+
 
 		bufferDataArr.push(
-			min[0],
-			min[1],
+			worldMin[0],
+			worldMin[1],
 		);
 		bufferDataArr.push(
-			max[0],
-			max[1],
+			worldMax[0],
+			worldMax[1],
 		);
 
 		bufferDataArr.push(
@@ -47,12 +46,14 @@ export let buildSceneAccelerationStructureBufferData = (state, device) => {
 }
 
 export let buildSceneInstanceDataBufferData = (state, device) => {
-	let bufferDataArr = getAllRenderGameObjectData(state).reduce((bufferDataArr, [gameObject, transform, geometry, material], geometryIndex) => {
+	let bufferDataArr = getAllRenderGameObjectData(state).reduce((bufferDataArr, [gameObject, transform, geometry, material]) => {
+		let localPosition = getLocalPosition(transform, state)
+
 		bufferDataArr.push(
 			geometry,
 			material,
-			0.0,
-			0.0
+			localPosition[0],
+			localPosition[1]
 		);
 
 		return bufferDataArr;

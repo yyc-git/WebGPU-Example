@@ -1,19 +1,20 @@
 import { createState } from "./data/CreateData";
 import { exec as init } from "./pipeline/InitPipeline";
 import { exec as render } from "./pipeline/RenderPipeline";
-import { createGeometryBuffer, createMaterialBuffer, createTransformBuffer } from "./scene/CreateScene";
+import { createGeometryBuffer, createMaterialBuffer, createScene, createTransformBuffer } from "./scene/CreateScene";
 
-let _buildScene = (state, count) => {
+let _buildScene = (state, { transformCount, geometryCount, materialCount }) => {
 	return {
 		...state,
-		transformBuffer: createTransformBuffer(count),
-		geometryBuffer: createGeometryBuffer(count),
-		materialBuffer: createMaterialBuffer(count)
+		ecsData: createScene(transformCount),
+		transformBuffer: createTransformBuffer(transformCount),
+		geometryBuffer: createGeometryBuffer(geometryCount),
+		materialBuffer: createMaterialBuffer(materialCount)
 	}
 }
 
 let _main = async () => {
-	let count = 1
+	let count = { transformCount: 2, geometryCount: 1, materialCount: 1 }
 
 	let state = createState()
 

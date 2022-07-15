@@ -15,5 +15,5 @@
 // }
 
 export let getAllRenderGameObjectData = (state) => {
-	return [[0, 0, 0, 0]]
+	return state.ecsData
 }

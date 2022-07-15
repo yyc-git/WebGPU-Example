@@ -1,5 +1,7 @@
-// let getLocalPosition = (geometry, { geometryBuffer }) => {
-// 	let offset = geometry * 2
+import { create } from "../math/Vector2"
 
-// 	return geometryBuffer[offset]
-// }
+export let getLocalPosition = (transform, { transformBuffer }) => {
+	let offset = transform * 2
+
+	return create(transformBuffer[offset], transformBuffer[offset + 1])
+}

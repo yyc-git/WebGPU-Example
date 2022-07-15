@@ -2,21 +2,24 @@ import * as Vector2 from "./Vector2"
 import type * as Vector2Type from "./Vector2"
 
 type t = {
-	min: Vector2Type.t,
-	max: Vector2Type.t
+	worldMin: Vector2Type.t,
+	worldMax: Vector2Type.t
 }
 
-export let create = (min, max): t => { return { min, max } };
+export let create = (worldMin, worldMax): t => { return { worldMin, worldMax } };
 
-export let computeRingAABB = ([cx, cy]: Vector2Type.t, r, w): t => {
+export let computeRingAABB = ([localPositionX, localPositionY]: Vector2Type.t, [cx, cy]: Vector2Type.t, r, w): t => {
+	let px = cx + localPositionX
+	let py = cy + localPositionY
+
 	return create(
 		Vector2.create(
-			cx - r - w,
-			cy - r - w,
+			px - r - w,
+			py - r - w,
 		),
 		Vector2.create(
-			cx + r + w,
-			cy + r + w,
+			px + r + w,
+			py + r + w,
 		)
 	)
 }
