@@ -1,0 +1,13 @@
+* how to optimize compute shader?
+
+** refer to https://www.reddit.com/r/vulkan/comments/cs4jb6/bad_preformance_of_simple_ray_trace_compute_shader/
+
+- switch
+
+If many threads in an warp run different parts of the switch they'll be masked and won't run in parallel. This means you might be losing some time there. 
+
+I would try to build a volume that only has one type of voxel and remove the switch to test if that's the bottleneck.
+
+
+
+- samples the texture the minimal amount(gpu memory access)

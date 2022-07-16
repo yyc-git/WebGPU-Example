@@ -68,18 +68,32 @@ optimize _isIntersectWithAABB2D;
 should at least draw 10m ring at 60fps!
 
 
+** TODO perf: use 2d bvh
+
+
 ** TODO perf: workgroup_size?
+query workgroup_size?
+
+run particl(adjust workgroup_size) to test perf!
+
+how to pass workgroup_size(x, y) run test!(compute index!)
+
+local var too many so that one workgroup can only run one local?
+
+
+
 
 ** TODO perf: compute! in _intersectScene
 
 
-** TODO perf: use 2d bvh
 
 
 
 * TODO perf: remove pad?
 
 * TODO camera scale, move
+
+should restore canvas' width, height!
 
 
 
