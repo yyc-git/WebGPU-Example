@@ -121,7 +121,9 @@ fn _intersectScene(ray: Ray)->RingIntersect {
 
   var as: AccelerationStructure;
 
-  for (var i : u32 = 0u; i < arrayLength(&sceneAccelerationStructure.accelerationStructures); i = i + 1u) {
+  var length = arrayLength(&sceneAccelerationStructure.accelerationStructures);
+
+  for (var i : u32 = 0u; i < length; i = i + 1u) {
     as = sceneAccelerationStructure.accelerationStructures[i];
 
     if (_isIntersectWithAABB2D(ray, AABB2D(as.worldMin, as.worldMax))) {
