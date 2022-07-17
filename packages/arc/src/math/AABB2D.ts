@@ -22,3 +22,10 @@ export let computeRingAABB = ([localPositionX, localPositionY]: Vector2.t, [cx, 
 		)
 	)
 }
+
+export let computeCenter = ({ worldMin, worldMax }: t) => {
+	return Vector2.create(
+		(worldMax[0] + worldMin[0]) / 2,
+		(worldMax[1] + worldMin[1]) / 2
+	)
+}

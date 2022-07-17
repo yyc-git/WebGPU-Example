@@ -1,21 +1,25 @@
-import { create, t } from "./AABB2D";
+import { computeCenter, create, t } from "./AABB2D";
 import * as Vector2 from "./Vector2"
+
+type instanceIndex = number
+
+type aabbData = { aabb: t, instanceIndex: instanceIndex }
 
 export type tree = {
 	wholeAABB: t,
-	leafAllAABBs: Array<t> | null,
+	leafAllAABBData: Array<aabbData> | null,
 	child1: tree | null,
 	child2: tree | null
 }
 
-let _sort = (getAxizFunc, allAABBs: Array<t>) => {
-	return allAABBs.sort((a, b) => {
-		return getAxizFunc(a.worldMin) - getAxizFunc(b.worldMin)
+let _sort = (getAxizFunc, allAABBData: Array<aabbData>) => {
+	return allAABBData.sort((a, b) => {
+		return getAxizFunc(computeCenter(a.aabb)) - getAxizFunc(computeCenter(b.aabb))
 	})
 }
 
-let _computeWholeAABB = (allAABBs) => {
-	let [worldMin, worldMax] = allAABBs.reduce(([worldMin, worldMax], aabb) => {
+let _computeWholeAABB = (allAABBData: Array<aabbData>) => {
+	let [worldMin, worldMax] = allAABBData.reduce(([worldMin, worldMax], { aabb }) => {
 		let aabbWorldMin = aabb.worldMin
 		let aabbWorldMax = aabb.worldMax
 
@@ -51,38 +55,41 @@ let _computeWholeAABB = (allAABBs) => {
 
 
 // TODO refactor: use rescript->tree instead of edit ref<node>
-let _build = (node, minCount, getAxizFuncs, getAxizFuncIndex, allAABBs: Array<t>): void => {
-	if (allAABBs.length <= minCount) {
+let _build = (node, minCount, getAxizFuncs, getAxizFuncIndex, allAABBData): void => {
+	if (allAABBData.length <= minCount) {
 		// node.wholeAABB = _computeWholeAABB(sortedAllAABBData)
-		node.leafAllAABBs = allAABBs
+		node.leafAllAABBData = allAABBData
 		node.child1 = null
 		node.child2 = null
 
 		return
 	}
 	else {
-		let sortedAllAABBData = _sort(getAxizFuncs[getAxizFuncIndex % 2], allAABBs)
+		let sortedAllAABBData = _sort(getAxizFuncs[getAxizFuncIndex % 2], allAABBData)
+		// console.log(sortedAllAABBData);
+
 
 		let splitIndex = Math.floor(sortedAllAABBData.length / 2)
 
 		let arr1 = sortedAllAABBData.slice(0, splitIndex)
-		let arr2 = sortedAllAABBData.slice(splitIndex + 1, sortedAllAABBData.length)
+		let arr2 = sortedAllAABBData.slice(splitIndex, sortedAllAABBData.length)
+		// console.log(splitIndex, arr1, arr2)
 
 		let child1 = {
 			wholeAABB: _computeWholeAABB(arr1),
-			leafAllAABBs: null,
+			leafAllAABBData: null,
 			child1: null,
 			child2: null
 		}
 		let child2 = {
 			wholeAABB: _computeWholeAABB(arr2),
-			leafAllAABBs: null,
+			leafAllAABBData: null,
 			child1: null,
 			child2: null
 		}
 
 		// node.wholeAABB = _computeWholeAABB(sortedAllAABBData)
-		node.leafAllAABBs = null
+		node.leafAllAABBData = null
 		node.child1 = child1
 		node.child2 = child2
 
@@ -92,19 +99,18 @@ let _build = (node, minCount, getAxizFuncs, getAxizFuncIndex, allAABBs: Array<t>
 }
 
 // TODO perf: use LBVH
-export let build = (allAABBs: Array<t>): tree => {
-	const MIN_COUNT = 5
+export let build = (allAABBData: Array<aabbData>, minCount = 5): tree => {
 	let tree = {
-		wholeAABB: _computeWholeAABB(allAABBs),
-		leafAllAABBs: null,
+		wholeAABB: _computeWholeAABB(allAABBData),
+		leafAllAABBData: null,
 		child1: null,
 		child2: null
 	}
 
-	_build(tree, MIN_COUNT, [
-		(vec2) => vec2.x,
-		(vec2) => vec2.y
-	], 0, allAABBs)
+	_build(tree, minCount, [
+		(vec2) => vec2[0],
+		(vec2) => vec2[1]
+	], 0, allAABBData)
 
 	return tree
 }
