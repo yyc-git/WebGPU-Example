@@ -1,4 +1,0 @@
-* how to render overlap arc?
-
-render random one?
-render by z?

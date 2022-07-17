@@ -1,14 +1,13 @@
 import * as Vector2 from "./Vector2"
-import type * as Vector2Type from "./Vector2"
 
-type t = {
-	worldMin: Vector2Type.t,
-	worldMax: Vector2Type.t
+export type t = {
+	worldMin: Vector2.t,
+	worldMax: Vector2.t
 }
 
 export let create = (worldMin, worldMax): t => { return { worldMin, worldMax } };
 
-export let computeRingAABB = ([localPositionX, localPositionY]: Vector2Type.t, [cx, cy]: Vector2Type.t, r, w): t => {
+export let computeRingAABB = ([localPositionX, localPositionY]: Vector2.t, [cx, cy]: Vector2.t, r, w): t => {
 	let px = cx + localPositionX
 	let py = cy + localPositionY
 

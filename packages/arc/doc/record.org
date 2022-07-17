@@ -71,6 +71,19 @@ should at least draw 10m ring at 60fps!
 ** TODO perf: use 2d bvh
 
 
+*** DONE implement build
+
+*** TODO add bdd test
+
+
+*** TODO implement traverse
+
+*** TODO add bdd test
+
+*** TODO implement traverse in compute shader
+
+*** TODO pass run test
+
 ** TODO perf: workgroup_size?
 query workgroup_size?
 
@@ -96,6 +109,7 @@ local var too many so that one workgroup can only run one local?
 should restore canvas' width, height!
 
 
+* TODO fix: 锯齿
 
 
 * TODO draw arc

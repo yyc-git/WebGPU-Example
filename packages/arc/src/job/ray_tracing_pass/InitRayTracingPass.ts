@@ -4,8 +4,25 @@ import { computeShader } from "../../shader/ray_tracing";
 export let exec = (state) => {
 	let { device } = state
 
+	const computeBindGroupLayout = device.createBindGroupLayout({
+		entries: [
+			{ binding: 0, visibility: GPUShaderStage.COMPUTE, buffer: { type:  "read-only-storage" } },
+			{ binding: 1, visibility: GPUShaderStage.COMPUTE, buffer: { type: "read-only-storage" } },
+			{ binding: 2, visibility: GPUShaderStage.COMPUTE, buffer: { type: "read-only-storage" } },
+			{ binding: 3, visibility: GPUShaderStage.COMPUTE, buffer: { type: "read-only-storage" } },
+			{ binding: 4, visibility: GPUShaderStage.COMPUTE | GPUShaderStage.FRAGMENT, buffer: { type: "storage" } },
+			{ binding: 5, visibility: GPUShaderStage.COMPUTE | GPUShaderStage.FRAGMENT, buffer: { type: "uniform" } },
+		],
+	});
+
+
+	const computePipelineLayout = device.createPipelineLayout({
+		bindGroupLayouts: [computeBindGroupLayout],
+	});
+
+
 	const pipeline = device.createComputePipeline({
-		layout: 'auto',
+		layout: computePipelineLayout,
 		compute: {
 			module: device.createShaderModule({ code: computeShader }),
 			entryPoint: 'main',

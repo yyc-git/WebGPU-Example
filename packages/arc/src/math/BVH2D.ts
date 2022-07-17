@@ -1,80 +1,115 @@
-let build = (allAABBData) => {
-	// forEach x,y;
-	// if(count <= 5) stop;
+import { create, t } from "./AABB2D";
+import * as Vector2 from "./Vector2"
 
-	// bottom: local aabbs
-	bottom: world aabbs(contiguous memory)
-
-	top: bvh2D structure:
-	Node:
-	data: world aabb
-	// isLeaf: bool
-
-	// children: array<int>
-	if no child, set to 0(check: child1, child2 should be 0 together!)
-	child1
-	child2
-
-	instanceOffset
-	instanceCount
-
-	root(first one) + array<Node>
+export type tree = {
+	wholeAABB: t,
+	leafAllAABBs: Array<t> | null,
+	child1: tree | null,
+	child2: tree | null
 }
 
-traverse<recursive>:
-if (intersect(data, ray)) {
-	if (isLeafNode(node): child1(/or child2) === 0){
-		test intersect with instances(instanceOffset, instanceCount)
-
-		return closesetHit
+let _sort = (getAxizFunc, allAABBs: Array<t>) => {
+	return allAABBs.sort((a, b) => {
+		return getAxizFunc(a.worldMin) - getAxizFunc(b.worldMin)
+	})
 }
 
-hit1 = intersect(ray, child1)
-hit2 = intersect(ray, child2)
+let _computeWholeAABB = (allAABBs) => {
+	let [worldMin, worldMax] = allAABBs.reduce(([worldMin, worldMax], aabb) => {
+		let aabbWorldMin = aabb.worldMin
+		let aabbWorldMax = aabb.worldMax
 
-return closesetHit(hit1, hit2)
+		if (aabbWorldMin[0] < worldMin[0]) {
+			worldMin[0] = aabbWorldMin[0]
+		}
+		if (aabbWorldMin[1] < worldMin[1]) {
+			worldMin[1] = aabbWorldMin[1]
+		}
+
+		if (aabbWorldMax[0] > worldMax[0]) {
+			worldMax[0] = aabbWorldMax[0]
+		}
+		if (aabbWorldMax[1] > worldMax[1]) {
+			worldMax[1] = aabbWorldMax[1]
+		}
+
+		// TODO refactor(rescript): change to immutable
+		return [worldMin, worldMax]
+	}, [
+		Vector2.create(
+			Infinity,
+			Infinity,
+		),
+		Vector2.create(
+			-Infinity,
+			-Infinity,
+		)
+	])
+
+	return create(worldMin, worldMax)
 }
 
-return miss
 
+// TODO refactor: use rescript->tree instead of edit ref<node>
+let _build = (node, minCount, getAxizFuncs, getAxizFuncIndex, allAABBs: Array<t>): void => {
+	if (allAABBs.length <= minCount) {
+		// node.wholeAABB = _computeWholeAABB(sortedAllAABBData)
+		node.leafAllAABBs = allAABBs
+		node.child1 = null
+		node.child2 = null
 
+		return
+	}
+	else {
+		let sortedAllAABBData = _sort(getAxizFuncs[getAxizFuncIndex % 2], allAABBs)
 
+		let splitIndex = Math.floor(sortedAllAABBData.length / 2)
 
-traverse<iterate>(otherChildResult):
+		let arr1 = sortedAllAABBData.slice(0, splitIndex)
+		let arr2 = sortedAllAABBData.slice(splitIndex + 1, sortedAllAABBData.length)
 
+		let child1 = {
+			wholeAABB: _computeWholeAABB(arr1),
+			leafAllAABBs: null,
+			child1: null,
+			child2: null
+		}
+		let child2 = {
+			wholeAABB: _computeWholeAABB(arr2),
+			leafAllAABBs: null,
+			child1: null,
+			child2: null
+		}
 
-if (!intersect(rootNode, ray)) {
-	return miss;
+		// node.wholeAABB = _computeWholeAABB(sortedAllAABBData)
+		node.leafAllAABBs = null
+		node.child1 = child1
+		node.child2 = child2
+
+		_build(child1, minCount, getAxizFuncs, getAxizFuncIndex + 1, arr1)
+		_build(child2, minCount, getAxizFuncs, getAxizFuncIndex + 1, arr2)
+	}
+}
+
+// TODO perf: use LBVH
+export let build = (allAABBs: Array<t>): tree => {
+	const MIN_COUNT = 5
+	let tree = {
+		wholeAABB: _computeWholeAABB(allAABBs),
+		leafAllAABBs: null,
+		child1: null,
+		child2: null
+	}
+
+	_build(tree, MIN_COUNT, [
+		(vec2) => vec2.x,
+		(vec2) => vec2.y
+	], 0, allAABBs)
+
+	return tree
 }
 
 
-var node = rootNode.child1
-
-var childResultArr:array<IntersectResult, 2> = []
-var childResultArrSize = 0
-
-var parentNodeOtherChild = rootNode.child2
-
-while (intersect(node, ray)) {
-	if (isLeafNode(node): child1(/or child2) === 0){
-		var intersectResult = test intersect with instances(instanceOffset, instanceCount)
-
-
-// TODO fix: childResultArr.push(closesetHit(intersectResult))
-childResultArr[childResultArrSize] = closesetHit(intersectResult)
-childResultArrSize = childResultArrSize + 1
-
-	node = parentNodeOtherChild
-}
-else {
-	node = node.child1
-	parentNodeOtherChild = node.child2
-}
-}
-
-if (childResultArrSize > 0) {
-	return closesetHit(childResultArr)
-}
-else {
-	return miss;
-}
+// let traverse = () => {
+// return 1 as any
+// }
