@@ -12,9 +12,9 @@ export type tree = {
 	child2: tree | null
 }
 
-let _sort = (getAxizFunc, allAABBData: Array<aabbData>) => {
+let _sort = (getAxiz, allAABBData: Array<aabbData>) => {
 	return allAABBData.sort((a, b) => {
-		return getAxizFunc(computeCenter(a.aabb)) - getAxizFunc(computeCenter(b.aabb))
+		return getAxiz(computeCenter(a.aabb)) - getAxiz(computeCenter(b.aabb))
 	})
 }
 
@@ -114,8 +114,3 @@ export let build = (allAABBData: Array<aabbData>, minCount = 5): tree => {
 
 	return tree
 }
-
-
-// let traverse = () => {
-// return 1 as any
-// }

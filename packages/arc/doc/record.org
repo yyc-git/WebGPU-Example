@@ -123,21 +123,12 @@ should restore canvas' width, height!
 
 
 
-
-* TODO perf: optimize memory
-
-
-compress?
-
-...
-
-
-
-
-
 * TODO object rotate, move
 
 perf: 2d matrix operate!
+
+
+* TODO fix: how to find closestHit?
 
 
 * TODO select object
@@ -148,3 +139,18 @@ perf: 2d matrix operate!
 
 
 
+
+
+
+
+* TODO perf: optimize memory
+
+
+compress?
+
+...
+
+
+* TODO perf: optimize Traversal bvh in gpu
+
+refer to https://zhuanlan.zhihu.com/p/70387497
