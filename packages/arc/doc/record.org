@@ -84,7 +84,18 @@ should at least draw 10m ring at 60fps!
 
 *** DONE pass run test
 
-*** TODO perf: use lbvh to build
+# *** TODO perf: use lbvh to build
+*** TODO perf: use Surface Area Heuristic (SAH) to build
+
+test transformCount: 1m
+
+** TODO fix: how to find closestHit?
+
+position add z!
+
+find by z!
+
+
 
 ** TODO perf: workgroup_size?
 query workgroup_size?
@@ -98,8 +109,7 @@ local var too many so that one workgroup can only run one local?
 
 
 
-** TODO perf: compute! in _intersectScene
-
+# ** TODO perf: compute! in _intersectScene
 
 
 
@@ -131,19 +141,18 @@ should restore canvas' width, height!
 perf: 2d matrix operate!
 
 
-* TODO fix: how to find closestHit?
+
+
+
+
+
+
+
+
+
 
 
 * TODO select object
-
-
-
-
-
-
-
-
-
 
 
 * TODO perf: optimize memory
@@ -154,6 +163,17 @@ compress?
 ...
 
 
-* TODO perf: optimize Traversal bvh in gpu
+* TODO perf: bvh
+
+** TODO feat: build,update bvh on gpu
+
+use HLBVH ?
+
+
+** TODO feat: update bvh
+
+
+** TODO perf: optimize Traversal bvh on gpu
 
 refer to https://zhuanlan.zhihu.com/p/70387497
+

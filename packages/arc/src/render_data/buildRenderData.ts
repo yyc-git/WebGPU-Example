@@ -27,8 +27,12 @@ export let buildSceneAccelerationStructureBufferData = (state, device) => {
 		}
 	})
 
+	let a1 = performance.now()
+
 	let tree = BVH2D.build(allAABBData, 5)
 	let [topLevelArr, bottomLevelArr] = Acceleration.build(tree)
+
+	let a2 = performance.now()
 
 
 	let topLevelBufferData = new Float32Array(flatten(topLevelArr))
@@ -46,6 +50,9 @@ export let buildSceneAccelerationStructureBufferData = (state, device) => {
 
 	let bottomLevelBuffer = createBuffer(device, GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST, bottomLevelBufferData)
 
+	let a3 = performance.now()
+
+	console.log(a2 - a1, a3 - a2)
 
 	return [
 		topLevelBuffer, topLevelBufferData.byteLength,

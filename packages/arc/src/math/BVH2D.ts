@@ -1,4 +1,5 @@
 import { computeCenter, create, t } from "./AABB2D";
+import { qsort } from "./Array";
 import * as Vector2 from "./Vector2"
 
 type instanceIndex = number
@@ -13,10 +14,23 @@ export type tree = {
 }
 
 let _sort = (getAxiz, allAABBData: Array<aabbData>) => {
-	return allAABBData.sort((a, b) => {
-		return getAxiz(computeCenter(a.aabb)) - getAxiz(computeCenter(b.aabb))
-	})
+	return qsort(allAABBData, ({ aabb }) => getAxiz(computeCenter(aabb)))
 }
+
+// let _findMiddleIndex = (getAxiz, allAABBData: Array<aabbData>) => {
+// 	// return allAABBData.reduce(([ middleIndex ], {aabb}) => {
+// 	// 	return getAxiz(computeCenter(a.aabb)) - getAxiz(computeCenter(b.aabb))
+// 	// })
+
+// 	let [_, middleIndex] = findKthLargest(
+// 		allAABBData.map(({ aabb }) => {
+// 			return getAxiz(computeCenter(aabb))
+// 		}),
+// 		Math.floor(allAABBData.length / 2)
+// 	)
+
+// 	return middleIndex
+// }
 
 let _computeWholeAABB = (allAABBData: Array<aabbData>) => {
 	let [worldMin, worldMax] = allAABBData.reduce(([worldMin, worldMax], { aabb }) => {
@@ -69,7 +83,8 @@ let _build = (node, minCount, getAxizFuncs, getAxizFuncIndex, allAABBData): void
 		// console.log(sortedAllAABBData);
 
 
-		let splitIndex = Math.floor(sortedAllAABBData.length / 2)
+		// let splitIndex = _findMiddleIndex(getAxizFuncs[getAxizFuncIndex % 2], allAABBData)
+		let splitIndex = Math.floor(allAABBData.length / 2)
 
 		let arr1 = sortedAllAABBData.slice(0, splitIndex)
 		let arr2 = sortedAllAABBData.slice(splitIndex, sortedAllAABBData.length)
@@ -98,7 +113,6 @@ let _build = (node, minCount, getAxizFuncs, getAxizFuncIndex, allAABBData): void
 	}
 }
 
-// TODO perf: use LBVH
 export let build = (allAABBData: Array<aabbData>, minCount = 5): tree => {
 	let tree = {
 		wholeAABB: _computeWholeAABB(allAABBData),
