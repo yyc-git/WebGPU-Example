@@ -6,12 +6,13 @@ export let exec = (state) => {
 
 	const computeBindGroupLayout = device.createBindGroupLayout({
 		entries: [
-			{ binding: 0, visibility: GPUShaderStage.COMPUTE, buffer: { type:  "read-only-storage" } },
-			{ binding: 1, visibility: GPUShaderStage.COMPUTE, buffer: { type: "read-only-storage" } },
+			{ binding: 0, visibility: GPUShaderStage.COMPUTE, buffer: { type: "uniform" } },
+			{ binding: 1, visibility: GPUShaderStage.COMPUTE, buffer: { type: "uniform" } },
 			{ binding: 2, visibility: GPUShaderStage.COMPUTE, buffer: { type: "read-only-storage" } },
 			{ binding: 3, visibility: GPUShaderStage.COMPUTE, buffer: { type: "read-only-storage" } },
-			{ binding: 4, visibility: GPUShaderStage.COMPUTE | GPUShaderStage.FRAGMENT, buffer: { type: "storage" } },
-			{ binding: 5, visibility: GPUShaderStage.COMPUTE | GPUShaderStage.FRAGMENT, buffer: { type: "uniform" } },
+			{ binding: 4, visibility: GPUShaderStage.COMPUTE, buffer: { type: "read-only-storage" } },
+			{ binding: 5, visibility: GPUShaderStage.COMPUTE | GPUShaderStage.FRAGMENT, buffer: { type: "storage" } },
+			{ binding: 6, visibility: GPUShaderStage.COMPUTE | GPUShaderStage.FRAGMENT, buffer: { type: "uniform" } },
 		],
 	});
 
@@ -36,7 +37,10 @@ export let exec = (state) => {
 	let [resolutionBuffer, resolutionData] = resolutionBufferData;
 
 
-	let [sceneAccelerationStructureBuffer, sceneAccelerationStructureBufferSize] = buildSceneAccelerationStructureBufferData(state, device);
+	let [
+		topLevelBuffer, topLevelBufferSize,
+		bottomLevelBuffer, bottomLevelBufferSize
+	] = buildSceneAccelerationStructureBufferData(state, device);
 	let [geometryDataBuffer, geometryDataBufferSize] = buildSceneGeometryDataBufferData(state, device);
 	let [instanceDataBuffer, instanceDataBufferSize] = buildSceneInstanceDataBufferData(state, device);
 	let [materialDataBuffer, materialDataBufferSize] = buildSceneMaterialDataBufferData(state, device);
@@ -47,40 +51,47 @@ export let exec = (state) => {
 			{
 				binding: 0,
 				resource: {
-					buffer: sceneAccelerationStructureBuffer,
-					size: sceneAccelerationStructureBufferSize
+					buffer: topLevelBuffer,
+					size: topLevelBufferSize
 				},
 			},
 			{
 				binding: 1,
+				resource: {
+					buffer: bottomLevelBuffer,
+					size: bottomLevelBufferSize
+				},
+			},
+			{
+				binding: 2,
 				resource: {
 					buffer: instanceDataBuffer,
 					size: instanceDataBufferSize
 				},
 			},
 			{
-				binding: 2,
+				binding: 3,
 				resource: {
 					buffer: geometryDataBuffer,
 					size: geometryDataBufferSize
 				},
 			},
 			{
-				binding: 3,
+				binding: 4,
 				resource: {
 					buffer: materialDataBuffer,
 					size: materialDataBufferSize
 				},
 			},
 			{
-				binding: 4,
+				binding: 5,
 				resource: {
 					buffer: pixelBuffer,
 					size: pixelBufferSize
 				},
 			},
 			{
-				binding: 5,
+				binding: 6,
 				resource: {
 					buffer: resolutionBuffer,
 					size: resolutionData.byteLength

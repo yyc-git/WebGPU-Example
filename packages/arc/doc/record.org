@@ -80,7 +80,7 @@ should at least draw 10m ring at 60fps!
 
 *** DONE add bdd test
 
-*** TODO implement traverse in compute shader
+*** DONE update compute shader
 
 *** TODO pass run test
 

@@ -4,45 +4,42 @@ import { computeRingAABB } from "../math/AABB2D";
 import { createBuffer } from "../webgpu/Buffer";
 import { getColor } from "../scene/Material";
 import { getLocalPosition } from "../scene/Transform";
+import * as BVH2D from "../math/BVH2D";
+import * as Acceleration from "../math/Acceleration";
+import { flatten } from "../math/Array";
 
 export let buildSceneAccelerationStructureBufferData = (state, device) => {
-	let bufferDataArr = getAllRenderGameObjectData(state).reduce((bufferDataArr, [gameObject, transform, geometry, material], instanceIndex) => {
+	// TODO use pipe
+	let allAABBData = getAllRenderGameObjectData(state).map(([gameObject, transform, geometry, material], instanceIndex) => {
 		let c = getC(geometry, state)
 		let w = getW(geometry, state)
 		let r = getR(geometry, state)
 
 		let localPosition = getLocalPosition(transform, state)
 
-		let { worldMin, worldMax } = computeRingAABB(localPosition, c, r, w)
-		// console.log(c, w, r, { worldMin, worldMax });
+		return {
+			aabb: computeRingAABB(localPosition, c, r, w),
+			instanceIndex
+		}
+	})
+
+	let tree = BVH2D.build(allAABBData)
+	let [topLevelArr, bottomLevelArr] = Acceleration.build(tree)
 
 
-		bufferDataArr.push(
-			worldMin[0],
-			worldMin[1],
-		);
-		bufferDataArr.push(
-			worldMax[0],
-			worldMax[1],
-		);
+	let topLevelBufferData = new Float32Array(flatten(topLevelArr))
 
-		bufferDataArr.push(
-			instanceIndex,
-			0.0,
-			0.0,
-			0.0,
-		);
+	let topLevelBuffer = createBuffer(device, GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST, topLevelBufferData)
 
-		return bufferDataArr;
-	}, [])
+	let bottomLevelBufferData = new Float32Array(flatten(bottomLevelArr))
 
-	let bufferData = new Float32Array(bufferDataArr);
+	let bottomLevelBuffer = createBuffer(device, GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST, bottomLevelBufferData)
 
-	// console.log(bufferData)
 
-	let buffer = createBuffer(device, GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST, bufferData)
-
-	return [buffer, bufferData.byteLength];
+	return [
+		topLevelBuffer, topLevelBufferData.byteLength,
+		bottomLevelBuffer, bottomLevelBufferData.byteLength
+	];
 }
 
 export let buildSceneInstanceDataBufferData = (state, device) => {

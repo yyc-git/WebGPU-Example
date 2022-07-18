@@ -14,7 +14,8 @@ let _buildScene = (state, { transformCount, geometryCount, materialCount }) => {
 }
 
 let _main = async () => {
-	let count = { transformCount: 300, geometryCount: 1, materialCount: 1 }
+	// let count = { transformCount: 300, geometryCount: 1, materialCount: 1 }
+	let count = { transformCount: 3, geometryCount: 1, materialCount: 1 }
 
 	let state = createState()
 

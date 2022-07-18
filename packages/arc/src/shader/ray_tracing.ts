@@ -13,15 +13,23 @@ struct RingIntersect {
   instanceIndex: f32,
 }
 
-struct AABB2D {
+// struct AABB2D {
+//   worldMin : vec2<f32>,
+//   worldMax : vec2<f32>,
+// }
+
+
+struct TopLevel {
   worldMin : vec2<f32>,
   worldMax : vec2<f32>,
+
+	leafInstanceOffset: f32,
+	leafInstanceCount: f32,
+	child1Index: f32,
+	child2Index: f32
 }
 
-
-
-
-struct AccelerationStructure {
+struct BottomLevel {
   worldMin : vec2<f32>,
   worldMax : vec2<f32>,
 
@@ -55,8 +63,12 @@ struct Material {
   pad_0: f32,
 }
 
- struct AccelerationStructures {
-  accelerationStructures : array<AccelerationStructure>,
+ struct TopLevels {
+  topLevels : array<TopLevel>,
+}
+
+ struct BottomLevels {
+  bottomLevels : array<BottomLevel>,
 }
 
  struct Instances {
@@ -79,26 +91,28 @@ struct Material {
   resolution : vec2<f32>
 }
 
-@binding(0) @group(0) var<storage, read> sceneAccelerationStructure :  AccelerationStructures;
-@binding(1) @group(0) var<storage, read> sceneInstanceData :  Instances;
-@binding(2) @group(0) var<storage, read> sceneGeometryData :  Geometrys;
-@binding(3) @group(0) var<storage, read> sceneMaterialData :  Materials;
+@binding(0) @group(0) var<uniform> topLevel : TopLevels;
+@binding(1) @group(0) var<uniform> bottomLevel : BottomLevels;
+@binding(2) @group(0) var<storage, read> sceneInstanceData :  Instances;
+@binding(3) @group(0) var<storage, read> sceneGeometryData :  Geometrys;
+@binding(4) @group(0) var<storage, read> sceneMaterialData :  Materials;
 
-@binding(4) @group(0) var<storage, read_write> pixelBuffer :  Pixels;
+@binding(5) @group(0) var<storage, read_write> pixelBuffer :  Pixels;
 
-@binding(5) @group(0) var<uniform> screenDimension : ScreenDimension;
+@binding(6) @group(0) var<uniform> screenDimension : ScreenDimension;
 
-fn _isIntersectWithAABB2D(ray: Ray, aabb: AABB2D) -> bool {
-  var target = ray.target;
-  var worldMin = aabb.worldMin;
-  var worldMax = aabb.worldMax;
+// fn _isIntersectWithAABB2D(ray: Ray, aabb: AABB2D) -> bool {
+//   var target = ray.target;
+//   var worldMin = aabb.worldMin;
+//   var worldMax = aabb.worldMax;
 
-return target.x > worldMin.x && target.x < worldMax.x && target.y > worldMin.y && target.y < worldMax.y;
-}
+// return target.x > worldMin.x && target.x < worldMax.x && target.y > worldMin.y && target.y < worldMax.y;
+// }
 
 
-fn _isIntersectWithRing(ray: Ray, instance: Instance, geometry: Geometry) -> bool {
-  var target = ray.target;
+// fn _isIntersectWithRing(ray: Ray, instance: Instance, geometry: Geometry) -> bool {
+fn _isIntersectWithRing(point: vec2<f32>, instance: Instance, geometry: Geometry) -> bool {
+  // var target = ray.target;
 
 var localPosition = instance.localPosition;
 
@@ -108,39 +122,96 @@ var localPosition = instance.localPosition;
 
   var worldPosition = localPosition + c;
 
-  var distanceSquare = pow(target.x - worldPosition.x, 2.0) + pow( target.y - worldPosition.y, 2.0);
+  var distanceSquare = pow(point.x - worldPosition.x, 2.0) + pow( point.y - worldPosition.y, 2.0);
 
   return distanceSquare >= pow(r, 2) && distanceSquare <= pow(r + w, 2);
 }
 
+fn _isPointIntersectWithAABB(point: vec2<f32>, worldMin: vec2<f32>, worldMax: vec2<f32>) -> bool {
+return point.x > worldMin.x && point.x < worldMax.x && point.y > worldMin.y && point.y < worldMax.y;
+}
+
+fn _isPointIntersectWithTopLevelNode(point: vec2<f32>, node: TopLevel) -> bool {
+return _isPointIntersectWithAABB(point, node.worldMin, node. worldMax);
+}
+
+fn _isLeafNode(node: TopLevel) -> bool {
+  return node.leafInstanceCountOffset !== 0;
+}
+
+fn _hasChild(childIndex) -> bool {
+  return childIndex !== 0;
+}
+
+// fn _handleIntersectWithLeafNode (intersectResult, isIntersectWithInstance, point, node: topLevelNodeData, bottomLevelArr: bottomLevelArr) -> void {
+// }
 
 fn _intersectScene(ray: Ray)->RingIntersect {
   var intersectResult: RingIntersect;
 
   intersectResult.isClosestHit = false;
 
-  var as: AccelerationStructure;
+var point = ray.target;
 
-  var length = arrayLength(&sceneAccelerationStructure.accelerationStructures);
+var rootNode = topLevels.topLevels[0];
 
-  for (var i : u32 = 0u; i < length; i = i + 1u) {
-    as = sceneAccelerationStructure.accelerationStructures[i];
+var stackContainer:array<TopLevel> = [rootNode];
+var stackSize:u32 = 1;
 
-    if (_isIntersectWithAABB2D(ray, AABB2D(as.worldMin, as.worldMax))) {
-var instance: Instance = sceneInstanceData.instances[u32(as.instanceIndex)];
+var child1Index: u32;
+var child2Index: u32;
+
+while(stackSize > 0){
+		let currentNode = stackContainer[stackSize - 1];
+		stackSize = stackSize - 1;
+
+
+		if (_isPointIntersectWithTopLevelNode(point, currentNode)) {
+			if (_isLeafNode(currentNode)) {
+				// _handleIntersectWithLeafNode(intersectResult, isIntersectWithInstance, point, currentNode, bottomLevelArr);
+
+var leafInstanceOffset = u32(currentNode.leafInstanceOffset);
+var leafInstanceCount = u32(currentNode.leafInstanceCount);
+
+while(leafInstanceCount > 0){
+var bottomLevel = bottomLevels.bottomLevels[leafInstanceOffset];
+
+if(_isPointIntersectWithAABB(point, bottomLevel.worldMin, bottomLevel.worldMax)){
+var instance: Instance = sceneInstanceData.instances[u32(bottomLevel.instanceIndex)];
 var geometryIndex = u32(instance.geometryIndex);
-
-
  var geometry:Geometry = sceneGeometryData.geometrys[geometryIndex];
 
-      if (_isIntersectWithRing(ray,instance, geometry)) {
+      if (_isIntersectWithRing(point,instance, geometry)) {
         if (!intersectResult.isClosestHit) {
           intersectResult.isClosestHit = true;
-          intersectResult.instanceIndex = as.instanceIndex;
+          intersectResult.instanceIndex = bottomLevel.instanceIndex;
+
+          break;
         }
       }
-    }
-  }
+}
+}
+
+
+				// if (intersectResult.isClosestHit) {
+				// 	break;
+				// }
+			}
+			else {
+        child1Index = u32(currentNode.child1Index);
+        child2Index = u32(currentNode.child2Index);
+
+				if (_hasChild(child1Index)) {
+					stackContainer[stackSize] = topLevels.topLevels[child1Index];
+					stackSize += 1;
+				}
+				if (_hasChild(child2Index)) {
+					stackContainer[stackSize] = topLevels.topLevels[child2Index];
+					stackSize += 1;
+				}
+			}
+		}
+}
 
   return intersectResult;
 }
