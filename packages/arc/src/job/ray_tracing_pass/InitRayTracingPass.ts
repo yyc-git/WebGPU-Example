@@ -6,8 +6,8 @@ export let exec = (state) => {
 
 	const computeBindGroupLayout = device.createBindGroupLayout({
 		entries: [
-			{ binding: 0, visibility: GPUShaderStage.COMPUTE, buffer: { type: "uniform" } },
-			{ binding: 1, visibility: GPUShaderStage.COMPUTE, buffer: { type: "uniform" } },
+			{ binding: 0, visibility: GPUShaderStage.COMPUTE, buffer: { type: "read-only-storage" } },
+			{ binding: 1, visibility: GPUShaderStage.COMPUTE, buffer: { type: "read-only-storage" } },
 			{ binding: 2, visibility: GPUShaderStage.COMPUTE, buffer: { type: "read-only-storage" } },
 			{ binding: 3, visibility: GPUShaderStage.COMPUTE, buffer: { type: "read-only-storage" } },
 			{ binding: 4, visibility: GPUShaderStage.COMPUTE, buffer: { type: "read-only-storage" } },

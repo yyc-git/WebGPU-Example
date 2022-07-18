@@ -8,6 +8,10 @@ import * as BVH2D from "../math/BVH2D";
 import * as Acceleration from "../math/Acceleration";
 import { flatten } from "../math/Array";
 
+// let _addPaddingData = () => {
+// return 1 as any
+// }
+
 export let buildSceneAccelerationStructureBufferData = (state, device) => {
 	// TODO use pipe
 	let allAABBData = getAllRenderGameObjectData(state).map(([gameObject, transform, geometry, material], instanceIndex) => {
@@ -23,17 +27,24 @@ export let buildSceneAccelerationStructureBufferData = (state, device) => {
 		}
 	})
 
-	let tree = BVH2D.build(allAABBData)
+	let tree = BVH2D.build(allAABBData, 5)
 	let [topLevelArr, bottomLevelArr] = Acceleration.build(tree)
 
 
 	let topLevelBufferData = new Float32Array(flatten(topLevelArr))
 
-	let topLevelBuffer = createBuffer(device, GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST, topLevelBufferData)
+	let topLevelBuffer = createBuffer(device, GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST, topLevelBufferData)
+
+	// add padding
+	bottomLevelArr = bottomLevelArr.map((data) => {
+		data.push(0, 0, 0)
+
+		return data
+	})
 
 	let bottomLevelBufferData = new Float32Array(flatten(bottomLevelArr))
 
-	let bottomLevelBuffer = createBuffer(device, GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST, bottomLevelBufferData)
+	let bottomLevelBuffer = createBuffer(device, GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST, bottomLevelBufferData)
 
 
 	return [

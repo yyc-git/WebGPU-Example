@@ -246,4 +246,46 @@ defineFeature(feature, test => {
 			)
 		});
 	});
+
+
+	test('build acceleartion with minCount=2', ({ given, and, when, then }) => {
+		let allAABBData
+		let tree
+		let result
+
+		given(/^create (\d+) aabbs$/, (arg0) => {
+			allAABBData = [
+				createAABBData(0.5, 0.3, 0.8, 0.9, 0),
+				createAABBData(0.6, 0.2, 0.5, 0.5, 1),
+				createAABBData(-0.5, 0.2, 0.1, 0.3, 2),
+				createAABBData(0.2, -0.2, 0.4, 0.3, 3),
+				// createAABBData(0.6, -0.1, 0.4, 0.4, 4),
+			]
+		});
+
+		and(/^build bvh with minCount=(\d+)$/, (arg0) => {
+			tree = build(allAABBData, arg0)
+
+			// console.log(JSON.stringify(tree));
+		});
+
+		when('build acceleartion with bvh', () => {
+			result = Acceleration.build(tree)
+		});
+
+		then('should return correct bottomLevel', () => {
+			let [topLevelArr, bottomLevelArr] = result
+
+			// console.log(topLevelArr)
+			// console.log(bottomLevelArr)
+			expect(bottomLevelArr).toEqual(
+				[
+					[-0.5, 0.2, 0.1, 0.3, 2],
+					[0.2, -0.2, 0.4, 0.3, 3],
+					[0.6, 0.2, 0.5, 0.5, 1],
+					[0.5, 0.3, 0.8, 0.9, 0]
+				]
+			)
+		});
+	});
 });

@@ -82,7 +82,9 @@ should at least draw 10m ring at 60fps!
 
 *** DONE update compute shader
 
-*** TODO pass run test
+*** DONE pass run test
+
+*** TODO perf: use lbvh to build
 
 ** TODO perf: workgroup_size?
 query workgroup_size?
@@ -115,6 +117,7 @@ should restore canvas' width, height!
 * TODO draw arc
 
 
+# * TODO fix: solve transformCount: 1->error: Binding sizes are too small for bind group [BindGroup] at index 0
 
 
 * TODO commit to user

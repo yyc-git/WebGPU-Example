@@ -91,8 +91,9 @@ struct Material {
   resolution : vec2<f32>
 }
 
-@binding(0) @group(0) var<uniform> topLevel : TopLevels;
-@binding(1) @group(0) var<uniform> bottomLevel : BottomLevels;
+
+@binding(0) @group(0) var<storage> topLevel : TopLevels;
+@binding(1) @group(0) var<storage> bottomLevel : BottomLevels;
 @binding(2) @group(0) var<storage, read> sceneInstanceData :  Instances;
 @binding(3) @group(0) var<storage, read> sceneGeometryData :  Geometrys;
 @binding(4) @group(0) var<storage, read> sceneMaterialData :  Materials;
@@ -136,11 +137,11 @@ return _isPointIntersectWithAABB(point, node.worldMin, node. worldMax);
 }
 
 fn _isLeafNode(node: TopLevel) -> bool {
-  return node.leafInstanceCountOffset !== 0;
+  return u32(node.leafInstanceCount) != 0;
 }
 
-fn _hasChild(childIndex) -> bool {
-  return childIndex !== 0;
+fn _hasChild(childIndex: u32) -> bool {
+  return childIndex != 0;
 }
 
 // fn _handleIntersectWithLeafNode (intersectResult, isIntersectWithInstance, point, node: topLevelNodeData, bottomLevelArr: bottomLevelArr) -> void {
@@ -153,10 +154,19 @@ fn _intersectScene(ray: Ray)->RingIntersect {
 
 var point = ray.target;
 
-var rootNode = topLevels.topLevels[0];
+var rootNode = topLevel.topLevels[0];
 
-var stackContainer:array<TopLevel> = [rootNode];
+// var stackContainer:array<TopLevel> = [rootNode];
+// var stackContainer:array<TopLevel>;
+// var<uniform> directions: array<vec3<f32>>;
+// var<uniform> stackContainer:array<TopLevel>;
+
+
+// var<storage> stackContainer:array<TopLevel>;
+var stackContainer:array<TopLevel, 10>;
+
 var stackSize:u32 = 1;
+stackContainer[0] = rootNode;
 
 var child1Index: u32;
 var child2Index: u32;
@@ -172,9 +182,11 @@ while(stackSize > 0){
 
 var leafInstanceOffset = u32(currentNode.leafInstanceOffset);
 var leafInstanceCount = u32(currentNode.leafInstanceCount);
+// var leafInstanceOffset = 0;
+// var leafInstanceCount = 2;
 
 while(leafInstanceCount > 0){
-var bottomLevel = bottomLevels.bottomLevels[leafInstanceOffset];
+var bottomLevel = bottomLevel.bottomLevels[leafInstanceOffset];
 
 if(_isPointIntersectWithAABB(point, bottomLevel.worldMin, bottomLevel.worldMax)){
 var instance: Instance = sceneInstanceData.instances[u32(bottomLevel.instanceIndex)];
@@ -190,23 +202,26 @@ var geometryIndex = u32(instance.geometryIndex);
         }
       }
 }
+
+leafInstanceCount = leafInstanceCount - 1;
+leafInstanceOffset = leafInstanceOffset + 1;
 }
 
 
-				// if (intersectResult.isClosestHit) {
-				// 	break;
-				// }
+				if (intersectResult.isClosestHit) {
+					break;
+				}
 			}
 			else {
         child1Index = u32(currentNode.child1Index);
         child2Index = u32(currentNode.child2Index);
 
 				if (_hasChild(child1Index)) {
-					stackContainer[stackSize] = topLevels.topLevels[child1Index];
+					stackContainer[stackSize] = topLevel.topLevels[child1Index];
 					stackSize += 1;
 				}
 				if (_hasChild(child2Index)) {
-					stackContainer[stackSize] = topLevels.topLevels[child2Index];
+					stackContainer[stackSize] = topLevel.topLevels[child2Index];
 					stackSize += 1;
 				}
 			}

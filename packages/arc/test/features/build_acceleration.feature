@@ -23,3 +23,9 @@ Feature: Build Acceleration
             When build acceleartion with bvh
             Then should return correct topLevel and bottomLevel
 
+        Scenario: build acceleartion with minCount=2
+            Given create 4 aabbs
+            And build bvh with minCount=2
+            When build acceleartion with bvh
+            Then should return correct bottomLevel
+

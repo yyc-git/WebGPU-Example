@@ -65,19 +65,19 @@ let _build = (node, topLevelArr, child1Arr, child2Arr, bottomLevelArr): void => 
 				// 0
 			]
 		)
-		bottomLevelArr.push(
-			node.leafAllAABBData.reduce((arr, { aabb, instanceIndex }) => {
-				let { worldMin, worldMax } = aabb
+		node.leafAllAABBData.reduce((arr, { aabb, instanceIndex }) => {
+			let { worldMin, worldMax } = aabb
 
-				return arr.concat([
-					worldMin[0],
-					worldMin[1],
-					worldMax[0],
-					worldMax[1],
-					instanceIndex
-				])
-			}, [])
-		)
+			arr.push([
+				worldMin[0],
+				worldMin[1],
+				worldMax[0],
+				worldMax[1],
+				instanceIndex
+			])
+
+			return arr
+		}, bottomLevelArr)
 
 		return
 	}
@@ -203,9 +203,9 @@ let _handleIntersectWithLeafNode = (intersectResult, isIntersectWithInstance, po
 			worldMinX, worldMinY, worldMaxX, worldMaxY
 		)) {
 			// console.log("c");
-			
+
 			if (isIntersectWithInstance(point, instanceIndex)) {
-			// console.log("d");
+				// console.log("d");
 				intersectResult.isClosestHit = true
 				intersectResult.instanceIndex = instanceIndex
 
