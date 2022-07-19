@@ -1,6 +1,11 @@
 export let flatten = <T>(array: Array<Array<T>>): Array<T> => {
 	return array.reduce((result, arr) => {
-		return result.concat(arr)
+		// return result.concat(arr)
+		return arr.reduce((result, value) => {
+			result.push(value)
+
+			return result
+		}, result)
 	}, [])
 }
 

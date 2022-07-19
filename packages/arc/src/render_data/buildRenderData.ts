@@ -37,22 +37,29 @@ export let buildSceneAccelerationStructureBufferData = (state, device) => {
 
 	let topLevelBufferData = new Float32Array(flatten(topLevelArr))
 
-	let topLevelBuffer = createBuffer(device, GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST, topLevelBufferData)
-
+	let a3 = performance.now()
 	// add padding
 	bottomLevelArr = bottomLevelArr.map((data) => {
-		data.push(0, 0, 0)
+		// data.push(0, 0, 0)
+		data.push(0)
+		data.push(0)
+		data.push(0)
 
 		return data
 	})
+	let a4 = performance.now()
 
 	let bottomLevelBufferData = new Float32Array(flatten(bottomLevelArr))
 
+
+	console.log(a2 - a1, a3 - a2, a4 - a3)
+
+
+	let topLevelBuffer = createBuffer(device, GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST, topLevelBufferData)
+
+
 	let bottomLevelBuffer = createBuffer(device, GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST, bottomLevelBufferData)
 
-	let a3 = performance.now()
-
-	console.log(a2 - a1, a3 - a2)
 
 	return [
 		topLevelBuffer, topLevelBufferData.byteLength,
