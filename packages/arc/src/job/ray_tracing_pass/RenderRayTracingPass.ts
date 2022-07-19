@@ -8,10 +8,15 @@ export let exec = (state) => {
 
 	const commandEncoder = device.createCommandEncoder();
 
+	let workgroup_size = {
+		width: 8,
+		height: 8
+	}
+
 	const passEncoder = commandEncoder.beginComputePass();
 	passEncoder.setPipeline(pipeline);
 	passEncoder.setBindGroup(0, bindGroup);
-	passEncoder.dispatchWorkgroups(width, height, 1);
+	passEncoder.dispatchWorkgroups(Math.ceil(width / workgroup_size.width), Math.ceil(height / workgroup_size.height));
 	passEncoder.end();
 
 	device.queue.submit([commandEncoder.finish()]);

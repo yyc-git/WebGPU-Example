@@ -259,7 +259,7 @@ fn _traceRay(ray: Ray, payload: ptr<function,RayPayload>)->bool {
   return _handleRayMiss(payload);
 }
 
-@compute @workgroup_size(1, 1, 1)
+@compute @workgroup_size(8, 8, 1)
 fn main(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>) {
   var ipos = vec2<u32>(GlobalInvocationID.x, GlobalInvocationID.y);
 
