@@ -69,8 +69,8 @@ let _computeWholeAABB = (allAABBData: Array<aabbData>) => {
 
 
 // TODO refactor: use rescript->tree instead of edit ref<node>
-let _build = (node, minCount, getAxizFuncs, getAxizFuncIndex, allAABBData): void => {
-	if (allAABBData.length <= minCount) {
+let _build = (node, minCount, maxDepth, depth, getAxizFuncs, getAxizFuncIndex, allAABBData): void => {
+	if (depth >= maxDepth || allAABBData.length <= minCount) {
 		// node.wholeAABB = _computeWholeAABB(sortedAllAABBData)
 		node.leafAllAABBData = allAABBData
 		node.child1 = null
@@ -108,12 +108,13 @@ let _build = (node, minCount, getAxizFuncs, getAxizFuncIndex, allAABBData): void
 		node.child1 = child1
 		node.child2 = child2
 
-		_build(child1, minCount, getAxizFuncs, getAxizFuncIndex + 1, arr1)
-		_build(child2, minCount, getAxizFuncs, getAxizFuncIndex + 1, arr2)
+		_build(child1, minCount, maxDepth, depth + 1, getAxizFuncs, getAxizFuncIndex + 1, arr1)
+		_build(child2, minCount, maxDepth, depth + 1, getAxizFuncs, getAxizFuncIndex + 1, arr2)
 	}
 }
 
-export let build = (allAABBData: Array<aabbData>, minCount = 5): tree => {
+//by middle
+export let build = (allAABBData: Array<aabbData>, minCount = 5, maxDepth = 10): tree => {
 	let tree = {
 		wholeAABB: _computeWholeAABB(allAABBData),
 		leafAllAABBData: null,
@@ -121,10 +122,51 @@ export let build = (allAABBData: Array<aabbData>, minCount = 5): tree => {
 		child2: null
 	}
 
-	_build(tree, minCount, [
+
+	_build(tree, minCount, maxDepth, 1, [
 		(vec2) => vec2[0],
 		(vec2) => vec2[1]
 	], 0, allAABBData)
 
 	return tree
 }
+
+// let _findMinAndMax = (allAABBData: Array<aabbData>) => {
+// 	return 1 as any
+// }
+
+// let _buildGridPosition = () => {
+// 	return 1 as any
+// }
+
+// let _splitBy3 = () => {
+// 	return 1 as any
+// }
+
+// let _mortonEncodeByMagicbits = () => {
+// 	return 1 as any
+// }
+
+// let _sortByMorton = () => {
+// 	return 1 as any
+// }
+
+// let _binarySearchFirstChangeBitIndex = (sortedArr) => {
+// 	return 1 as any
+// }
+
+// let _buildByLBVH = () => {
+// 	return 1 as any
+// }
+
+// //by lbvh
+// export let buildByLBVH = (allAABBData: Array<aabbData>, minCount = 5): tree => {
+// 	let tree = {
+// 		wholeAABB: _computeWholeAABB(allAABBData),
+// 		leafAllAABBData: null,
+// 		child1: null,
+// 		child2: null
+// 	}
+
+// 	return tree
+// }

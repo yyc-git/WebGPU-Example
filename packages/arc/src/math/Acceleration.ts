@@ -1,3 +1,4 @@
+import { qsort } from "./Array"
 import { tree } from "./BVH2D"
 
 // type instanceOffset = number
@@ -14,19 +15,11 @@ type leafInstanceOffset = number
 type leafInstanceCount = number
 type child1Index = number
 type child2Index = number
-// type child1InstanceOffset = number
-// type child1InstanceCount = number
-// type child2InstanceOffset = number
-// type child2InstanceCount = number
 
 type topLevelNodeData = [
 	wholeWorldMinX, wholeWorldMinY, wholeWorldMaxX, wholeWorldMaxY,
 	leafInstanceOffset,
 	leafInstanceCount,
-	// child1InstanceOffset,
-	// child1InstanceCount,
-	// child2InstanceOffset,
-	// child2InstanceCount
 	child1Index,
 	child2Index
 ]
@@ -108,6 +101,42 @@ let _build = (node, topLevelArr, child1Arr, child2Arr, bottomLevelArr): void => 
 
 	return
 }
+
+// let _getDepth = (topLevelArr) => {
+// 	let rootNode = topLevelArr[0]
+
+// 	let child1IndexOffset = 6
+// 	let child2IndexOffset = 7
+
+// 	let stackContainer = [rootNode]
+// 	let stackSize = 1
+
+// 	let stackSizeArr = []
+
+// 	while (stackSize > 0) {
+// 		let currentNode = stackContainer[stackSize - 1]
+
+// 		stackSize -= 1
+
+// 		if (_isLeafNode(currentNode)) {
+// 			stackSizeArr.push(stackSize)
+// 		}
+// 		else {
+// 			if (_hasChild(currentNode, child1IndexOffset)) {
+// 				stackContainer[stackSize] = topLevelArr[currentNode[child1IndexOffset]]
+// 				stackSize += 1
+// 			}
+// 			if (_hasChild(currentNode, child2IndexOffset)) {
+// 				stackContainer[stackSize] = topLevelArr[currentNode[child2IndexOffset]]
+// 				stackSize += 1
+// 			}
+// 		}
+// 	}
+
+// 	// let arr = qsort(stackSizeArr, (v) => v)
+
+// 	return Math.max.apply(null, stackSizeArr)
+// }
 
 export let build = (tree: tree): [topLevelArr, bottomLevelArr] => {
 	let topLevelArr = []

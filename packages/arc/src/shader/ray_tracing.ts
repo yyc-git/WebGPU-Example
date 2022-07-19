@@ -148,6 +148,8 @@ fn _hasChild(childIndex: u32) -> bool {
 // }
 
 fn _intersectScene(ray: Ray)->RingIntersect {
+const MAX_DEPTH = 10;
+
   var intersectResult: RingIntersect;
 
   intersectResult.isClosestHit = false;
@@ -161,9 +163,7 @@ var rootNode = topLevel.topLevels[0];
 // var<uniform> directions: array<vec3<f32>>;
 // var<uniform> stackContainer:array<TopLevel>;
 
-
-// var<storage> stackContainer:array<TopLevel>;
-var stackContainer:array<TopLevel, 10>;
+var stackContainer:array<TopLevel, MAX_DEPTH>;
 
 var stackSize:u32 = 1;
 stackContainer[0] = rootNode;
