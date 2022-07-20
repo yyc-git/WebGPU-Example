@@ -1,7 +1,8 @@
 import { loadFeature, defineFeature } from 'jest-cucumber';
-import { build, buildByLBVH } from '../../src/math/BVH2D';
+import { build, buildByLBVH, _findBit, _mortonEncodeGridPositionByMagicbits } from '../../src/math/BVH2D';
 import { createAABBData, createAABB } from '../tool/AABBTool';
 import * as Acceleration from '../../src/math/Acceleration';
+import { dec2bin } from '../../src/utils/BitUtils';
 
 const feature = loadFeature('./test/features/build_acceleration.feature');
 
@@ -556,146 +557,58 @@ defineFeature(feature, test => {
 
 	// 	given(/^create (\d+) aabbs$/, (arg0) => {
 	// 		allAABBData = [
-	// 			// createAABBData(0.3, 0.3, 0.31, 0.31, 0),
-	// 			// createAABBData(0.1, 0.2, 0.5, 0.5, 2),
-	// 			// createAABBData(-0.5, 0.2, 0.1, 0.3, 1),
-
-
-	// 			createAABBData(0.5, 0.3, 0.8, 0.9, 0),
-	// 			createAABBData(0.6, 0.2, 0.5, 0.5, 1),
-	// 			createAABBData(-0.5, 0.2, 0.1, 0.3, 2),
-	// 			createAABBData(0.2, -0.2, 0.4, 0.3, 3),
-	// 			createAABBData(0.6, -0.1, 0.7, 0.4, 4),
+	// 			createAABBData(0.1, 0.1, 0.11, 0.11, 0),
+	// 			createAABBData(0.96, 0.99, 0.961, 0.991, 1),
+	// 			createAABBData(0.96, 0.99, 0.962, 0.992, 2),
+	// 			createAABBData(0.95, 0.99, 0.962, 0.992, 3),
 	// 		]
+
+	// 		allAABBData[0] = [allAABBData[0], [0, 1]]
+	// 		allAABBData[1] = [allAABBData[1], [973, 1003]]
+	// 		allAABBData[2] = [allAABBData[2], [972, 1003]]
+	// 		allAABBData[3] = [allAABBData[3], [972, 1004]]
+	// 		// console.log(dec2bin(973), dec2bin(1003));
+
 	// 	});
 
 	// 	when(/^build bvh with minCount=(\d+), maxDepth=(\d+)$/, (arg0, arg1) => {
-	// 		tree = buildByLBVH(allAABBData, arg0, arg1)
+	// 		tree = buildByLBVH2(allAABBData, 2, 10)
 	// 	});
 
 	// 	then('should return correct tree', () => {
 	// 		console.log(JSON.stringify(tree))
 	// 		// expect(tree).toEqual(
 	// 		// 	{
-	// 		// 		"wholeAABB": {
-	// 		// 			"worldMin": [
-	// 		// 				-0.5,
-	// 		// 				0.2
-	// 		// 			],
-	// 		// 			"worldMax": [
-	// 		// 				0.5,
-	// 		// 				0.5
-	// 		// 			]
-	// 		// 		},
-	// 		// 		"leafAllAABBData": null,
-	// 		// 		"child1": {
-	// 		// 			"wholeAABB": {
-	// 		// 				"worldMin": [
-	// 		// 					-0.5,
-	// 		// 					0.2
-	// 		// 				],
-	// 		// 				"worldMax": [
-	// 		// 					0.1,
-	// 		// 					0.3
-	// 		// 				]
-	// 		// 			},
-	// 		// 			"leafAllAABBData": [
-	// 		// 				{
-	// 		// 					"aabb": {
-	// 		// 						"worldMin": [
-	// 		// 							-0.5,
-	// 		// 							0.2
-	// 		// 						],
-	// 		// 						"worldMax": [
-	// 		// 							0.1,
-	// 		// 							0.3
-	// 		// 						]
-	// 		// 					},
-	// 		// 					"instanceIndex": 1
-	// 		// 				}
-	// 		// 			],
-	// 		// 			"child1": null,
-	// 		// 			"child2": null
-	// 		// 		},
-	// 		// 		"child2": {
-	// 		// 			"wholeAABB": {
-	// 		// 				"worldMin": [
-	// 		// 					0.1,
-	// 		// 					0.2
-	// 		// 				],
-	// 		// 				"worldMax": [
-	// 		// 					0.5,
-	// 		// 					0.5
-	// 		// 				]
-	// 		// 			},
-	// 		// 			"leafAllAABBData": null,
-	// 		// 			"child1": {
-	// 		// 				"wholeAABB": {
-	// 		// 					"worldMin": [
-	// 		// 						0.1,
-	// 		// 						0.2
-	// 		// 					],
-	// 		// 					"worldMax": [
-	// 		// 						0.5,
-	// 		// 						0.5
-	// 		// 					]
-	// 		// 				},
-	// 		// 				"leafAllAABBData": [
-	// 		// 					{
-	// 		// 						"aabb": {
-	// 		// 							"worldMin": [
-	// 		// 								0.1,
-	// 		// 								0.2
-	// 		// 							],
-	// 		// 							"worldMax": [
-	// 		// 								0.5,
-	// 		// 								0.5
-	// 		// 							]
-	// 		// 						},
-	// 		// 						"instanceIndex": 2
-	// 		// 					}
-	// 		// 				],
-	// 		// 				"child1": null,
-	// 		// 				"child2": null
-	// 		// 			},
-	// 		// 			"child2": {
-	// 		// 				"wholeAABB": {
-	// 		// 					"worldMin": [
-	// 		// 						0.3,
-	// 		// 						0.3
-	// 		// 					],
-	// 		// 					"worldMax": [
-	// 		// 						0.31,
-	// 		// 						0.31
-	// 		// 					]
-	// 		// 				},
-	// 		// 				"leafAllAABBData": [
-	// 		// 					{
-	// 		// 						"aabb": {
-	// 		// 							"worldMin": [
-	// 		// 								0.3,
-	// 		// 								0.3
-	// 		// 							],
-	// 		// 							"worldMax": [
-	// 		// 								0.31,
-	// 		// 								0.31
-	// 		// 							]
-	// 		// 						},
-	// 		// 						"instanceIndex": 0
-	// 		// 					}
-	// 		// 				],
-	// 		// 				"child1": null,
-	// 		// 				"child2": null
-	// 		// 			}
-	// 		// 		}
-	// 		// 	}
-	// 		// )
-	// 		// expect(tree).toEqual(
-	// 		// 	{
 	// 		// 	}
 	// 		// )
 	// 	});
 	// });
+
+
+	test('find bit', ({ given, when, then }) => {
+		let bit
+
+		when(/^find (.*) bit at (.*)$/, (binary, index) => {
+			bit = _findBit(Number(binary), Number(index))
+		});
+
+		then(/^should return (.*)$/, (b) => {
+			expect(bit).toEqual(Number(b))
+		});
+	});
+
+
+	test('morton encode', ({ given, when, then }) => {
+		let code
+
+		when(/^morton encode (.*), (.*)$/, (gridPositionX, gridPositionY) => {
+			code = _mortonEncodeGridPositionByMagicbits([Number(gridPositionX), Number(gridPositionY)])
+		});
+
+		then(/^should return (.*)$/, (c) => {
+			expect(code).toEqual(Number(c))
+		});
+	});
 
 	test('build acceleartion', ({ given, and, when, then }) => {
 		let allAABBData

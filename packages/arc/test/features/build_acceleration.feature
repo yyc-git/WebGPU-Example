@@ -37,6 +37,25 @@ Feature: Build Acceleration
             When build bvh with minCount=1, maxDepth=2
             Then should return correct tree
 
+        Scenario Outline: find bit
+            When find <Binary> bit at <Index>
+            Then should return <Bit>
+
+            Examples:
+
+                | Binary                 | Index | Bit |
+                | 0b11111111100011011011 | 20    | 1   |
+                | 0b11111111100011011011 | 3     | 0   |
+
+        Scenario Outline: morton encode
+            When morton encode <GridPositionX>, <GridPositionY>
+            Then should return <Code>
+
+            Examples:
+
+                | GridPositionX | GridPositionY | Code                   |
+                | 0b1111001101  | 0b1111101011  | 0b11111111100011011011 |
+
         # Scenario: aaa
         #     Given create 3 aabbs
         #     When build bvh with minCount=1, maxDepth=2
