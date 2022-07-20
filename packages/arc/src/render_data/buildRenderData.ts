@@ -25,15 +25,17 @@ export let buildSceneAccelerationStructureBufferData = (state, device) => {
 			aabb: computeRingAABB(localPosition, c, r, w),
 			instanceIndex
 		}
-	})
+	});
 
-	let a1 = performance.now()
+	// ( console as any ).profile("build")
+	let a1 = performance.now();
 
-	let tree = BVH2D.build(allAABBData, 5)
-	let [topLevelArr, bottomLevelArr] = Acceleration.build(tree)
+	let tree = BVH2D.buildByLBVH(allAABBData, 5)
+	let [topLevelArr, bottomLevelArr] = Acceleration.build(tree);
 
-	let a2 = performance.now()
+	let a2 = performance.now();
 
+	// ( console as any ).profileEnd()
 
 	let topLevelBufferData = new Float32Array(flatten(topLevelArr))
 

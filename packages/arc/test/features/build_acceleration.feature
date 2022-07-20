@@ -32,6 +32,15 @@ Feature: Build Acceleration
             When build bvh with minCount=1, maxDepth=2
             Then should return correct tree
 
+        Scenario: build bvh with 2 same aabbs by lbvh
+            Given create 3 aabbs
+            When build bvh with minCount=1, maxDepth=2
+            Then should return correct tree
+
+        # Scenario: aaa
+        #     Given create 3 aabbs
+        #     When build bvh with minCount=1, maxDepth=2
+        #     Then should return correct tree
 
     Rule: build acceleartion
 

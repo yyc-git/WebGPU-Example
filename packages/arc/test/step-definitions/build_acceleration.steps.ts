@@ -322,7 +322,6 @@ defineFeature(feature, test => {
 		});
 
 		then('should return correct tree', () => {
-			// console.log(JSON.stringify(tree))
 			expect(tree).toEqual(
 				{
 					"wholeAABB": {
@@ -440,6 +439,263 @@ defineFeature(feature, test => {
 			)
 		});
 	});
+
+
+	test('build bvh with 2 same aabbs by lbvh', ({ given, when, then }) => {
+		let allAABBData
+		let tree
+
+		given(/^create (\d+) aabbs$/, (arg0) => {
+			allAABBData = [
+				createAABBData(0.3, 0.3, 0.31, 0.31, 0),
+				createAABBData(0.3, 0.3, 0.31, 0.31, 0),
+
+				createAABBData(-0.5, 0.2, 0.1, 0.3, 1),
+			]
+		});
+
+		when(/^build bvh with minCount=(\d+), maxDepth=(\d+)$/, (arg0, arg1) => {
+			tree = buildByLBVH(allAABBData, arg0, arg1)
+		});
+
+		then('should return correct tree', () => {
+			// console.log(JSON.stringify(tree))
+			expect(tree).toEqual(
+				{
+					"wholeAABB": {
+						"worldMin": [
+							-0.5,
+							0.2
+						],
+						"worldMax": [
+							0.31,
+							0.31
+						]
+					},
+					"leafAllAABBData": null,
+					"child1": {
+						"wholeAABB": {
+							"worldMin": [
+								-0.5,
+								0.2
+							],
+							"worldMax": [
+								0.1,
+								0.3
+							]
+						},
+						"leafAllAABBData": [
+							{
+								"aabb": {
+									"worldMin": [
+										-0.5,
+										0.2
+									],
+									"worldMax": [
+										0.1,
+										0.3
+									]
+								},
+								"instanceIndex": 1
+							}
+						],
+						"child1": null,
+						"child2": null
+					},
+					"child2": {
+						"wholeAABB": {
+							"worldMin": [
+								0.3,
+								0.3
+							],
+							"worldMax": [
+								0.31,
+								0.31
+							]
+						},
+						"leafAllAABBData": [
+							{
+								"aabb": {
+									"worldMin": [
+										0.3,
+										0.3
+									],
+									"worldMax": [
+										0.31,
+										0.31
+									]
+								},
+								"instanceIndex": 0
+							},
+							{
+								"aabb": {
+									"worldMin": [
+										0.3,
+										0.3
+									],
+									"worldMax": [
+										0.31,
+										0.31
+									]
+								},
+								"instanceIndex": 0
+							}
+						],
+						"child1": null,
+						"child2": null
+					}
+				}
+			)
+		});
+	});
+
+
+	// test('aaa', ({ given, when, then }) => {
+	// 	let allAABBData
+	// 	let tree
+
+	// 	given(/^create (\d+) aabbs$/, (arg0) => {
+	// 		allAABBData = [
+	// 			// createAABBData(0.3, 0.3, 0.31, 0.31, 0),
+	// 			// createAABBData(0.1, 0.2, 0.5, 0.5, 2),
+	// 			// createAABBData(-0.5, 0.2, 0.1, 0.3, 1),
+
+
+	// 			createAABBData(0.5, 0.3, 0.8, 0.9, 0),
+	// 			createAABBData(0.6, 0.2, 0.5, 0.5, 1),
+	// 			createAABBData(-0.5, 0.2, 0.1, 0.3, 2),
+	// 			createAABBData(0.2, -0.2, 0.4, 0.3, 3),
+	// 			createAABBData(0.6, -0.1, 0.7, 0.4, 4),
+	// 		]
+	// 	});
+
+	// 	when(/^build bvh with minCount=(\d+), maxDepth=(\d+)$/, (arg0, arg1) => {
+	// 		tree = buildByLBVH(allAABBData, arg0, arg1)
+	// 	});
+
+	// 	then('should return correct tree', () => {
+	// 		console.log(JSON.stringify(tree))
+	// 		// expect(tree).toEqual(
+	// 		// 	{
+	// 		// 		"wholeAABB": {
+	// 		// 			"worldMin": [
+	// 		// 				-0.5,
+	// 		// 				0.2
+	// 		// 			],
+	// 		// 			"worldMax": [
+	// 		// 				0.5,
+	// 		// 				0.5
+	// 		// 			]
+	// 		// 		},
+	// 		// 		"leafAllAABBData": null,
+	// 		// 		"child1": {
+	// 		// 			"wholeAABB": {
+	// 		// 				"worldMin": [
+	// 		// 					-0.5,
+	// 		// 					0.2
+	// 		// 				],
+	// 		// 				"worldMax": [
+	// 		// 					0.1,
+	// 		// 					0.3
+	// 		// 				]
+	// 		// 			},
+	// 		// 			"leafAllAABBData": [
+	// 		// 				{
+	// 		// 					"aabb": {
+	// 		// 						"worldMin": [
+	// 		// 							-0.5,
+	// 		// 							0.2
+	// 		// 						],
+	// 		// 						"worldMax": [
+	// 		// 							0.1,
+	// 		// 							0.3
+	// 		// 						]
+	// 		// 					},
+	// 		// 					"instanceIndex": 1
+	// 		// 				}
+	// 		// 			],
+	// 		// 			"child1": null,
+	// 		// 			"child2": null
+	// 		// 		},
+	// 		// 		"child2": {
+	// 		// 			"wholeAABB": {
+	// 		// 				"worldMin": [
+	// 		// 					0.1,
+	// 		// 					0.2
+	// 		// 				],
+	// 		// 				"worldMax": [
+	// 		// 					0.5,
+	// 		// 					0.5
+	// 		// 				]
+	// 		// 			},
+	// 		// 			"leafAllAABBData": null,
+	// 		// 			"child1": {
+	// 		// 				"wholeAABB": {
+	// 		// 					"worldMin": [
+	// 		// 						0.1,
+	// 		// 						0.2
+	// 		// 					],
+	// 		// 					"worldMax": [
+	// 		// 						0.5,
+	// 		// 						0.5
+	// 		// 					]
+	// 		// 				},
+	// 		// 				"leafAllAABBData": [
+	// 		// 					{
+	// 		// 						"aabb": {
+	// 		// 							"worldMin": [
+	// 		// 								0.1,
+	// 		// 								0.2
+	// 		// 							],
+	// 		// 							"worldMax": [
+	// 		// 								0.5,
+	// 		// 								0.5
+	// 		// 							]
+	// 		// 						},
+	// 		// 						"instanceIndex": 2
+	// 		// 					}
+	// 		// 				],
+	// 		// 				"child1": null,
+	// 		// 				"child2": null
+	// 		// 			},
+	// 		// 			"child2": {
+	// 		// 				"wholeAABB": {
+	// 		// 					"worldMin": [
+	// 		// 						0.3,
+	// 		// 						0.3
+	// 		// 					],
+	// 		// 					"worldMax": [
+	// 		// 						0.31,
+	// 		// 						0.31
+	// 		// 					]
+	// 		// 				},
+	// 		// 				"leafAllAABBData": [
+	// 		// 					{
+	// 		// 						"aabb": {
+	// 		// 							"worldMin": [
+	// 		// 								0.3,
+	// 		// 								0.3
+	// 		// 							],
+	// 		// 							"worldMax": [
+	// 		// 								0.31,
+	// 		// 								0.31
+	// 		// 							]
+	// 		// 						},
+	// 		// 						"instanceIndex": 0
+	// 		// 					}
+	// 		// 				],
+	// 		// 				"child1": null,
+	// 		// 				"child2": null
+	// 		// 			}
+	// 		// 		}
+	// 		// 	}
+	// 		// )
+	// 		// expect(tree).toEqual(
+	// 		// 	{
+	// 		// 	}
+	// 		// )
+	// 	});
+	// });
 
 	test('build acceleartion', ({ given, and, when, then }) => {
 		let allAABBData
