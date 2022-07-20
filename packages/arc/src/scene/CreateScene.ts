@@ -6,6 +6,8 @@ export let createTransformBuffer = (count): Float32Array => {
 	for (let i = 0; i < count; i++) {
 		posArr.push(Math.random() * 2 - 1)
 		posArr.push(Math.random() * 2 - 1)
+		// posArr.push(Math.random()  * 0.5)
+		//  posArr.push(Math.random() * 0.5 )
 	}
 
 	return new Float32Array(posArr)
@@ -15,10 +17,14 @@ export let createGeometryBuffer = (count): Float32Array => {
 	let c = create(0, 0)
 	// let w = 2.0
 	// let r = 5.0
-	// let w = 0.02
-	// let r = 0.05
-	let w = 0.002
-	let r = 0.005
+	let w = 0.02
+	let r = 0.05
+	// let w = 0.002
+	// let r = 0.005
+	// let w = 0.008
+	// let r = 0.020
+	// let w = 0.001
+	// let r = 0.0025
 
 	return new Float32Array([
 		c[0],
@@ -40,7 +46,7 @@ export let createScene = (transformCount) => {
 	let allRenderGameObjectData = []
 
 	for (let i = 0; i < transformCount; i++) {
-		allRenderGameObjectData.push([ i, i, 0, 0 ])
+		allRenderGameObjectData.push([i, i, 0, 0])
 	}
 
 	return allRenderGameObjectData

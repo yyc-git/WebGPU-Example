@@ -68,7 +68,7 @@ optimize _isIntersectWithAABB2D;
 should at least draw 10m ring at 60fps!
 
 
-** TODO perf: use 2d bvh
+** DONE perf: use 2d bvh
 
 
 *** DONE implement build
@@ -87,7 +87,7 @@ should at least draw 10m ring at 60fps!
 
 *** DONE perf: limit max depth to 10
 
-*** TODO perf: use lbvh to build
+*** DONE perf: use lbvh to build
 # *** TODO perf: use Surface Area Heuristic (SAH) to build
 
 # test transformCount: 1m
@@ -98,20 +98,17 @@ TODO fix bug!
 compare more aabbs with old implement and new implement!
 
 
-add test case:
-box1 and box2's center is the same
+# add test case:
+# box1 and box2's center is the same
 
 
 add test case:
+test _findBit
+test _mortonEncodeGridPositionByMagicbits:
+1111001101 1111101011
 
+11111111100011011011
 
-
-
-** TODO fix: how to find closestHit?
-
-position add z!
-
-find by z!
 
 
 ** DONE perf: workgroup_size?
@@ -130,10 +127,17 @@ local var too many so that one workgroup can only run one local?
 # ** TODO perf: compute! in _intersectScene
 
 
+* TODO fix: how to find closestHit?
 
-** TODO perf: render 10M arcs should at 60fps !
+position add z!
 
-*** TODO fix error:
+find by z!
+
+
+
+* DONE perf: render 10M arcs should at 60fps !
+
+** TODO fix error:
 index.html:1 Binding size (160000000) is larger than the maximum binding size (134217728).
  - While validating entries[1] as a Buffer.
 Expected entry layout: { binding: 1, visibility: ShaderStage::Compute, buffer: { type: BufferBindingType::ReadOnlyStorage, hasDynamicOffset: 0, minBindingSize: 0 } }
@@ -143,6 +147,34 @@ Expected entry layout: { binding: 1, visibility: ShaderStage::Compute, buffer: {
 
 
 *** TODO test memory
+
+
+
+result:
+4M rings
+
+init time:
+10s(build bvh)
+
+60fps
+memory: 211MB
+
+
+
+
+* TODO commit to user
+
+
+change to:
+	 let w = 0.02
+	 let r = 0.05
+
+
+
+* TODO render in Meta3D
+
+
+
 
 
 * TODO perf: remove pad?
@@ -156,13 +188,6 @@ should restore canvas' width(to 760px), height(to 500px)!
 
 * TODO fix: 锯齿
 
-
-* TODO commit to user
-
-
-
-
-* TODO render in Meta3D
 
 
 
@@ -200,6 +225,16 @@ perf: 2d matrix operate!
 
 
 * TODO select object
+
+
+
+
+* TODO fix(lbvh): in grid position:[972-974, 1003-1004] not render ring!!!
+
+when:
+createGeometryBuffer->w=0.002, r=0.005
+render 100K rings
+
 
 
 * TODO perf: bvh
