@@ -1,3 +1,4 @@
+import { dec2bin } from "../utils/BitUtils"
 import { computeCenter, create, t } from "./AABB2D"
 import { qsort } from "./Array"
 import * as Vector2 from "./Vector2"
@@ -80,15 +81,12 @@ let _build = (node, minCount, maxDepth, depth, getAxizFuncs, getAxizFuncIndex, a
 	}
 	else {
 		let sortedAllAABBData = _sort(getAxizFuncs[getAxizFuncIndex % 2], allAABBData)
-		// console.log(sortedAllAABBData)
 
 
-		// let splitIndex = _findMiddleIndex(getAxizFuncs[getAxizFuncIndex % 2], allAABBData)
 		let splitIndex = Math.floor(allAABBData.length / 2)
 
 		let arr1 = sortedAllAABBData.slice(0, splitIndex)
 		let arr2 = sortedAllAABBData.slice(splitIndex, sortedAllAABBData.length)
-		// console.log(splitIndex, arr1, arr2)
 
 		let child1 = {
 			wholeAABB: _computeWholeAABB(arr1),
@@ -134,14 +132,14 @@ export let build = (allAABBData: Array<aabbData>, minCount = 5, maxDepth = 10): 
 
 
 
-let _buildGridPosition = ({ worldMin, worldMax }, allAABBData: Array<aabbData>) => {
+let _buildGridPosition = ({ worldMin, worldMax }, allAABBData: Array<aabbData>, gridXBitCount, gridYBitCount) => {
 	let minX = worldMin[0]
 	let maxX = worldMax[0]
 	let minY = worldMin[1]
 	let maxY = worldMax[1]
 
-	let stepX = (maxX - minX) / 1024
-	let stepY = (maxY - minY) / 1024
+	let stepX = (maxX - minX) / Math.pow(2, gridXBitCount)
+	let stepY = (maxY - minY) / Math.pow(2, gridYBitCount)
 
 	return allAABBData.map((aabbData) => {
 		let [centerX, centerY] = computeCenter(aabbData.aabb)
@@ -156,17 +154,35 @@ let _buildGridPosition = ({ worldMin, worldMax }, allAABBData: Array<aabbData>) 
 }
 
 let _mortonEncodeGridPositionByMagicbits = ([gridPositionX, gridPositionY]) => {
-	let res = gridPositionX | (gridPositionY << 32)
-	res = (res | (res << 8)) & 0x00ff00ff00ff00ff
-	res = (res | (res << 4)) & 0x0f0f0f0f0f0f0f0f
-	res = (res | (res << 2)) & 0x3333333333333333
-	res = (res | (res << 1)) & 0x5555555555555555
+	let index1 = gridPositionX
+	let index2 = gridPositionY
 
-	return res | (res >> 31)
+	index1 &= 0x0000ffff
+	index2 &= 0x0000ffff
+	index1 |= (index1 << 8)
+	index2 |= (index2 << 8)
+	index1 &= 0x00ff00ff
+	index2 &= 0x00ff00ff
+	index1 |= (index1 << 4)
+	index2 |= (index2 << 4)
+	index1 &= 0x0f0f0f0f
+	index2 &= 0x0f0f0f0f
+	index1 |= (index1 << 2)
+	index2 |= (index2 << 2)
+	index1 &= 0x33333333
+	index2 &= 0x33333333
+	index1 |= (index1 << 1)
+	index2 |= (index2 << 1)
+	index1 &= 0x55555555
+	index2 &= 0x55555555
+
+	return (index1 | (index2 << 1))
 }
 
 let _mortonEncode = (allAABBDataWithGridPosition) => {
-	allAABBDataWithGridPosition.map(([aabbData, gridPosition]) => {
+	// console.log(allAABBDataWithGridPosition)
+
+	return allAABBDataWithGridPosition.map(([aabbData, gridPosition]) => {
 		return [aabbData, _mortonEncodeGridPositionByMagicbits(gridPosition)]
 	})
 }
@@ -177,53 +193,112 @@ let _sortByMorton = (allAABBDataWithMortonEncode) => {
 	})
 }
 
-let _findHighest1BitIndex = (x) => {
-	let bitIndex = 0
+// let _findHighest1BitIndex = (x) => {
+// 	let bitIndex = 0
 
-	while ((x & (x - 1)) !== 0) {
-		x = x & (x - 1)
+// 	while (x) {
+// 		x >>= 1
+// 		bitIndex++
+// 	}
 
-		bitIndex += 1
-	}
+// 	return bitIndex
+// }
 
-	return bitIndex
+let _findBit = (x, index) => {
+	return (x >> index) & 1
 }
 
 let _convertToAllAABBData = (sortedAllAABBDataWithMortonEncode) => {
 	return sortedAllAABBDataWithMortonEncode.map(([aabbData, _]) => aabbData)
 }
 
-let _binarySearchFirstChangeBitIndex = (sortedAllAABBDataWithMortonEncode) => {
+let _binarySearchFirstChangeBitIndex = (sortedAllAABBDataWithMortonEncode, index) => {
 	let [_, maxMortonEncode] = sortedAllAABBDataWithMortonEncode[sortedAllAABBDataWithMortonEncode.length - 1]
 
-	let highest1BitIndex = _findHighest1BitIndex(maxMortonEncode)
+	let maxValueBit = _findBit(maxMortonEncode, index)
+
+	// 	console.log(
+	// 		sortedAllAABBDataWithMortonEncode,
+	// 		maxMortonEncode, dec2bin(maxMortonEncode), highest1BitIndex
+	// 	)
+	// 	console.log(
+	// 		 dec2bin(sortedAllAABBDataWithMortonEncode[0][1]),
+	// _findHighest1BitIndex(sortedAllAABBDataWithMortonEncode[0][1])
+	// 	)
+
+
+
+
+
+	// sortedAllAABBDataWithMortonEncode
+
+
+
 
 	let lowIndex = 0
 	let highIndex = sortedAllAABBDataWithMortonEncode.length - 1
 
 	let firstChangeBitIndex = null
 
-	while (lowIndex <= highIndex) {
+	// TODO remove
+	let count = 30
+
+	while (lowIndex < highIndex && count > 0) {
+		// console.log(lowIndex, highIndex, firstChangeBitIndex)
+
+		count--
+
 		let middleIndex = Math.floor((lowIndex + highIndex) / 2)
 
-		let middleHighest1BitIndex = _findHighest1BitIndex(sortedAllAABBDataWithMortonEncode[middleIndex][1])
+		let middleValueBit = _findBit(sortedAllAABBDataWithMortonEncode[middleIndex][1], index)
 
-		if (middleHighest1BitIndex < highest1BitIndex) {
+
+		// console.log("middleValueBit:", middleValueBit, sortedAllAABBDataWithMortonEncode[middleIndex][1]);
+
+
+		if (middleValueBit < maxValueBit) {
 			lowIndex = middleIndex
 			firstChangeBitIndex = middleIndex
+
+			if (lowIndex == highIndex - 1) {
+				break
+			}
 		}
 		// equal
 		else {
 			highIndex = middleIndex
 		}
+	}
 
+	// TODO remove
+	if (count === 0) {
+		throw new Error("error")
 	}
 
 	return firstChangeBitIndex
 }
 
-let _buildByLBVH = (node, minCount, maxDepth, depth, sortedAllAABBDataWithMortonEncode): void => {
-	if (depth >= maxDepth || sortedAllAABBDataWithMortonEncode.length <= minCount) {
+let _findSearchBitIndex = (sortedAllAABBDataWithMortonEncode, searchBitIndex) => {
+	let maxMortonEncode = sortedAllAABBDataWithMortonEncode[sortedAllAABBDataWithMortonEncode.length - 1][1]
+	let minMortonEncode = sortedAllAABBDataWithMortonEncode[0][1]
+
+	let result = searchBitIndex
+
+	while (result > 0) {
+		if (_findBit(maxMortonEncode, result) == _findBit(minMortonEncode, result)) {
+			result -= 1
+		}
+		else {
+			break
+		}
+	}
+
+	return result
+}
+
+let _buildByLBVH = (node, minCount, maxDepth, depth, searchBitIndex, sortedAllAABBDataWithMortonEncode): void => {
+	// console.log(sortedAllAABBDataWithMortonEncode)
+	if (depth >= maxDepth || sortedAllAABBDataWithMortonEncode.length <= minCount || searchBitIndex < 1) {
 		node.leafAllAABBData = _convertToAllAABBData(sortedAllAABBDataWithMortonEncode)
 		node.child1 = null
 		node.child2 = null
@@ -231,10 +306,14 @@ let _buildByLBVH = (node, minCount, maxDepth, depth, sortedAllAABBDataWithMorton
 		return
 	}
 	else {
-		let firstChangeBitIndex = _binarySearchFirstChangeBitIndex(sortedAllAABBDataWithMortonEncode)
+		// console.log(sortedAllAABBDataWithMortonEncode, searchBitIndex)
+		searchBitIndex = _findSearchBitIndex(sortedAllAABBDataWithMortonEncode, searchBitIndex)
+		// console.log(searchBitIndex)
 
-		let arr1 = sortedAllAABBDataWithMortonEncode.slice(0, firstChangeBitIndex)
-		let arr2 = sortedAllAABBDataWithMortonEncode.slice(firstChangeBitIndex, sortedAllAABBDataWithMortonEncode.length)
+		let firstChangeBitIndex = _binarySearchFirstChangeBitIndex(sortedAllAABBDataWithMortonEncode, searchBitIndex)
+
+		let arr1 = sortedAllAABBDataWithMortonEncode.slice(0, firstChangeBitIndex + 1)
+		let arr2 = sortedAllAABBDataWithMortonEncode.slice(firstChangeBitIndex + 1, sortedAllAABBDataWithMortonEncode.length)
 
 		let child1 = {
 			wholeAABB: _computeWholeAABB(_convertToAllAABBData(arr1)),
@@ -253,12 +332,15 @@ let _buildByLBVH = (node, minCount, maxDepth, depth, sortedAllAABBDataWithMorton
 		node.child1 = child1
 		node.child2 = child2
 
-		_buildByLBVH(child1, minCount, maxDepth, depth + 1, arr1)
-		_buildByLBVH(child2, minCount, maxDepth, depth + 1, arr2)
+		_buildByLBVH(child1, minCount, maxDepth, depth + 1, searchBitIndex - 1, arr1)
+		_buildByLBVH(child2, minCount, maxDepth, depth + 1, searchBitIndex - 1, arr2)
 	}
 }
 
 export let buildByLBVH = (allAABBData: Array<aabbData>, minCount = 5, maxDepth = 10): tree => {
+	const GRID_X_BIT_COUNT = 10
+	const GRID_Y_BIT_COUNT = 10
+
 	let wholeAABB = _computeWholeAABB(allAABBData)
 	let tree = {
 		wholeAABB,
@@ -267,8 +349,8 @@ export let buildByLBVH = (allAABBData: Array<aabbData>, minCount = 5, maxDepth =
 		child2: null
 	}
 
-	_buildByLBVH(tree, minCount, maxDepth, 0, _sortByMorton(
-		_mortonEncode(_buildGridPosition(wholeAABB, allAABBData))
+	_buildByLBVH(tree, minCount, maxDepth, 0, GRID_X_BIT_COUNT + GRID_Y_BIT_COUNT, _sortByMorton(
+		_mortonEncode(_buildGridPosition(wholeAABB, allAABBData, GRID_X_BIT_COUNT, GRID_Y_BIT_COUNT))
 	))
 
 	return tree

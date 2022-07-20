@@ -1,12 +1,12 @@
 import { loadFeature, defineFeature } from 'jest-cucumber';
-import { build } from '../../src/math/BVH2D';
+import { build, buildByLBVH } from '../../src/math/BVH2D';
 import { createAABBData, createAABB } from '../tool/AABBTool';
 import * as Acceleration from '../../src/math/Acceleration';
 
 const feature = loadFeature('./test/features/build_acceleration.feature');
 
 defineFeature(feature, test => {
-	test('build bvh with only one leaf node', ({ given, when, then }) => {
+	test('build bvh with only one leaf node by middle', ({ given, when, then }) => {
 		let allAABBData
 		let tree
 
@@ -34,7 +34,7 @@ defineFeature(feature, test => {
 		});
 	});
 
-	test('build bvh with 2 depth', ({ given, when, then }) => {
+	test('build bvh with 2 depth by middle', ({ given, when, then }) => {
 		let allAABBData
 		let tree
 
@@ -139,7 +139,7 @@ defineFeature(feature, test => {
 		});
 	});
 
-	test('build bvh with 3 aabbs', ({ given, when, then }) => {
+	test('build bvh with 3 aabbs by middle', ({ given, when, then }) => {
 		let allAABBData
 		let tree
 
@@ -234,6 +234,170 @@ defineFeature(feature, test => {
 										"worldMax": [
 											0.3,
 											0.35
+										]
+									},
+									"instanceIndex": 0
+								}
+							],
+							"child1": null,
+							"child2": null
+						},
+						"child2": {
+							"wholeAABB": {
+								"worldMin": [
+									0.1,
+									0.2
+								],
+								"worldMax": [
+									0.5,
+									0.5
+								]
+							},
+							"leafAllAABBData": [
+								{
+									"aabb": {
+										"worldMin": [
+											0.1,
+											0.2
+										],
+										"worldMax": [
+											0.5,
+											0.5
+										]
+									},
+									"instanceIndex": 2
+								}
+							],
+							"child1": null,
+							"child2": null
+						}
+					}
+				}
+			)
+		});
+	});
+
+	test('build bvh with only one leaf node by lbvh', ({ given, when, then }) => {
+		let allAABBData
+		let tree
+
+		given(/^create (\d+) aabbs$/, (arg0) => {
+			allAABBData = [
+				createAABBData(0.1, 0.2, 0.5, 0.5, 0),
+				createAABBData(0.5, 0.3, 0.8, 0.9, 1),
+			]
+		});
+
+		when(/^build bvh with minCount=(\d+)$/, (arg0) => {
+			tree = buildByLBVH(allAABBData, arg0)
+		});
+
+		then('should return tree which only has one leaf node', () => {
+			expect(tree).toEqual({
+				wholeAABB: createAABB(
+					0.1, 0.2,
+					0.8, 0.9
+				),
+				leafAllAABBData: allAABBData,
+				child1: null,
+				child2: null
+			})
+		});
+	});
+
+	test('build bvh with 2 depth by lbvh', ({ given, when, then }) => {
+		let allAABBData
+		let tree
+
+		given(/^create (\d+) aabbs$/, (arg0) => {
+			allAABBData = [
+				createAABBData(0.3, 0.3, 0.31, 0.31, 0),
+				createAABBData(0.1, 0.2, 0.5, 0.5, 2),
+				createAABBData(-0.5, 0.2, 0.1, 0.3, 1),
+			]
+		});
+
+		when(/^build bvh with minCount=(\d+), maxDepth=(\d+)$/, (arg0, arg1) => {
+			tree = buildByLBVH(allAABBData, arg0, arg1)
+		});
+
+		then('should return correct tree', () => {
+			// console.log(JSON.stringify(tree))
+			expect(tree).toEqual(
+				{
+					"wholeAABB": {
+						"worldMin": [
+							-0.5,
+							0.2
+						],
+						"worldMax": [
+							0.5,
+							0.5
+						]
+					},
+					"leafAllAABBData": null,
+					"child1": {
+						"wholeAABB": {
+							"worldMin": [
+								-0.5,
+								0.2
+							],
+							"worldMax": [
+								0.1,
+								0.3
+							]
+						},
+						"leafAllAABBData": [
+							{
+								"aabb": {
+									"worldMin": [
+										-0.5,
+										0.2
+									],
+									"worldMax": [
+										0.1,
+										0.3
+									]
+								},
+								"instanceIndex": 1
+							}
+						],
+						"child1": null,
+						"child2": null
+					},
+					"child2": {
+						"wholeAABB": {
+							"worldMin": [
+								0.1,
+								0.2
+							],
+							"worldMax": [
+								0.5,
+								0.5
+							]
+						},
+						"leafAllAABBData": null,
+						"child1": {
+							"wholeAABB": {
+								"worldMin": [
+									0.3,
+									0.3
+								],
+								"worldMax": [
+									0.31,
+									0.31
+								]
+							},
+							"leafAllAABBData": [
+								{
+									"aabb": {
+										"worldMin": [
+											0.3,
+											0.3
+										],
+										"worldMax": [
+											0.31,
+											0.31
 										]
 									},
 									"instanceIndex": 0
