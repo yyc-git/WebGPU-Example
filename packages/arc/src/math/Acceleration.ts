@@ -13,16 +13,17 @@ type wholeWorldMaxX = number
 type wholeWorldMaxY = number
 
 type leafInstanceOffset = number
-type leafInstanceCount = number
-type maxLayer = layer
+// type leafInstanceCount = number
+type leafInstanceCountAndMaxLayer = number
 type child1Index = number
 type child2Index = number
 
 type topLevelNodeData = [
 	wholeWorldMinX, wholeWorldMinY, wholeWorldMaxX, wholeWorldMaxY,
 	leafInstanceOffset,
-	leafInstanceCount,
-	maxLayer,
+	// leafInstanceCount,
+	// maxLayer,
+	leafInstanceCountAndMaxLayer,
 	child1Index,
 	child2Index
 ]
@@ -39,6 +40,23 @@ type instanceIndex = number
 
 type bottomLevelArr = Array<[worldMinX, worldMinY, worldMaxX, worldMaxY, instanceIndex, layer]>
 
+let _mergeTwo16BitValues = (value1, value2) => {
+	return (value1 << 16) | value2
+}
+
+let _getLeafInstanceCount = (
+	leafInstanceCountAndMaxLayer: number
+) => {
+	return (leafInstanceCountAndMaxLayer >> 16) & 0xffff
+}
+
+let _getMaxLayer = (
+	leafInstanceCountAndMaxLayer: number
+) => {
+	return leafInstanceCountAndMaxLayer & 0xffff
+}
+
+
 // TODO refactor(rescript): not edit ref: topLevelArr, bottomLevelArr
 // let _build = (node, topLevelArr, hierachyArr, bottomLevelArr): void => {
 let _build = (node, topLevelArr, child1Arr, child2Arr, bottomLevelArr: bottomLevelArr): void => {
@@ -53,8 +71,7 @@ let _build = (node, topLevelArr, child1Arr, child2Arr, bottomLevelArr: bottomLev
 				worldMax[0],
 				worldMax[1],
 				bottomLevelArr.length,
-				node.leafAllAABBData.length,
-				maxLayer
+				_mergeTwo16BitValues(node.leafAllAABBData.length, maxLayer)
 			]
 		)
 		node.leafAllAABBData.reduce((arr, { aabb, instanceIndex, layer }) => {
@@ -82,8 +99,7 @@ let _build = (node, topLevelArr, child1Arr, child2Arr, bottomLevelArr: bottomLev
 			worldMax[0],
 			worldMax[1],
 			0,
-			0,
-			maxLayer
+			_mergeTwo16BitValues(0, maxLayer)
 		]
 	)
 	let nodeIndex = topLevelArr.length - 1
@@ -147,7 +163,6 @@ export let build = (tree: tree): [topLevelArr, bottomLevelArr] => {
 
 	_build(tree, topLevelArr, child1Arr, child2Arr, bottomLevelArr)
 
-
 	topLevelArr = topLevelArr.map((data, index) => {
 		if (child1Arr[index] !== undefined) {
 			data.push(child1Arr[index])
@@ -171,6 +186,7 @@ export let build = (tree: tree): [topLevelArr, bottomLevelArr] => {
 
 type traverseResult = {
 	isClosestHit: boolean,
+	layer: number,
 	instanceIndex: instanceIndex | null
 }
 
@@ -192,18 +208,22 @@ let _isPointIntersectWithTopLevelNode = (point, node: topLevelNodeData) => {
 	)
 }
 
-let _isLeafNode = (node: topLevelNodeData) => {
-	let leafInstanceCountOffset = 5
+let _isLeafNode = (leafInstanceCount) => {
+	// let leafInstanceCountOffset = 5
 
-	return node[leafInstanceCountOffset] !== 0
+	// return node[leafInstanceCountOffset] !== 0
+
+	return leafInstanceCount !== 0
 }
 
-let _handleIntersectWithLeafNode = (intersectResult, isIntersectWithInstance, point, node: topLevelNodeData, bottomLevelArr: bottomLevelArr) => {
+let _handleIntersectWithLeafNode = (intersectResult, isIntersectWithInstance, point,
+	leafInstanceCount, maxLayer, node: topLevelNodeData,
+	bottomLevelArr: bottomLevelArr) => {
 	let [
 		wholeWorldMinX, wholeWorldMinY, wholeWorldMaxX, wholeWorldMaxY,
 		leafInstanceOffset,
-		leafInstanceCount,
-		maxLayer
+		// leafInstanceCount,
+		// maxLayer
 	] = node
 
 
@@ -226,7 +246,7 @@ let _handleIntersectWithLeafNode = (intersectResult, isIntersectWithInstance, po
 					intersectResult.layer = layer
 					intersectResult.instanceIndex = instanceIndex
 
-					if(layer == maxLayer){
+					if (layer == maxLayer) {
 						break
 					}
 				}
@@ -245,9 +265,9 @@ let _hasChild = (node, childIndexOffset) => {
 export let traverse = (isIntersectWithInstance, point, topLevelArr: topLevelArr, bottomLevelArr: bottomLevelArr): traverseResult => {
 	let rootNode = topLevelArr[0]
 
-	let maxLayerOffset = 6
-	let child1IndexOffset = 7
-	let child2IndexOffset = 8
+	let leafInstanceCountAndMaxLayerOffset = 5
+	let child1IndexOffset = 6
+	let child2IndexOffset = 7
 
 	// let node = rootNode
 
@@ -265,8 +285,11 @@ export let traverse = (isIntersectWithInstance, point, topLevelArr: topLevelArr,
 
 		stackSize -= 1
 
+		let leafInstanceCountAndMaxLayer = currentNode[leafInstanceCountAndMaxLayerOffset]
 
-		if (currentNode[maxLayerOffset] <= intersectResult.layer) {
+		let maxLayer = _getMaxLayer(leafInstanceCountAndMaxLayer)
+
+		if (maxLayer <= intersectResult.layer) {
 			continue
 		}
 
@@ -281,8 +304,11 @@ export let traverse = (isIntersectWithInstance, point, topLevelArr: topLevelArr,
 			// 	_hasChild(currentNode, child2IndexOffset),
 			// )
 
-			if (_isLeafNode(currentNode)) {
-				_handleIntersectWithLeafNode(intersectResult, isIntersectWithInstance, point, currentNode, bottomLevelArr)
+			let leafInstanceCount = _getLeafInstanceCount(leafInstanceCountAndMaxLayer)
+			
+
+			if (_isLeafNode(leafInstanceCount)) {
+				_handleIntersectWithLeafNode(intersectResult, isIntersectWithInstance, point, leafInstanceCount, maxLayer, currentNode, bottomLevelArr)
 
 				// if (intersectResult.isClosestHit) {
 				// 	break
