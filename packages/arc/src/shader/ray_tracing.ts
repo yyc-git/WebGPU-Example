@@ -25,7 +25,7 @@ struct TopLevel {
   worldMax : vec2<f32>,
 
 	leafInstanceOffset: f32,
-	leafInstanceCount: f32,
+	leafInstanceCountAndMaxLayer: f32,
 	child1Index: f32,
 	child2Index: f32
 }
@@ -35,10 +35,11 @@ struct BottomLevel {
   worldMax : vec2<f32>,
 
   instanceIndex: f32,
+  layer: f32,
   // TODO remove pad?
   pad_0: f32,
   pad_1: f32,
-  pad_2: f32,
+  // pad_2: f32,
 }
 
 struct Instance {
@@ -47,11 +48,11 @@ struct Instance {
 
   localPosition: vec2<f32>,
 
-  layer: f32,
-  // TODO remove pad?
-  pad_0: f32,
-  pad_1: f32,
-  pad_2: f32,
+  // layer: f32,
+  // // TODO remove pad?
+  // pad_0: f32,
+  // pad_1: f32,
+  // pad_2: f32,
 }
 
 
@@ -143,12 +144,20 @@ fn _isPointIntersectWithTopLevelNode(point: vec2<f32>, node: TopLevel) -> bool {
 return _isPointIntersectWithAABB(point, node.worldMin, node. worldMax);
 }
 
-fn _isLeafNode(node: TopLevel) -> bool {
-  return u32(node.leafInstanceCount) != 0;
+fn _isLeafNode(leafInstanceCount:u32) -> bool {
+  return leafInstanceCount != 0;
 }
 
 fn _hasChild(childIndex: u32) -> bool {
   return childIndex != 0;
+}
+
+fn _getMaxLayer(leafInstanceCountAndMaxLayer: u32) -> u32 {
+  return leafInstanceCountAndMaxLayer & 0xffff;
+}
+
+fn _getLeafInstanceCount(leafInstanceCountAndMaxLayer: u32) -> u32 {
+  return (leafInstanceCountAndMaxLayer >> 16) & 0xffff;
 }
 
 // fn _handleIntersectWithLeafNode (intersectResult, isIntersectWithInstance, point, node: topLevelNodeData, bottomLevelArr: bottomLevelArr) -> void {
@@ -183,13 +192,22 @@ while(stackSize > 0){
 		let currentNode = stackContainer[stackSize - 1];
 		stackSize = stackSize - 1;
 
+		var leafInstanceCountAndMaxLayer = u32(currentNode.leafInstanceCountAndMaxLayer);
+
+ var maxLayer =   _getMaxLayer(leafInstanceCountAndMaxLayer);
+ if(maxLayer <= intersectResult.layer){
+   continue;
+ }
 
 		if (_isPointIntersectWithTopLevelNode(point, currentNode)) {
-			if (_isLeafNode(currentNode)) {
+			var leafInstanceCount = u32(_getLeafInstanceCount(leafInstanceCountAndMaxLayer));
+
+
+			if (_isLeafNode(leafInstanceCount)) {
 				// _handleIntersectWithLeafNode(intersectResult, isIntersectWithInstance, point, currentNode, bottomLevelArr);
 
 var leafInstanceOffset = u32(currentNode.leafInstanceOffset);
-var leafInstanceCount = u32(currentNode.leafInstanceCount);
+// var leafInstanceCount = u32(currentNode.leafInstanceCount);
 // var leafInstanceOffset = 0;
 // var leafInstanceCount = 2;
 
@@ -203,14 +221,16 @@ var geometryIndex = u32(instance.geometryIndex);
 
 
       if (_isIntersectWithRing(point,instance, geometry)) {
- var layer = u32(instance.layer);
+ var layer = u32(bottomLevel.layer);
 
-        if (!intersectResult.isClosestHit || layer >= intersectResult.layer) {
+        if (!intersectResult.isClosestHit || layer > intersectResult.layer) {
           intersectResult.isClosestHit = true;
           intersectResult.layer = layer;
           intersectResult.instanceIndex = bottomLevel.instanceIndex;
 
-          // break;
+if(layer == maxLayer){
+  break;
+}
         }
       }
 }

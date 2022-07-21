@@ -41,9 +41,9 @@ defineFeature(feature, test => {
 
 		given(/^create (\d+) aabbs$/, (arg0) => {
 			allAABBData = [
-				createAABBData(0.3, 0.3, 0.31, 0.31, 0, 2),
-				createAABBData(0.1, 0.2, 0.5, 0.5, 2, 0),
-				createAABBData(-0.5, 0.2, 0.1, 0.3, 1, 1),
+				createAABBData(0.3, 0.3, 0.31, 0.31, 0, 3),
+				createAABBData(0.1, 0.2, 0.5, 0.5, 2, 1),
+				createAABBData(-0.5, 0.2, 0.1, 0.3, 1, 2),
 			]
 		});
 
@@ -66,7 +66,7 @@ defineFeature(feature, test => {
 								0.5
 							]
 						},
-						"maxLayer": 2
+						"maxLayer": 3
 					},
 					"leafAllAABBData": null,
 					"child1": {
@@ -81,7 +81,7 @@ defineFeature(feature, test => {
 									0.3
 								]
 							},
-							"maxLayer": 1
+							"maxLayer": 2
 						},
 						"leafAllAABBData": [
 							{
@@ -96,7 +96,7 @@ defineFeature(feature, test => {
 									]
 								},
 								"instanceIndex": 1,
-								"layer": 1
+								"layer": 2
 							}
 						],
 						"child1": null,
@@ -114,7 +114,7 @@ defineFeature(feature, test => {
 									0.5
 								]
 							},
-							"maxLayer": 2
+							"maxLayer": 3
 						},
 						"leafAllAABBData": null,
 						"child1": {
@@ -129,7 +129,7 @@ defineFeature(feature, test => {
 										0.31
 									]
 								},
-								"maxLayer": 2
+								"maxLayer": 3
 							},
 							"leafAllAABBData": [
 								{
@@ -144,7 +144,7 @@ defineFeature(feature, test => {
 										]
 									},
 									"instanceIndex": 0,
-									"layer": 2
+									"layer": 3
 								}
 							],
 							"child1": null,
@@ -162,7 +162,7 @@ defineFeature(feature, test => {
 										0.5
 									]
 								},
-								"maxLayer": 0
+								"maxLayer": 1
 							},
 							"leafAllAABBData": [
 								{
@@ -177,7 +177,7 @@ defineFeature(feature, test => {
 										]
 									},
 									"instanceIndex": 2,
-									"layer": 0
+									"layer": 1
 								}
 							],
 							"child1": null,
@@ -222,7 +222,7 @@ defineFeature(feature, test => {
 								0.31
 							]
 						},
-						"maxLayer": 0
+						"maxLayer": 1
 					},
 					"leafAllAABBData": null,
 					"child1": {
@@ -237,7 +237,7 @@ defineFeature(feature, test => {
 									0.3
 								]
 							},
-							"maxLayer": 0
+							"maxLayer": 1
 						},
 						"leafAllAABBData": [
 							{
@@ -252,7 +252,7 @@ defineFeature(feature, test => {
 									]
 								},
 								"instanceIndex": 1,
-								"layer": 0
+								"layer": 1
 							}
 						],
 						"child1": null,
@@ -270,7 +270,7 @@ defineFeature(feature, test => {
 									0.31
 								]
 							},
-							"maxLayer": 0
+							"maxLayer": 1
 						},
 						"leafAllAABBData": [
 							{
@@ -285,7 +285,7 @@ defineFeature(feature, test => {
 									]
 								},
 								"instanceIndex": 0,
-								"layer": 0
+								"layer": 1
 							},
 							{
 								"aabb": {
@@ -299,7 +299,7 @@ defineFeature(feature, test => {
 									]
 								},
 								"instanceIndex": 0,
-								"layer": 0
+								"layer": 1
 							}
 						],
 						"child1": null,
@@ -377,10 +377,10 @@ defineFeature(feature, test => {
 
 		given(/^create (\d+) aabbs$/, (arg0) => {
 			allAABBData = [
-				createAABBData(0.5, 0.3, 0.8, 0.9, 0, 2),
-				createAABBData(0.6, 0.2, 0.5, 0.5, 1, 2),
-				createAABBData(-0.5, 0.2, 0.1, 0.3, 2, 1),
-				createAABBData(0.2, -0.2, 0.4, 0.3, 3, 0),
+				createAABBData(0.5, 0.3, 0.8, 0.9, 0, 3),
+				createAABBData(0.6, 0.2, 0.5, 0.5, 1, 3),
+				createAABBData(-0.5, 0.2, 0.1, 0.3, 2, 2),
+				createAABBData(0.2, -0.2, 0.4, 0.3, 3, 1),
 			]
 		});
 
@@ -403,36 +403,36 @@ defineFeature(feature, test => {
 				[
 					[
 						-0.5, -0.2, 0.8,
-						0.9, 0, 2,
+						0.9, 0, 3,
 						1, 4
 					],
 					[
 						-0.5, -0.2, 0.4,
-						0.3, 0, 1,
+						0.3, 0, 2,
 						2, 3
 					],
 					[
 						-0.5, 0.2, 0.1,
-						0.3, 0, 65537,
+						0.3, 0, 65538,
 						0, 0
 					],
 					[
 						0.2, -0.2, 0.4,
-						0.3, 1, 65536,
+						0.3, 1, 65537,
 						0, 0
 					],
 					[
 						0.5, 0.2, 0.8, 0.9,
-						0, 2, 5, 6
+						0, 3, 5, 6
 					],
 					[
 						0.6, 0.2, 0.5,
-						0.5, 2, 65538,
+						0.5, 2, 65539,
 						0, 0
 					],
 					[
 						0.5, 0.3, 0.8,
-						0.9, 3, 65538,
+						0.9, 3, 65539,
 						0, 0
 					]
 				]
@@ -440,10 +440,10 @@ defineFeature(feature, test => {
 			)
 			expect(bottomLevelArr).toEqual(
 				[
-					[-0.5, 0.2, 0.1, 0.3, 2, 1],
-					[0.2, -0.2, 0.4, 0.3, 3, 0],
-					[0.6, 0.2, 0.5, 0.5, 1, 2],
-					[0.5, 0.3, 0.8, 0.9, 0, 2]
+					[-0.5, 0.2, 0.1, 0.3, 2, 2],
+					[0.2, -0.2, 0.4, 0.3, 3, 1],
+					[0.6, 0.2, 0.5, 0.5, 1, 3],
+					[0.5, 0.3, 0.8, 0.9, 0, 3]
 				]
 			)
 		});
@@ -481,10 +481,10 @@ defineFeature(feature, test => {
 			// console.log(bottomLevelArr)
 			expect(bottomLevelArr).toEqual(
 				[
-					[-0.5, 0.2, 0.1, 0.3, 2, 0],
-					[0.2, -0.2, 0.4, 0.3, 3, 0],
-					[0.6, 0.2, 0.5, 0.5, 1, 0],
-					[0.5, 0.3, 0.8, 0.9, 0, 0]
+					[-0.5, 0.2, 0.1, 0.3, 2, 1],
+					[0.2, -0.2, 0.4, 0.3, 3, 1],
+					[0.6, 0.2, 0.5, 0.5, 1, 1],
+					[0.5, 0.3, 0.8, 0.9, 0, 1]
 				]
 			)
 		});

@@ -117,8 +117,8 @@ defineFeature(feature, test => {
 
 		given("create instances and their aabbs", () => {
 			allAABBData = [
-				createAABBData(0.5, 0.3, 0.8, 0.9, 0, 0),
-				createAABBData(0.6, 0.2, 0.7, 0.5, 1, 1),
+				createAABBData(0.5, 0.3, 0.8, 0.9, 0, 1),
+				createAABBData(0.6, 0.2, 0.7, 0.5, 1, 2),
 			]
 
 			isIntersectWithInstanceStub = sandbox.stub()
@@ -207,10 +207,10 @@ defineFeature(feature, test => {
 
 		given('create instances and their aabbs that are overlap', () => {
 			allAABBData = [
-				createAABBData(-0.1, 0.1, 0.6, 0.5, 0, 0),
-				createAABBData(-0.4, -0.4, -0.1, -0.2, 1, 10),
-				createAABBData(0.2, 0.2, 0.7, 0.6, 2, 2),
-				createAABBData(0.3, 0.3, 0.8, 0.8, 3, 1),
+				createAABBData(-0.1, 0.1, 0.6, 0.5, 0, 1),
+				createAABBData(-0.4, -0.4, -0.1, -0.2, 2, 4),
+				createAABBData(0.2, 0.2, 0.7, 0.6, 2, 3),
+				createAABBData(0.3, 0.3, 0.8, 0.8, 3, 2),
 			]
 
 			isIntersectWithInstanceStub = sandbox.stub()

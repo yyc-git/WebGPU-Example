@@ -135,11 +135,53 @@ find by 图层!
 
 change 图层 to z!
 
+
+
+# * TODO perf: remove pad?
+
+
 * TODO perf: optimize traverse?
 
+# if top layer, break;
 
-* TODO perf: remove pad?
 
+# instance node add min layer, max layer(layer of its node)
+top node add max layer(layer of its node)
+
+add test case
+
+
+in leaf:
+if < intersectResult.layer, continue
+if layer is leaf node's max layer, break
+
+in stack:
+if currentNode's max layer <= intersectResult.layer, continue
+(judge when set child1, child2?)
+
+# if top layer, break;
+
+
+
+fix: buildRenderData->BottomLevel, Instance
+
+
+
+pass run test
+
+
+
+TODO compress top node structure data:
+merge leafInstanceCount, layer
+
+
+pass run test
+
+
+
+
+
+check <2 16
 
 * TODO fix: 锯齿
 

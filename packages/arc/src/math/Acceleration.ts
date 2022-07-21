@@ -186,7 +186,7 @@ export let build = (tree: tree): [topLevelArr, bottomLevelArr] => {
 
 type traverseResult = {
 	isClosestHit: boolean,
-	layer: number,
+	layer: layer,
 	instanceIndex: instanceIndex | null
 }
 
@@ -274,9 +274,10 @@ export let traverse = (isIntersectWithInstance, point, topLevelArr: topLevelArr,
 	let stackContainer = [rootNode]
 	let stackSize = 1
 
-	let intersectResult = {
+	let intersectResult: traverseResult = {
 		isClosestHit: false,
-		layer: -1,
+		// layer: -1,
+		layer: 0,
 		instanceIndex: null
 	}
 
@@ -305,7 +306,7 @@ export let traverse = (isIntersectWithInstance, point, topLevelArr: topLevelArr,
 			// )
 
 			let leafInstanceCount = _getLeafInstanceCount(leafInstanceCountAndMaxLayer)
-			
+
 
 			if (_isLeafNode(leafInstanceCount)) {
 				_handleIntersectWithLeafNode(intersectResult, isIntersectWithInstance, point, leafInstanceCount, maxLayer, currentNode, bottomLevelArr)

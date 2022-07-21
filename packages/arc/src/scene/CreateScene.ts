@@ -1,7 +1,8 @@
 import { create } from "../math/Vector2"
+import { layer } from "../type/LayerType"
 
 export let createTransformBuffer = (count): Float32Array => {
-	let layer = [0,1,2,3]
+	let layers: Array<layer> = [1, 2, 3, 4]
 
 	let data = []
 
@@ -9,7 +10,7 @@ export let createTransformBuffer = (count): Float32Array => {
 		data.push(Math.random() * 2 - 1)
 		data.push(Math.random() * 2 - 1)
 
-		data.push(layer[ Math.floor(Math.random() * 4)])
+		data.push(layers[Math.floor(Math.random() * 4)])
 	}
 
 	return new Float32Array(data)
