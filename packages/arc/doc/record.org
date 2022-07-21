@@ -140,7 +140,7 @@ change 图层 to z!
 # * TODO perf: remove pad?
 
 
-* TODO perf: optimize traverse?
+* DONE perf: optimize traverse?
 
 # if top layer, break;
 
@@ -183,12 +183,6 @@ pass run test
 
 check <2 16
 
-* TODO fix: 锯齿
-
-
-* TODO camera scale, move
-
-should restore canvas' width(to 760px), height(to 500px)!
 
 
 
@@ -228,6 +222,10 @@ change to:
 
 
 
+* TODO write article!
+
+
+
 * TODO render in Meta3D
 
 
@@ -237,6 +235,12 @@ change to:
 
 
 
+* TODO fix: 锯齿
+
+
+* TODO camera scale, move
+
+should restore canvas' width(to 760px), height(to 500px)!
 
 
 
