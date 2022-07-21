@@ -1,16 +1,18 @@
 import { create } from "../math/Vector2"
 
 export let createTransformBuffer = (count): Float32Array => {
-	let posArr = []
+	let layer = [0,1,2,3]
+
+	let data = []
 
 	for (let i = 0; i < count; i++) {
-		posArr.push(Math.random() * 2 - 1)
-		posArr.push(Math.random() * 2 - 1)
-		// posArr.push(Math.random()  * 0.5)
-		//  posArr.push(Math.random() * 0.5 )
+		data.push(Math.random() * 2 - 1)
+		data.push(Math.random() * 2 - 1)
+
+		data.push(layer[ Math.floor(Math.random() * 4)])
 	}
 
-	return new Float32Array(posArr)
+	return new Float32Array(data)
 }
 
 export let createGeometryBuffer = (count): Float32Array => {

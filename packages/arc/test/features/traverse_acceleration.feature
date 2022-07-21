@@ -20,7 +20,6 @@ Feature: Traverse Acceleration
             Then should not intersect
 
         Scenario: intersect case1
-            # Scenario: aaa
             When traverse acceleartion
             Then should intersect
 
@@ -35,3 +34,14 @@ Feature: Traverse Acceleration
         Scenario: intersect case1 by lbvh
             When traverse acceleartion
             Then should intersect
+
+
+    Rule: find closest hit
+
+        Scenario: find closest hit
+            Given prepare sandbox
+            And create instances and their aabbs that are overlap
+            And build bvh with minCount=1 by lbvh
+            And build acceleartion with bvh
+            When traverse acceleartion
+            Then should intersect with the closet hit

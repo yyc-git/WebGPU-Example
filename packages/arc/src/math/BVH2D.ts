@@ -223,8 +223,6 @@ export let _mortonEncodeGridPositionByMagicbits = ([gridPositionX, gridPositionY
 }
 
 let _mortonEncode = (allAABBDataWithGridPosition) => {
-	// log(allAABBDataWithGridPosition)
-
 	return allAABBDataWithGridPosition.map(([aabbData, gridPosition]) => {
 		return [aabbData, _mortonEncodeGridPositionByMagicbits(gridPosition)]
 	})
@@ -277,7 +275,7 @@ let _binarySearchFirstChangeBitIndex = (sortedAllAABBDataWithMortonEncode,
 	let count = 30
 
 	while (lowIndex < highIndex && count > 0) {
-		log(lowIndex, highIndex, firstChangeBitIndex)
+		// log(lowIndex, highIndex, firstChangeBitIndex)
 
 		count--
 
@@ -286,7 +284,7 @@ let _binarySearchFirstChangeBitIndex = (sortedAllAABBDataWithMortonEncode,
 		let middleValueBit = _findBit(sortedAllAABBDataWithMortonEncode[middleIndex][1], index)
 
 
-		log("middleValueBit:", middleValueBit, maxValueBit, lowIndex, highIndex);
+		// log("middleValueBit:", middleValueBit, maxValueBit, lowIndex, highIndex);
 
 
 		if (middleValueBit < maxValueBit) {
@@ -355,7 +353,6 @@ let _handleLeafNode = (node, sortedAllAABBData, dataStartIndex, dataLength) => {
 }
 
 let _buildByLBVH = (node, minCount, maxDepth, depth, searchBitIndex, sortedAllAABBDataWithMortonEncode, sortedAllAABBData, dataStartIndex, dataLength): void => {
-	// log(sortedAllAABBDataWithMortonEncode)
 	// if (depth >= maxDepth || sortedAllAABBDataWithMortonEncode.length <= minCount || searchBitIndex < 1) {
 	if (depth >= maxDepth || dataLength <= minCount || searchBitIndex < 1) {
 		// node.leafAllAABBData = _convertToAllAABBData(sortedAllAABBDataWithMortonEncode)
@@ -365,11 +362,11 @@ let _buildByLBVH = (node, minCount, maxDepth, depth, searchBitIndex, sortedAllAA
 		return
 	}
 	else {
-		log(sortedAllAABBDataWithMortonEncode,
-			dataStartIndex, dataLength,
-			searchBitIndex)
+		// log(sortedAllAABBDataWithMortonEncode,
+		// 	dataStartIndex, dataLength,
+		// 	searchBitIndex)
 		searchBitIndex = _findSearchBitIndex(sortedAllAABBDataWithMortonEncode, dataStartIndex, dataLength, searchBitIndex)
-		log(searchBitIndex)
+		// log(searchBitIndex)
 
 		if (searchBitIndex < 1) {
 			_handleLeafNode(node, sortedAllAABBData, dataStartIndex, dataLength)
@@ -378,7 +375,7 @@ let _buildByLBVH = (node, minCount, maxDepth, depth, searchBitIndex, sortedAllAA
 
 
 		let firstChangeBitIndex = _binarySearchFirstChangeBitIndex(sortedAllAABBDataWithMortonEncode, dataStartIndex, dataLength, searchBitIndex)
-		log("firstChangeBitIndex: ", firstChangeBitIndex)
+		// log("firstChangeBitIndex: ", firstChangeBitIndex)
 
 		let child1StartIndex = dataStartIndex
 		let child1Length = firstChangeBitIndex - dataStartIndex + 1
@@ -386,10 +383,10 @@ let _buildByLBVH = (node, minCount, maxDepth, depth, searchBitIndex, sortedAllAA
 		let child2StartIndex = firstChangeBitIndex + 1
 		let child2Length = dataLength - (firstChangeBitIndex - dataStartIndex + 1)
 
-		log("child1->wholeAABB:", sortedAllAABBData, child1StartIndex, child1Length,
+		// log("child1->wholeAABB:", sortedAllAABBData, child1StartIndex, child1Length,
 
-			_computeWholeAABBForLBVH(sortedAllAABBData, child1StartIndex, child1Length)
-		);
+		// 	_computeWholeAABBForLBVH(sortedAllAABBData, child1StartIndex, child1Length)
+		// );
 
 
 		let child1 = {

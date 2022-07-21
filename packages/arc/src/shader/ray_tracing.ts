@@ -10,6 +10,7 @@ struct Ray {
 
 struct RingIntersect {
   isClosestHit: bool,
+  layer: u32,
   instanceIndex: f32,
 }
 
@@ -45,6 +46,12 @@ struct Instance {
   materialIndex: f32,
 
   localPosition: vec2<f32>,
+
+  layer: f32,
+  // TODO remove pad?
+  pad_0: f32,
+  pad_1: f32,
+  pad_2: f32,
 }
 
 
@@ -153,6 +160,7 @@ const MAX_DEPTH = 10;
   var intersectResult: RingIntersect;
 
   intersectResult.isClosestHit = false;
+  intersectResult.layer = 0;
 
 var point = ray.target;
 
@@ -193,12 +201,16 @@ var instance: Instance = sceneInstanceData.instances[u32(bottomLevel.instanceInd
 var geometryIndex = u32(instance.geometryIndex);
  var geometry:Geometry = sceneGeometryData.geometrys[geometryIndex];
 
+
       if (_isIntersectWithRing(point,instance, geometry)) {
-        if (!intersectResult.isClosestHit) {
+ var layer = u32(instance.layer);
+
+        if (!intersectResult.isClosestHit || layer >= intersectResult.layer) {
           intersectResult.isClosestHit = true;
+          intersectResult.layer = layer;
           intersectResult.instanceIndex = bottomLevel.instanceIndex;
 
-          break;
+          // break;
         }
       }
 }
@@ -208,9 +220,9 @@ leafInstanceOffset = leafInstanceOffset + 1;
 }
 
 
-				if (intersectResult.isClosestHit) {
-					break;
-				}
+				// if (intersectResult.isClosestHit) {
+				// 	break;
+				// }
 			}
 			else {
         child1Index = u32(currentNode.child1Index);

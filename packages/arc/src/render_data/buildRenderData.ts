@@ -3,7 +3,7 @@ import { getC, getR, getW } from "../scene/Geometry"
 import { computeRingAABB } from "../math/AABB2D";
 import { createBuffer } from "../webgpu/Buffer";
 import { getColor } from "../scene/Material";
-import { getLocalPosition } from "../scene/Transform";
+import { getLayer, getLocalPosition } from "../scene/Transform";
 import * as BVH2D from "../math/BVH2D";
 import * as Acceleration from "../math/Acceleration";
 import { flatten } from "../math/Array";
@@ -72,12 +72,17 @@ export let buildSceneAccelerationStructureBufferData = (state, device) => {
 export let buildSceneInstanceDataBufferData = (state, device) => {
 	let bufferDataArr = getAllRenderGameObjectData(state).reduce((bufferDataArr, [gameObject, transform, geometry, material]) => {
 		let localPosition = getLocalPosition(transform, state)
+		let layer = getLayer(transform, state)
 
 		bufferDataArr.push(
 			geometry,
 			material,
 			localPosition[0],
-			localPosition[1]
+			localPosition[1],
+			layer,
+			0,
+			0,
+			0
 		);
 
 		return bufferDataArr;

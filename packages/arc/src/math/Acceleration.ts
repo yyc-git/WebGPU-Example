@@ -1,4 +1,4 @@
-import { qsort } from "./Array"
+import { log } from "../utils/LogUtils"
 import { tree } from "./BVH2D"
 
 // type instanceOffset = number
@@ -147,11 +147,6 @@ export let build = (tree: tree): [topLevelArr, bottomLevelArr] => {
 	_build(tree, topLevelArr, child1Arr, child2Arr, bottomLevelArr)
 
 
-	// console.log("aaa");
-	// console.log(child1Arr, child2Arr);
-
-	// console.log("bbb");
-
 	topLevelArr = topLevelArr.map((data, index) => {
 		if (child1Arr[index] !== undefined) {
 			data.push(child1Arr[index])
@@ -206,7 +201,7 @@ let _isLeafNode = (node: topLevelNodeData) => {
 	return node[leafInstanceCountOffset] !== 0
 }
 
-let _handleIntersectWithLeafNode = (intersectResult, isIntersectWithInstance, point, node: topLevelNodeData, bottomLevelArr: bottomLevelArr) => {
+let _handleIntersectWithLeafNode = (intersectResult, [isIntersectWithInstance, getInstanceLayer], point, node: topLevelNodeData, bottomLevelArr: bottomLevelArr) => {
 	let [
 		wholeWorldMinX, wholeWorldMinY, wholeWorldMaxX, wholeWorldMaxY,
 		leafInstanceOffset,
@@ -216,29 +211,23 @@ let _handleIntersectWithLeafNode = (intersectResult, isIntersectWithInstance, po
 	] = node
 
 
-	// console.log("b1:",
-	// 	// leafInstanceOffset,
-	// 	// leafInstanceCount,
-	// 	node
-	// )
-
 	while (leafInstanceCount > 0) {
 		let [worldMinX, worldMinY, worldMaxX, worldMaxY, instanceIndex] = bottomLevelArr[leafInstanceOffset]
-
-		// console.log("bbb:", isIntersectWithInstance(point, instanceIndex))
 
 		if (_isPointIntersectWithAABB(
 			point,
 			worldMinX, worldMinY, worldMaxX, worldMaxY
 		)) {
-			// console.log("c");
-
 			if (isIntersectWithInstance(point, instanceIndex)) {
-				// console.log("d");
-				intersectResult.isClosestHit = true
-				intersectResult.instanceIndex = instanceIndex
+				let layer = getInstanceLayer(instanceIndex)
 
-				break;
+				if (!intersectResult.isClosestHit || layer >= intersectResult.layer) {
+					// log("hit")
+					
+					intersectResult.isClosestHit = true
+					intersectResult.layer = layer
+					intersectResult.instanceIndex = instanceIndex
+				}
 			}
 		}
 
@@ -251,7 +240,7 @@ let _hasChild = (node, childIndexOffset) => {
 	return node[childIndexOffset] !== 0
 }
 
-export let traverse = (isIntersectWithInstance, point, topLevelArr: topLevelArr, bottomLevelArr: bottomLevelArr): traverseResult => {
+export let traverse = ([isIntersectWithInstance, getInstanceLayer], point, topLevelArr: topLevelArr, bottomLevelArr: bottomLevelArr): traverseResult => {
 	let rootNode = topLevelArr[0]
 
 	let child1IndexOffset = 6
@@ -264,6 +253,7 @@ export let traverse = (isIntersectWithInstance, point, topLevelArr: topLevelArr,
 
 	let intersectResult = {
 		isClosestHit: false,
+		layer: 0,
 		instanceIndex: null
 	}
 
@@ -272,23 +262,27 @@ export let traverse = (isIntersectWithInstance, point, topLevelArr: topLevelArr,
 
 		stackSize -= 1
 
-		// console.log("a", _isPointIntersectWithTopLevelNode(point, currentNode));
+		// log("stackSize: ", stackSize)
 
 		if (_isPointIntersectWithTopLevelNode(point, currentNode)) {
-			// console.log(
+			// log(
+			// 	"_isPointIntersectWithTopLevelNode true:",
 			// 	currentNode,
 			// 	_isLeafNode(currentNode),
 			// 	_hasChild(currentNode, child1IndexOffset),
 			// 	_hasChild(currentNode, child2IndexOffset),
 			// )
-			if (_isLeafNode(currentNode)) {
-				_handleIntersectWithLeafNode(intersectResult, isIntersectWithInstance, point, currentNode, bottomLevelArr)
 
-				if (intersectResult.isClosestHit) {
-					break
-				}
+			if (_isLeafNode(currentNode)) {
+				_handleIntersectWithLeafNode(intersectResult, [isIntersectWithInstance, getInstanceLayer], point, currentNode, bottomLevelArr)
+
+				// if (intersectResult.isClosestHit) {
+				// 	break
+				// }
 			}
 			else {
+				// log("judge child")
+				
 				if (_hasChild(currentNode, child1IndexOffset)) {
 					stackContainer[stackSize] = topLevelArr[currentNode[child1IndexOffset]]
 					stackSize += 1

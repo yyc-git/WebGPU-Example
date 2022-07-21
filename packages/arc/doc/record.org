@@ -127,11 +127,26 @@ local var too many so that one workgroup can only run one local?
 # ** TODO perf: compute! in _intersectScene
 
 
-* TODO fix: how to find closestHit?
+* DONE fix: how to find closestHit?
 
-position add z!
+position add 图层!
 
-find by z!
+find by 图层!
+
+change 图层 to z!
+
+* TODO perf: optimize traverse?
+
+
+* TODO perf: remove pad?
+
+
+* TODO fix: 锯齿
+
+
+* TODO camera scale, move
+
+should restore canvas' width(to 760px), height(to 500px)!
 
 
 
@@ -177,16 +192,10 @@ change to:
 
 
 
-* TODO perf: remove pad?
-
-* TODO camera scale, move
-
-should restore canvas' width(to 760px), height(to 500px)!
 
 
 
 
-* TODO fix: 锯齿
 
 
 
