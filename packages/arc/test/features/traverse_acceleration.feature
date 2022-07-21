@@ -3,7 +3,9 @@ Feature: Traverse Acceleration
     I want to traverse acceleration
     So that I can get intersect result
 
-    Rule: build by middle
+    # Rule: build by middle
+
+    Rule: build by lbvh
 
         Background: prepare
             Given prepare sandbox
@@ -23,25 +25,16 @@ Feature: Traverse Acceleration
             When traverse acceleartion
             Then should intersect
 
-    Rule: build by lbvh
-
-        Background: prepare by lbvh
-            Given prepare sandbox
-            And create instances and their aabbs
-            And build bvh with minCount=1 by lbvh
-            And build acceleartion with bvh
-
-        Scenario: intersect case1 by lbvh
+        Scenario: intersect case2
             When traverse acceleartion
             Then should intersect
-
 
     Rule: find closest hit
 
         Scenario: find closest hit
             Given prepare sandbox
             And create instances and their aabbs that are overlap
-            And build bvh with minCount=1 by lbvh
+            And build bvh with minCount=1
             And build acceleartion with bvh
             When traverse acceleartion
             Then should intersect with the closet hit

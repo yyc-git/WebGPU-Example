@@ -1,3 +1,4 @@
+import { layer } from "../type/LayerType"
 import { dec2bin } from "../utils/BitUtils"
 import { log } from "../utils/LogUtils"
 import { computeCenter, create, t } from "./AABB2D"
@@ -6,139 +7,24 @@ import * as Vector2 from "./Vector2"
 
 type instanceIndex = number
 
-type aabbData = { aabb: t, instanceIndex: instanceIndex }
+type aabbData = { aabb: t, instanceIndex: instanceIndex, layer: layer }
+
+type wholeAABBData = { aabb: t, maxLayer: layer }
+
+// type leafAABBData = { aabb: t, instanceIndex: instanceIndex }
 
 export type tree = {
-	wholeAABB: t,
+	wholeAABBData: wholeAABBData,
 	leafAllAABBData: Array<aabbData> | null,
 	child1: tree | null,
 	child2: tree | null
 }
 
-let _sort = (getAxiz, allAABBData: Array<aabbData>) => {
-	return qsort(allAABBData, ({ aabb }) => getAxiz(computeCenter(aabb)))
-}
-
-// let _findMiddleIndex = (getAxiz, allAABBData: Array<aabbData>) => {
-// 	// return allAABBData.reduce(([ middleIndex ], {aabb}) => {
-// 	// 	return getAxiz(computeCenter(a.aabb)) - getAxiz(computeCenter(b.aabb))
-// 	// })
-
-// 	let [_, middleIndex] = findKthLargest(
-// 		allAABBData.map(({ aabb }) => {
-// 			return getAxiz(computeCenter(aabb))
-// 		}),
-// 		Math.floor(allAABBData.length / 2)
-// 	)
-
-// 	return middleIndex
-// }
-
-let _computeWholeAABB = (allAABBData: Array<aabbData>) => {
-	let [worldMin, worldMax] = allAABBData.reduce(([worldMin, worldMax], { aabb }) => {
-		let aabbWorldMin = aabb.worldMin
-		let aabbWorldMax = aabb.worldMax
-
-		if (aabbWorldMin[0] < worldMin[0]) {
-			worldMin[0] = aabbWorldMin[0]
-		}
-		if (aabbWorldMin[1] < worldMin[1]) {
-			worldMin[1] = aabbWorldMin[1]
-		}
-
-		if (aabbWorldMax[0] > worldMax[0]) {
-			worldMax[0] = aabbWorldMax[0]
-		}
-		if (aabbWorldMax[1] > worldMax[1]) {
-			worldMax[1] = aabbWorldMax[1]
-		}
-
-		// TODO refactor(rescript): change to immutable
-		return [worldMin, worldMax]
-	}, [
-		Vector2.create(
-			Infinity,
-			Infinity,
-		),
-		Vector2.create(
-			-Infinity,
-			-Infinity,
-		)
-	])
-
-	return create(worldMin, worldMax)
-}
-
-
-// TODO refactor: use rescript->tree instead of edit ref<node>
-let _build = (node, minCount, maxDepth, depth, getAxizFuncs, getAxizFuncIndex, allAABBData): void => {
-	if (depth >= maxDepth || allAABBData.length <= minCount) {
-		// node.wholeAABB = _computeWholeAABB(sortedAllAABBData)
-		node.leafAllAABBData = allAABBData
-		node.child1 = null
-		node.child2 = null
-
-		return
-	}
-	else {
-		let sortedAllAABBData = _sort(getAxizFuncs[getAxizFuncIndex % 2], allAABBData)
-
-
-		let splitIndex = Math.floor(allAABBData.length / 2)
-
-		let arr1 = sortedAllAABBData.slice(0, splitIndex)
-		let arr2 = sortedAllAABBData.slice(splitIndex, sortedAllAABBData.length)
-
-		let child1 = {
-			wholeAABB: _computeWholeAABB(arr1),
-			leafAllAABBData: null,
-			child1: null,
-			child2: null
-		}
-		let child2 = {
-			wholeAABB: _computeWholeAABB(arr2),
-			leafAllAABBData: null,
-			child1: null,
-			child2: null
-		}
-
-		// node.wholeAABB = _computeWholeAABB(sortedAllAABBData)
-		node.leafAllAABBData = null
-		node.child1 = child1
-		node.child2 = child2
-
-		_build(child1, minCount, maxDepth, depth + 1, getAxizFuncs, getAxizFuncIndex + 1, arr1)
-		_build(child2, minCount, maxDepth, depth + 1, getAxizFuncs, getAxizFuncIndex + 1, arr2)
-	}
-}
-
-//by middle
-export let build = (allAABBData: Array<aabbData>, minCount = 5, maxDepth = 10): tree => {
-	let tree = {
-		wholeAABB: _computeWholeAABB(allAABBData),
-		leafAllAABBData: null,
-		child1: null,
-		child2: null
-	}
-
-
-	_build(tree, minCount, maxDepth, 1, [
-		(vec2) => vec2[0],
-		(vec2) => vec2[1]
-	], 0, allAABBData)
-
-	return tree
-}
-
-
-
-
-
 let _getGridXBitCount = () => 10
 
 let _getGridYBitCount = () => 10
 
-let _computeWholeAABBForLBVH = (allAABBData: Array<aabbData>, dataStartIndex, dataLength) => {
+let _computeWholeAABBData = (allAABBData: Array<aabbData>, dataStartIndex, dataLength): wholeAABBData => {
 	let worldMin = Vector2.create(
 		Infinity,
 		Infinity,
@@ -148,8 +34,10 @@ let _computeWholeAABBForLBVH = (allAABBData: Array<aabbData>, dataStartIndex, da
 		-Infinity,
 	)
 
+	let maxLayer: layer = 0
+
 	for (let i = dataStartIndex; i < dataStartIndex + dataLength; i++) {
-		let aabb = allAABBData[i].aabb
+		let { aabb, layer } = allAABBData[i]
 
 		let aabbWorldMin = aabb.worldMin
 		let aabbWorldMax = aabb.worldMax
@@ -167,12 +55,20 @@ let _computeWholeAABBForLBVH = (allAABBData: Array<aabbData>, dataStartIndex, da
 		if (aabbWorldMax[1] > worldMax[1]) {
 			worldMax[1] = aabbWorldMax[1]
 		}
+
+		if (layer > maxLayer) {
+			maxLayer = layer
+		}
 	}
 
-	return create(worldMin, worldMax)
+	return {
+		aabb: create(worldMin, worldMax),
+		maxLayer
+	}
 }
 
-let _buildGridPosition = ({ worldMin, worldMax }, allAABBData: Array<aabbData>) => {
+let _buildGridPosition = ({ aabb }: wholeAABBData, allAABBData: Array<aabbData>) => {
+	let { worldMin, worldMax } = aabb
 	let minX = worldMin[0]
 	let maxX = worldMax[0]
 	let minY = worldMin[1]
@@ -383,20 +279,20 @@ let _buildByLBVH = (node, minCount, maxDepth, depth, searchBitIndex, sortedAllAA
 		let child2StartIndex = firstChangeBitIndex + 1
 		let child2Length = dataLength - (firstChangeBitIndex - dataStartIndex + 1)
 
-		// log("child1->wholeAABB:", sortedAllAABBData, child1StartIndex, child1Length,
+		// log("child1->wholeAABBData:", sortedAllAABBData, child1StartIndex, child1Length,
 
-		// 	_computeWholeAABBForLBVH(sortedAllAABBData, child1StartIndex, child1Length)
+		// 	_computeWholeAABBData(sortedAllAABBData, child1StartIndex, child1Length)
 		// );
 
 
 		let child1 = {
-			wholeAABB: _computeWholeAABBForLBVH(sortedAllAABBData, child1StartIndex, child1Length),
+			wholeAABBData: _computeWholeAABBData(sortedAllAABBData, child1StartIndex, child1Length),
 			leafAllAABBData: null,
 			child1: null,
 			child2: null
 		}
 		let child2 = {
-			wholeAABB: _computeWholeAABBForLBVH(sortedAllAABBData, child2StartIndex, child2Length),
+			wholeAABBData: _computeWholeAABBData(sortedAllAABBData, child2StartIndex, child2Length),
 			leafAllAABBData: null,
 			child1: null,
 			child2: null
@@ -419,12 +315,12 @@ let _buildByLBVH = (node, minCount, maxDepth, depth, searchBitIndex, sortedAllAA
 	}
 }
 
-export let buildByLBVH = (allAABBData: Array<aabbData>, minCount = 5, maxDepth = 10): tree => {
-	let wholeAABB = _computeWholeAABBForLBVH(allAABBData, 0,
+export let build = (allAABBData: Array<aabbData>, minCount = 5, maxDepth = 10): tree => {
+	let wholeAABBData = _computeWholeAABBData(allAABBData, 0,
 		allAABBData.length
 	)
 	let tree = {
-		wholeAABB,
+		wholeAABBData,
 		leafAllAABBData: null,
 		child1: null,
 		child2: null
@@ -432,7 +328,7 @@ export let buildByLBVH = (allAABBData: Array<aabbData>, minCount = 5, maxDepth =
 
 
 	let sortedAllAABBDataWithMortonEncode = _sortByMorton(
-		_mortonEncode(_buildGridPosition(wholeAABB, allAABBData))
+		_mortonEncode(_buildGridPosition(wholeAABBData, allAABBData))
 	)
 
 	_buildByLBVH(tree, minCount, maxDepth, 0, _getGridXBitCount() + _getGridYBitCount(), sortedAllAABBDataWithMortonEncode,
@@ -447,13 +343,13 @@ export let buildByLBVH = (allAABBData: Array<aabbData>, minCount = 5, maxDepth =
 
 
 // export let buildByLBVH2 = (allAABBDataWithGridPosition, minCount = 5, maxDepth = 10): tree => {
-// 	let wholeAABB = _computeWholeAABBForLBVH(allAABBDataWithGridPosition.map(([aabbData, _]) => aabbData), 0,
+// 	let wholeAABBData = _computeWholeAABBData(allAABBDataWithGridPosition.map(([aabbData, _]) => aabbData), 0,
 // 		allAABBDataWithGridPosition.length
 // 	)
 
 
 // 	let tree = {
-// 		wholeAABB,
+// 		wholeAABBData,
 // 		leafAllAABBData: null,
 // 		child1: null,
 // 		child2: null
@@ -461,7 +357,7 @@ export let buildByLBVH = (allAABBData: Array<aabbData>, minCount = 5, maxDepth =
 
 
 // 	let sortedAllAABBDataWithMortonEncode = _sortByMorton(
-// 		// _mortonEncode(_buildGridPosition(wholeAABB, allAABBData, GRID_X_BIT_COUNT, GRID_Y_BIT_COUNT))
+// 		// _mortonEncode(_buildGridPosition(wholeAABBData, allAABBData, GRID_X_BIT_COUNT, GRID_Y_BIT_COUNT))
 // 		_mortonEncode(allAABBDataWithGridPosition)
 // 	)
 

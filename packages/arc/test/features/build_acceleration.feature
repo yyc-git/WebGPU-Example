@@ -3,22 +3,22 @@ Feature: Build Acceleration
     I want to build acceleration
     So that I can acceleration tracing scene
 
-    Rule: build bvh by middle
+    # Rule: build bvh by middle
 
-        Scenario: build bvh with only one leaf node by middle
-            Given create 2 aabbs
-            When build bvh with minCount=2
-            Then should return tree which only has one leaf node
+    #     Scenario: build bvh with only one leaf node by middle
+    #         Given create 2 aabbs
+    #         When build bvh with minCount=2
+    #         Then should return tree which only has one leaf node
 
-        Scenario: build bvh with 2 depth by middle
-            Given create 3 aabbs
-            When build bvh with minCount=1, maxDepth=2
-            Then should return correct tree
+    #     Scenario: build bvh with 2 depth by middle
+    #         Given create 3 aabbs
+    #         When build bvh with minCount=1, maxDepth=2
+    #         Then should return correct tree
 
-        Scenario: build bvh with 3 aabbs by middle
-            Given create 3 aabbs
-            When build bvh with minCount=1
-            Then should return correct tree
+    #     Scenario: build bvh with 3 aabbs by middle
+    #         Given create 3 aabbs
+    #         When build bvh with minCount=1
+    #         Then should return correct tree
 
     Rule: build bvh by lbvh
 

@@ -17,7 +17,8 @@ export let createAABB = (worldMinX = 0,
 
 export let createAABBData = (worldMinX = 0,
 	worldMinY = 0, worldMaxX = 0, worldMaxY = 0,
-	instanceIndex = 0
+	instanceIndex = 0,
+	layer = 0
 ) => {
 	return {
 		aabb: AABB2D.create(
@@ -28,6 +29,24 @@ export let createAABBData = (worldMinX = 0,
 				worldMaxX, worldMaxY
 			)
 		),
-		instanceIndex
+		instanceIndex,
+		layer
+	}
+}
+
+export let createWholeAABBData = (worldMinX = 0,
+	worldMinY = 0, worldMaxX = 0, worldMaxY = 0,
+	maxLayer = 0
+) => {
+	return {
+		aabb: AABB2D.create(
+			Vector2.create(
+				worldMinX, worldMinY
+			),
+			Vector2.create(
+				worldMaxX, worldMaxY
+			)
+		),
+		maxLayer
 	}
 }

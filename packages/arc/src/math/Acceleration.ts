@@ -1,5 +1,6 @@
+import { layer } from "../type/LayerType"
 import { log } from "../utils/LogUtils"
-import { tree } from "./BVH2D"
+import { tree } from "./LBVH2D"
 
 // type instanceOffset = number
 // type instanceCount = number
@@ -13,6 +14,7 @@ type wholeWorldMaxY = number
 
 type leafInstanceOffset = number
 type leafInstanceCount = number
+type maxLayer = layer
 type child1Index = number
 type child2Index = number
 
@@ -20,6 +22,7 @@ type topLevelNodeData = [
 	wholeWorldMinX, wholeWorldMinY, wholeWorldMaxX, wholeWorldMaxY,
 	leafInstanceOffset,
 	leafInstanceCount,
+	maxLayer,
 	child1Index,
 	child2Index
 ]
@@ -34,18 +37,15 @@ type worldMaxY = number
 
 type instanceIndex = number
 
-type bottomLevelArr = Array<[worldMinX, worldMinY, worldMaxX, worldMaxY, instanceIndex]>
+type bottomLevelArr = Array<[worldMinX, worldMinY, worldMaxX, worldMaxY, instanceIndex, layer]>
 
 // TODO refactor(rescript): not edit ref: topLevelArr, bottomLevelArr
 // let _build = (node, topLevelArr, hierachyArr, bottomLevelArr): void => {
-let _build = (node, topLevelArr, child1Arr, child2Arr, bottomLevelArr): void => {
-	let { worldMin, worldMax } = node.wholeAABB
+let _build = (node, topLevelArr, child1Arr, child2Arr, bottomLevelArr: bottomLevelArr): void => {
+	let { aabb, maxLayer } = node.wholeAABBData
+	let { worldMin, worldMax } = aabb
 
 	if (node.leafAllAABBData !== null) {
-		// hierachyArr[topLevelArr.length] = null
-		// child1Arr[topLevelArr.length] = null
-		// child2Arr[topLevelArr.length] = null
-
 		topLevelArr.push(
 			[
 				worldMin[0],
@@ -54,11 +54,10 @@ let _build = (node, topLevelArr, child1Arr, child2Arr, bottomLevelArr): void => 
 				worldMax[1],
 				bottomLevelArr.length,
 				node.leafAllAABBData.length,
-				// 0,
-				// 0
+				maxLayer
 			]
 		)
-		node.leafAllAABBData.reduce((arr, { aabb, instanceIndex }) => {
+		node.leafAllAABBData.reduce((arr, { aabb, instanceIndex, layer }) => {
 			let { worldMin, worldMax } = aabb
 
 			arr.push([
@@ -66,7 +65,8 @@ let _build = (node, topLevelArr, child1Arr, child2Arr, bottomLevelArr): void => 
 				worldMin[1],
 				worldMax[0],
 				worldMax[1],
-				instanceIndex
+				instanceIndex,
+				layer
 			])
 
 			return arr
@@ -83,6 +83,7 @@ let _build = (node, topLevelArr, child1Arr, child2Arr, bottomLevelArr): void => 
 			worldMax[1],
 			0,
 			0,
+			maxLayer
 		]
 	)
 	let nodeIndex = topLevelArr.length - 1
@@ -183,10 +184,6 @@ let _isPointIntersectWithAABB = (
 let _isPointIntersectWithTopLevelNode = (point, node: topLevelNodeData) => {
 	let [
 		wholeWorldMinX, wholeWorldMinY, wholeWorldMaxX, wholeWorldMaxY,
-		leafInstanceOffset,
-		leafInstanceCount,
-		child1Index,
-		child2Index
 	] = node
 
 	return _isPointIntersectWithAABB(
@@ -201,32 +198,37 @@ let _isLeafNode = (node: topLevelNodeData) => {
 	return node[leafInstanceCountOffset] !== 0
 }
 
-let _handleIntersectWithLeafNode = (intersectResult, [isIntersectWithInstance, getInstanceLayer], point, node: topLevelNodeData, bottomLevelArr: bottomLevelArr) => {
+let _handleIntersectWithLeafNode = (intersectResult, isIntersectWithInstance, point, node: topLevelNodeData, bottomLevelArr: bottomLevelArr) => {
 	let [
 		wholeWorldMinX, wholeWorldMinY, wholeWorldMaxX, wholeWorldMaxY,
 		leafInstanceOffset,
 		leafInstanceCount,
-		child1Index,
-		child2Index
+		maxLayer
 	] = node
 
 
 	while (leafInstanceCount > 0) {
-		let [worldMinX, worldMinY, worldMaxX, worldMaxY, instanceIndex] = bottomLevelArr[leafInstanceOffset]
+		// let [worldMinX, worldMinY, worldMaxX, worldMaxY, instanceIndex] = bottomLevelArr[leafInstanceOffset]
+		let [worldMinX, worldMinY, worldMaxX, worldMaxY, instanceIndex, layer] = bottomLevelArr[leafInstanceOffset]
 
 		if (_isPointIntersectWithAABB(
 			point,
 			worldMinX, worldMinY, worldMaxX, worldMaxY
 		)) {
 			if (isIntersectWithInstance(point, instanceIndex)) {
-				let layer = getInstanceLayer(instanceIndex)
+				// let layer = getInstanceLayer(instanceIndex)
 
-				if (!intersectResult.isClosestHit || layer >= intersectResult.layer) {
+				// if (!intersectResult.isClosestHit || layer >= intersectResult.layer) {
+				if (!intersectResult.isClosestHit || layer > intersectResult.layer) {
 					// log("hit")
-					
+
 					intersectResult.isClosestHit = true
 					intersectResult.layer = layer
 					intersectResult.instanceIndex = instanceIndex
+
+					if(layer == maxLayer){
+						break
+					}
 				}
 			}
 		}
@@ -240,11 +242,12 @@ let _hasChild = (node, childIndexOffset) => {
 	return node[childIndexOffset] !== 0
 }
 
-export let traverse = ([isIntersectWithInstance, getInstanceLayer], point, topLevelArr: topLevelArr, bottomLevelArr: bottomLevelArr): traverseResult => {
+export let traverse = (isIntersectWithInstance, point, topLevelArr: topLevelArr, bottomLevelArr: bottomLevelArr): traverseResult => {
 	let rootNode = topLevelArr[0]
 
-	let child1IndexOffset = 6
-	let child2IndexOffset = 7
+	let maxLayerOffset = 6
+	let child1IndexOffset = 7
+	let child2IndexOffset = 8
 
 	// let node = rootNode
 
@@ -253,7 +256,7 @@ export let traverse = ([isIntersectWithInstance, getInstanceLayer], point, topLe
 
 	let intersectResult = {
 		isClosestHit: false,
-		layer: 0,
+		layer: -1,
 		instanceIndex: null
 	}
 
@@ -261,6 +264,11 @@ export let traverse = ([isIntersectWithInstance, getInstanceLayer], point, topLe
 		let currentNode = stackContainer[stackSize - 1]
 
 		stackSize -= 1
+
+
+		if (currentNode[maxLayerOffset] <= intersectResult.layer) {
+			continue
+		}
 
 		// log("stackSize: ", stackSize)
 
@@ -274,7 +282,7 @@ export let traverse = ([isIntersectWithInstance, getInstanceLayer], point, topLe
 			// )
 
 			if (_isLeafNode(currentNode)) {
-				_handleIntersectWithLeafNode(intersectResult, [isIntersectWithInstance, getInstanceLayer], point, currentNode, bottomLevelArr)
+				_handleIntersectWithLeafNode(intersectResult, isIntersectWithInstance, point, currentNode, bottomLevelArr)
 
 				// if (intersectResult.isClosestHit) {
 				// 	break
@@ -282,7 +290,7 @@ export let traverse = ([isIntersectWithInstance, getInstanceLayer], point, topLe
 			}
 			else {
 				// log("judge child")
-				
+
 				if (_hasChild(currentNode, child1IndexOffset)) {
 					stackContainer[stackSize] = topLevelArr[currentNode[child1IndexOffset]]
 					stackSize += 1
