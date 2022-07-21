@@ -40,20 +40,20 @@ type instanceIndex = number
 
 type bottomLevelArr = Array<[worldMinX, worldMinY, worldMaxX, worldMaxY, instanceIndex, layer]>
 
-let _mergeTwo16BitValues = (value1, value2) => {
-	return (value1 << 16) | value2
+let _merge24BitValueAnd8BitValue = (value1, value2) => {
+	return (value1 << 8) | value2
 }
 
 let _getLeafInstanceCount = (
 	leafInstanceCountAndMaxLayer: number
 ) => {
-	return (leafInstanceCountAndMaxLayer >> 16) & 0xffff
+	return (leafInstanceCountAndMaxLayer >> 8) & 0xffffff
 }
 
 let _getMaxLayer = (
 	leafInstanceCountAndMaxLayer: number
 ) => {
-	return leafInstanceCountAndMaxLayer & 0xffff
+	return leafInstanceCountAndMaxLayer & 0xff
 }
 
 
@@ -64,6 +64,17 @@ let _build = (node, topLevelArr, child1Arr, child2Arr, bottomLevelArr: bottomLev
 	let { worldMin, worldMax } = aabb
 
 	if (node.leafAllAABBData !== null) {
+		// TODO require check
+		if (node.leafAllAABBData.length >= 10000 || maxLayer >= 65536 || maxLayer == 0) {
+			throw new Error("error")
+		}
+		let leafInstanceCountAndMaxLayer = _merge24BitValueAnd8BitValue(node.leafAllAABBData.length, maxLayer)
+
+		// // TODO remove
+		// if(leafInstanceCountAndMaxLayer == 0){
+		// 	throw new Error("error")
+		// }
+
 		topLevelArr.push(
 			[
 				worldMin[0],
@@ -71,7 +82,8 @@ let _build = (node, topLevelArr, child1Arr, child2Arr, bottomLevelArr: bottomLev
 				worldMax[0],
 				worldMax[1],
 				bottomLevelArr.length,
-				_mergeTwo16BitValues(node.leafAllAABBData.length, maxLayer)
+				// _merge24BitValueAnd8BitValue(node.leafAllAABBData.length, maxLayer)
+				leafInstanceCountAndMaxLayer
 			]
 		)
 		node.leafAllAABBData.reduce((arr, { aabb, instanceIndex, layer }) => {
@@ -99,7 +111,7 @@ let _build = (node, topLevelArr, child1Arr, child2Arr, bottomLevelArr: bottomLev
 			worldMax[0],
 			worldMax[1],
 			0,
-			_mergeTwo16BitValues(0, maxLayer)
+			_merge24BitValueAnd8BitValue(0, maxLayer)
 		]
 	)
 	let nodeIndex = topLevelArr.length - 1

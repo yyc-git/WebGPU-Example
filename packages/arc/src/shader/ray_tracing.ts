@@ -153,11 +153,11 @@ fn _hasChild(childIndex: u32) -> bool {
 }
 
 fn _getMaxLayer(leafInstanceCountAndMaxLayer: u32) -> u32 {
-  return leafInstanceCountAndMaxLayer & 0xffff;
+  return leafInstanceCountAndMaxLayer & 0xff;
 }
 
 fn _getLeafInstanceCount(leafInstanceCountAndMaxLayer: u32) -> u32 {
-  return (leafInstanceCountAndMaxLayer >> 16) & 0xffff;
+  return (leafInstanceCountAndMaxLayer >> 8) & 0xffffff;
 }
 
 // fn _handleIntersectWithLeafNode (intersectResult, isIntersectWithInstance, point, node: topLevelNodeData, bottomLevelArr: bottomLevelArr) -> void {
@@ -195,12 +195,18 @@ while(stackSize > 0){
 		var leafInstanceCountAndMaxLayer = u32(currentNode.leafInstanceCountAndMaxLayer);
 
  var maxLayer =   _getMaxLayer(leafInstanceCountAndMaxLayer);
+
+//  if(maxLayer == 0){
+//    break;
+//  }
+
  if(maxLayer <= intersectResult.layer){
+//  if(maxLayer < intersectResult.layer ){
    continue;
  }
 
 		if (_isPointIntersectWithTopLevelNode(point, currentNode)) {
-			var leafInstanceCount = u32(_getLeafInstanceCount(leafInstanceCountAndMaxLayer));
+			var leafInstanceCount = _getLeafInstanceCount(leafInstanceCountAndMaxLayer);
 
 
 			if (_isLeafNode(leafInstanceCount)) {
