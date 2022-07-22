@@ -213,12 +213,19 @@ memory: 211MB
 
 
 
-* TODO commit to user
+* DONE commit to user
 
 
 change to:
 	 let w = 0.02
 	 let r = 0.05
+
+
+
+* TODO camera scale, move
+
+should restore canvas' width(to 760px), height(to 500px)!
+
 
 
 
@@ -237,10 +244,6 @@ change to:
 
 * TODO fix: 锯齿
 
-
-* TODO camera scale, move
-
-should restore canvas' width(to 760px), height(to 500px)!
 
 
 
@@ -290,6 +293,10 @@ when:
 createGeometryBuffer->w=0.002, r=0.005
 render 100K rings
 
+
+
+how to fix:
+should add ring with position in [972-974, 1003-1004] to test!
 
 
 * TODO perf: bvh
