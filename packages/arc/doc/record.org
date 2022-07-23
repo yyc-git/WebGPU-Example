@@ -222,18 +222,33 @@ change to:
 
 
 
-* TODO camera scale, move
 
-should restore canvas' width(to 760px), height(to 500px)!
+* DONE fix(lbvh): in grid position:[972-974, 1003-1004] not render ring!!!
+
+when:
+createGeometryBuffer->w=0.002, r=0.005
+render 100K rings
 
 
+
+how to fix:
+should add ring with position in [972-974, 1003-1004] to test!
 
 
 * TODO write article!
 
 
-
 * TODO render in Meta3D
+
+
+
+
+
+
+
+* TODO camera scale, move
+
+should restore canvas' width(to 760px), height(to 500px)!
 
 
 
@@ -285,18 +300,6 @@ perf: 2d matrix operate!
 * TODO select object
 
 
-
-
-* TODO fix(lbvh): in grid position:[972-974, 1003-1004] not render ring!!!
-
-when:
-createGeometryBuffer->w=0.002, r=0.005
-render 100K rings
-
-
-
-how to fix:
-should add ring with position in [972-974, 1003-1004] to test!
 
 
 * TODO perf: bvh

@@ -20,10 +20,10 @@ export let createGeometryBuffer = (count): Float32Array => {
 	let c = create(0, 0)
 	// let w = 2.0
 	// let r = 5.0
-	let w = 0.02
-	let r = 0.05
-	// let w = 0.002
-	// let r = 0.005
+	// let w = 0.02
+	// let r = 0.05
+	let w = 0.002
+	let r = 0.005
 	// let w = 0.008
 	// let r = 0.020
 	// let w = 0.001

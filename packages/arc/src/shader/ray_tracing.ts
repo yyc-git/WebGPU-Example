@@ -164,7 +164,7 @@ fn _getLeafInstanceCount(leafInstanceCountAndMaxLayer: u32) -> u32 {
 // }
 
 fn _intersectScene(ray: Ray)->RingIntersect {
-const MAX_DEPTH = 10;
+const MAX_DEPTH = 20;
 
   var intersectResult: RingIntersect;
 
