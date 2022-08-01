@@ -230,7 +230,49 @@ should add ring with position in [972-974, 1003-1004] to test!
 
 
 
-* TODO study
+* DONE study
+
+
+
+* TODO implement ray tracing pipeline Demo!
+
+** TODO implement
+
+
+** TODO how to update bvh?
+
+
+** TODO compare with BVH demo!
+
+
+
+
+* TODO perf: optimize Traversal bvh on gpu
+
+refer to https://zhuanlan.zhihu.com/p/70387497
+
+** TODO perf: 基于Ray Packet的并行
+
+packet size: 8*8?
+
+if the whole aabb of packet not intersect with node's whole aabb, skip it;
+
+
+
+** TODO study Bulk-Synchronous Parallel Simultaneous BVH Traversal for Collision Detection on GPUs
+
+refer to:
+https://www.pure.ed.ac.uk/ws/portalfiles/portal/60657582/bulk_synchronous_parallel_bvh_traversal_for_collision_detection_on_gpus_authorversion_.pdf
+
+
+
+** TODO perf: traverse bvh: use stack-less
+
+not limit maxDepth when build bvh!
+
+
+
+
 
 
 * TODO feat: build,update bvh on CPU
@@ -243,6 +285,10 @@ or HLBVH with work queues:
 https://research.nvidia.com/publication/simpler-and-faster-hlbvh-work-queues
 
 or GPU-based Out-of-Core HLBVH Construction: https://diglib.eg.org/bitstream/handle/10.2312/sre20151165/041-050.pdf?sequence=1
+
+
+
+
 
 
 * TODO spilit BottomLevel to multiple storage buffers
