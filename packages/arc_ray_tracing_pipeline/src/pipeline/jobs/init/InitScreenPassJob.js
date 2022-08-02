@@ -1,27 +1,22 @@
 import WebGPU from "wonder-webgpu";
 import fs from "fs";
 import path from "path";
-import { getPass, setScreenPass, getWebGPU } from "../../../data/Repo.js";
+import { getPass, setScreenPass, getWebGPU } from "../../../../mine/Repo.js";
+import { createBuffer } from "../../../webgpu/Buffer.js";
 
 let _buildResolutionBufferData = (window, device) => {
     let bufferData = new Float32Array([
         window.width,
         window.height
     ]);
-    let bufferSize = bufferData.byteLength;
 
-    let buffer = device.createBuffer({
-        size: bufferSize,
-        usage: WebGPU.GPUBufferUsage.UNIFORM | WebGPU.GPUBufferUsage.COPY_DST
-    });
-
-    buffer.setSubData(0, bufferData);
+    let buffer = createBuffer(device, WebGPU.GPUBufferUsage.UNIFORM | WebGPU.GPUBufferUsage.COPY_DST, bufferData)
 
     return [buffer, bufferData];
 }
 
-export let exec = () => {
-    let { device, window, swapChainFormat } = getWebGPU();
+export let exec = (state) => {
+    let { device, window, swapChainFormat } = state.webgpu
 
     let bindGroupLayout = device.createBindGroupLayout({
         entries: [
@@ -38,7 +33,7 @@ export let exec = () => {
         ]
     });
 
-    let { pixelBufferData } = getPass();
+    let { pixelBufferData } = state.pass
     let [pixelBuffer, pixelBufferSize] = pixelBufferData;
 
     let [resolutionBuffer, resolutionData] = _buildResolutionBufferData(window, device);
@@ -89,8 +84,11 @@ export let exec = () => {
         }]
     });
 
-    setScreenPass({
-        bindGroup,
-        pipeline
-    });
+    return {
+        ...state,
+        screenPass: {
+            bindGroup,
+            pipeline
+        }
+    }
 }

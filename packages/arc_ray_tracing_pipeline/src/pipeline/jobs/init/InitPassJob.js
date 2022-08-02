@@ -1,5 +1,4 @@
 import WebGPU from "wonder-webgpu";
-import { getWebGPU, setPass } from "../../../data/Repo.js"
 
 let _buildPixelBufferData = (window, device) => {
     let bufferSize =
@@ -17,10 +16,13 @@ let _buildPixelBufferData = (window, device) => {
 }
 
 
-export let exec = () => {
-    let { device, window } = getWebGPU();
+export let exec = (state) => {
+    let { device, window } = state.webgpu
 
-    setPass({
-        pixelBufferData: _buildPixelBufferData(window, device)
-    });
+    return {
+        ...state,
+        pass: {
+            pixelBufferData: _buildPixelBufferData(window, device)
+        }
+    };
 }

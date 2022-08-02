@@ -1,8 +1,8 @@
-import { getWebGPU } from "../../../data/Repo.js";
-
-export let exec = () => {
-    let { swapChain, window } = getWebGPU();
+export let exec = (state) => {
+    let { swapChain, window } = state.webgpu
 
     swapChain.present();
     window.pollEvents();
+
+    return state
 }

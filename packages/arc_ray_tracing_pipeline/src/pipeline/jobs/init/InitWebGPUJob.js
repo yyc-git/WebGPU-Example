@@ -1,8 +1,8 @@
 import WebGPU from "wonder-webgpu";
-import { getConfig, setWebGPU } from "../../../data/Repo.js";
 
-export let exec = async () => {
-    let { width, height } = getConfig();
+export let exec = async (state) => {
+    // let { width, height } = getConfig();
+    let { width, height } = state.config
 
     let window = new WebGPU.WebGPUWindow({
         width,
@@ -26,13 +26,26 @@ export let exec = async () => {
         format: swapChainFormat
     });
 
-    setWebGPU({
-        window,
-        device,
-        adapter,
-        context,
-        queue,
-        swapChainFormat,
-        swapChain,
-    });
+    // setWebGPU({
+    //     window,
+    //     device,
+    //     adapter,
+    //     context,
+    //     queue,
+    //     swapChainFormat,
+    //     swapChain,
+    // });
+
+    return {
+        ...state,
+        webgpu: {
+            window,
+            device,
+            adapter,
+            context,
+            queue,
+            swapChainFormat,
+            swapChain,
+        }
+    }
 }

@@ -2,8 +2,10 @@ import { exec as execRenderRayTracingPassJob } from "./jobs/render/RenderRayTrac
 import { exec as execRenderScreenPassJob } from "./jobs/render/RenderScreenPassJob.js";
 import { exec as execEndRenderJob } from "./jobs/render/EndRenderJob.js";
 
-export let exec = () => {
-    execRenderRayTracingPassJob();
-    execRenderScreenPassJob();
-    execEndRenderJob();
+export let exec = (state) => {
+    state = execRenderRayTracingPassJob(state);
+    state = execRenderScreenPassJob(state);
+    state = execEndRenderJob(state);
+
+    return state
 }

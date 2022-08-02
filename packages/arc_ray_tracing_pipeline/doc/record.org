@@ -1,0 +1,23 @@
+* TODO draw one ring
+
+remove camera
+
+Procedural geometry:
+geometry count's blas, transform count's tlas;
+# or one blas(contain all aabbs), one 
+
+
+* TODO perf: how to remove primary ray? 
+
+
+* TODO draw 4M rings
+
+
+* TODO open any-hit
+
+handle z
+
+move layer to z? 
+
+
+* TODO draw more rings

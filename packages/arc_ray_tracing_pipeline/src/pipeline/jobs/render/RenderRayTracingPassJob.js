@@ -1,11 +1,9 @@
-import { getRayTracingPass, getWebGPU } from "../../../data/Repo.js";
-
-export let exec = () => {
-    let { window, device, queue } = getWebGPU();
+export let exec = (state) => {
+    let { window, device, queue } = state.webgpu
     let {
         bindGroup,
         pipeline
-    } = getRayTracingPass();
+    } = state.rayTracingPass
 
     let commandEncoder = device.createCommandEncoder({});
     let passEncoder = commandEncoder.beginRayTracingPass({});
@@ -21,4 +19,6 @@ export let exec = () => {
     );
     passEncoder.endPass();
     queue.submit([commandEncoder.finish()]);
+
+    return state
 }

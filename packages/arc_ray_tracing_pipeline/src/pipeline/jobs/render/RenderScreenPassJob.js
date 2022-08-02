@@ -1,11 +1,9 @@
-import { getScreenPass, getWebGPU } from "../../../data/Repo.js";
-
-export let exec = () => {
-    let { swapChain, device, queue } = getWebGPU();
+export let exec = (state) => {
+    let { swapChain, device, queue } = state.webgpu
     let {
         bindGroup,
         pipeline
-    } = getScreenPass();
+    } = state.screenPass
 
     let backBufferView = swapChain.getCurrentTextureView();
     let commandEncoder = device.createCommandEncoder({});
@@ -22,4 +20,6 @@ export let exec = () => {
     passEncoder.draw(3, 1, 0, 0);
     passEncoder.endPass();
     queue.submit([commandEncoder.finish()]);
+
+    return state
 }
