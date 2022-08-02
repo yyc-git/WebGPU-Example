@@ -45,25 +45,20 @@ layout(std140, set = 0, binding = 2) buffer SceneInstanceData {
 }
 sceneInstanceData;
 
-// layout(std140, set = 0, binding = 3) buffer SceneGeometryData {
-//   Geometry geometrys[];
-// }
-// sceneGeometryData;
-
 layout(std140, set = 0, binding = 4) buffer SceneMaterialData {
   Material materials[];
 }
 sceneMaterialData;
 
 void main() {
-  // uint instanceIndex = gl_InstanceID;
+  uint instanceIndex = gl_InstanceID;
 
-  // Instance instance = sceneInstanceData.instances[instanceIndex];
-  // uint materialIndex = uint(instance.materialIndex);
+  Instance instance = sceneInstanceData.instances[instanceIndex];
+  uint materialIndex = uint(instance.materialIndex);
 
-  // Material material = sceneMaterialData.materials[materialIndex];
+  Material material = sceneMaterialData.materials[materialIndex];
 
-  // payload.radiance = material.color;
+  payload.radiance = material.color;
 
-  payload.radiance = vec3(1.0,0.0,0.0);
+  // payload.radiance = vec3(1.0,0.0,0.0);
 }

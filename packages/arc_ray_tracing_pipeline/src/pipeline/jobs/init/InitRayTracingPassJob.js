@@ -144,7 +144,7 @@ let _buildContainers = (state, device, queue) => {
     }, {});
 
 
-    console.log(JSON.stringify(_createInstances(state, geometryContainerMap)));
+    // console.log(JSON.stringify(_createInstances(state, geometryContainerMap)));
     let instanceContainer = device.createRayTracingAccelerationContainer({
         level: "top",
         usage: WebGPU.GPURayTracingAccelerationContainerUsage.PREFER_FAST_TRACE,
