@@ -49,10 +49,13 @@ move layer to z?
 
 * TODO draw > 4M rings(10M, 100M)
 
-** TODO perf: optimize top level memory
+** DONE perf: optimize top level memory
 increase memory?
 
 split tlas by layer
+
+    TODO should split by layer to 3 groups desc
+    git commit --amend
 
 
 # compress:
@@ -65,7 +68,10 @@ test only one layer
 
 * TODO increase geometry's r and w, fps should not change too big!
 
+traverse order bug?:
+max layer
 
+test arc code with no traverse order!!!
 
 
 

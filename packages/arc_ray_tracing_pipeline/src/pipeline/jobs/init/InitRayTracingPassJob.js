@@ -80,17 +80,68 @@ let _build34RowMajorMatrix = (localPosition, layer) => {
     ]);
 }
 
-let _createInstances = (state, geometryContainerMap) => {
-    // TODO should split by layer
+let _createAllInstances = (state, geometryContainerMap) => {
+    // TODO get groupedSortedLayers
+    let groupedSortedLayers = [
+        { minLayer: 0.00004, maxLayer: 0.00004 },
+        // { minLayer: 0.00003, maxLayer: 0.00004 },
+        { minLayer: 0.00003, maxLayer: 0.00003 },
+        // { minLayer: 0.00001, maxLayer: 0.00002 },
+        { minLayer: 0.00001, maxLayer: 0.00002 },
+    ]
 
-    let instances = getAllRenderGameObjectData(state).reduce((instances, [gameObject, transform, geometry, material], instanceIndex) => {
+    let maxInstanceCount = 10
+
+    let epsion = 0.000001
+
+    let _createInstancesArr = (groupedSortedLayers) => {
+        return groupedSortedLayers.map(_ => [])
+    }
+
+    let _getInstancesIndex = (layer, maxInstanceCount, epsion, instancesArr, groupedSortedLayers) => {
+        return groupedSortedLayers.reduce((result, { minLayer, maxLayer }, index) => {
+            if (layer >= minLayer - epsion && layer <= maxLayer + epsion && instancesArr[index].length < maxInstanceCount) {
+                result = index
+            }
+
+            return result
+        }, -1)
+    }
+
+    let _handleEmptyInstances = (instancesArr, geometryContainerMap) => {
+        return instancesArr.map(instances => {
+            if (instances.length === 0) {
+                instances.push({
+                    usage: WebGPU.GPURayTracingAccelerationInstanceUsage.FORCE_OPAQUE,
+                    mask: 0xFF,
+                    instanceId: 0,
+                    transformMatrix: _build34RowMajorMatrix([100000, 1000000], 100),
+                    geometryContainer: geometryContainerMap[0]
+                })
+            }
+
+            return instances
+        })
+    }
+
+    let instancesArr = getAllRenderGameObjectData(state).reduce((instancesArr, [gameObject, transform, geometry, material], instanceIndex) => {
         let geometryContainer = geometryContainerMap[geometry]
         // console.log(geometryContainerMap, geometry);
 
         let localPosition = getLocalPosition(transform, state)
         let layer = getLayer(transform, state)
 
-        instances.push(
+        let instancesIndex = _getInstancesIndex(layer, maxInstanceCount, epsion, instancesArr, groupedSortedLayers)
+
+        // console.log(instancesIndex, layer, maxInstanceCount);
+
+
+        if (instancesIndex === -1) {
+            throw new Error("instances are too many")
+        }
+
+
+        instancesArr[instancesIndex].push(
             {
                 usage: WebGPU.GPURayTracingAccelerationInstanceUsage.FORCE_OPAQUE,
                 mask: 0xFF,
@@ -108,16 +159,24 @@ let _createInstances = (state, geometryContainerMap) => {
             }
         )
 
-        return instances
-    }, []);
+        return instancesArr
+    }, _createInstancesArr(groupedSortedLayers));
 
 
-    return [
-        instances.slice(0, 3000000),
-        instances.slice(3000000),
-        // instances.slice(0, 5),
-        // instances.slice(5),
-    ]
+    return _handleEmptyInstances(instancesArr, geometryContainerMap)
+
+
+    // TODO ensure check: not exceed maxInstanceCount
+
+
+    // return [
+    //     // instances.slice(0, 3000000),
+    //     // instances.slice(3000000, 4000000),
+    //     // instances.slice(4000000),
+    //     instances.slice(0, 5),
+    //     instances.slice(5, 8),
+    //     instances.slice(8),
+    // ]
 }
 
 let _buildContainers = (state, device, queue) => {
@@ -192,7 +251,8 @@ let _buildContainers = (state, device, queue) => {
 
     let a2 = performance.now();
 
-    let instancesArr = _createInstances(state, geometryContainerMap)
+    let instancesArr = _createAllInstances(state, geometryContainerMap)
+    // console.log(instancesArr);
     let a21 = performance.now();
 
     let instanceContainerArr = instancesArr.map(instances => {
@@ -225,7 +285,7 @@ export let exec = (state) => {
     let { device, queue } = state.webgpu
 
     let shaderBindingTable = _createShaderBindingTable(device);
-    let [instanceContainer1, instanceContainer2] = _buildContainers(state, device, queue);
+    let [instanceContainer1, instanceContainer2, instanceContainer3] = _buildContainers(state, device, queue);
 
     let bindGroupLayout = device.createBindGroupLayout({
         entries: [
@@ -256,6 +316,11 @@ export let exec = (state) => {
             },
             {
                 binding: 5,
+                visibility: WebGPU.GPUShaderStage.RAY_GENERATION,
+                type: "acceleration-container"
+            },
+            {
+                binding: 6,
                 visibility: WebGPU.GPUShaderStage.RAY_GENERATION,
                 type: "acceleration-container"
             },
@@ -305,6 +370,12 @@ export let exec = (state) => {
                 accelerationContainer: instanceContainer2,
                 size: 0
             },
+            {
+                binding: 6,
+                accelerationContainer: instanceContainer3,
+                size: 0
+            },
+
         ]
     });
 
