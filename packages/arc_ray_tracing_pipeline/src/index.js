@@ -24,7 +24,8 @@ let _main = async () => {
 
     // let count = { transformCount: 5000000, geometryCount: 1, materialCount: 1 }
     // let count = { transformCount: 1, geometryCount: 1, materialCount: 1 }
-    let count = { transformCount: 10, geometryCount: 1, materialCount: 1 }
+    // let count = { transformCount: 10, geometryCount: 1, materialCount: 1 }
+    let count = { transformCount: 500000, geometryCount: 1, materialCount: 1 }
     // let count = { transformCount: 500000, geometryCount: 1, materialCount: 1 }
     // let count = { transformCount: 3000000, geometryCount: 1, materialCount: 1 }
 

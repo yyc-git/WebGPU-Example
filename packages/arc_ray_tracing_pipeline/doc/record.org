@@ -37,12 +37,18 @@ handle z
 
 move layer to z? 
 
+* TODO perf: flag
 
-* TODO perf: optimize init
+** DONE perf: optimize init
+
+# log time
+
+# use transformMatrix?
 
 change flag to update?
 
-* TODO perf: optimize trace
+
+** TODO perf: optimize trace
 
 skip any hit, only use closest hit
 

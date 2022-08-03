@@ -63,6 +63,23 @@ let _createShaderBindingTable = device => {
     });
 }
 
+let _build34RowMajorMatrix = (localPosition, layer) => {
+    return new Float32Array([
+        1,
+        0,
+        0,
+        localPosition[0],
+        0,
+        1,
+        0,
+        localPosition[1],
+        0,
+        0,
+        1,
+        layer
+    ]);
+}
+
 let _createInstances = (state, geometryContainerMap) => {
     return getAllRenderGameObjectData(state).reduce((instances, [gameObject, transform, geometry, material], instanceIndex) => {
         let geometryContainer = geometryContainerMap[geometry]
@@ -79,11 +96,12 @@ let _createInstances = (state, geometryContainerMap) => {
                 // TODO handle instanceOffset?
                 // instanceOffset: 0,
 
-                transform: {
-                    translation: { x: localPosition[0], y: localPosition[1], z: layer },
-                    rotation: { x: 0, y: 0, z: 0 },
-                    scale: { x: 1, y: 1, z: 1 }
-                },
+                // transform: {
+                //     translation: { x: localPosition[0], y: localPosition[1], z: layer },
+                //     rotation: { x: 0, y: 0, z: 0 },
+                //     scale: { x: 1, y: 1, z: 1 }
+                // },
+                transformMatrix: _build34RowMajorMatrix(localPosition, layer),
                 geometryContainer: geometryContainer
             }
         )
@@ -93,6 +111,8 @@ let _createInstances = (state, geometryContainerMap) => {
 }
 
 let _buildContainers = (state, device, queue) => {
+    let a1 = performance.now();
+
     let geometryContainerMap = getAllRenderGameObjectData(state).reduce((geometryContainerMap, [gameObject, transform, geometry, material]) => {
         if (geometryContainerMap[geometry] === undefined) {
             let c = getC(geometry, state)
@@ -125,6 +145,7 @@ let _buildContainers = (state, device, queue) => {
             let geometryContainer = device.createRayTracingAccelerationContainer({
                 level: "bottom",
                 usage: WebGPU.GPURayTracingAccelerationContainerUsage.PREFER_FAST_TRACE,
+        // usage: WebGPU.GPURayTracingAccelerationContainerUsage.PREFER_FAST_BUILD,
                 geometries: [
                     {
                         usage: WebGPU.GPURayTracingAccelerationGeometryUsage.OPAQUE,
@@ -146,14 +167,6 @@ let _buildContainers = (state, device, queue) => {
         return geometryContainerMap
     }, {});
 
-
-    // console.log(JSON.stringify(_createInstances(state, geometryContainerMap)));
-    let instanceContainer = device.createRayTracingAccelerationContainer({
-        level: "top",
-        usage: WebGPU.GPURayTracingAccelerationContainerUsage.PREFER_FAST_TRACE,
-        instances: _createInstances(state, geometryContainerMap)
-    });
-
     {
         let commandEncoder = device.createCommandEncoder({});
 
@@ -166,11 +179,29 @@ let _buildContainers = (state, device, queue) => {
         queue.submit([commandEncoder.finish()]);
     }
 
+
+    let a2 = performance.now();
+
+    let instances = _createInstances(state, geometryContainerMap)
+    let a21 = performance.now();
+
+    // let a3 = performance.now();
+    // console.log(JSON.stringify(_createInstances(state, geometryContainerMap)));
+    let instanceContainer = device.createRayTracingAccelerationContainer({
+        level: "top",
+        usage: WebGPU.GPURayTracingAccelerationContainerUsage.PREFER_FAST_TRACE,
+        instances
+    });
+
     {
         let commandEncoder = device.createCommandEncoder({});
         commandEncoder.buildRayTracingAccelerationContainer(instanceContainer);
         queue.submit([commandEncoder.finish()]);
     }
+
+    let a3 = performance.now();
+
+    console.log(a2 - a1, a21 - a2, a3 - a21)
 
     return instanceContainer;
 }
