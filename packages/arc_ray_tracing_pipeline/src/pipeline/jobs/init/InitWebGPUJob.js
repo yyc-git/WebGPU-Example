@@ -14,7 +14,7 @@ export let exec = async (state) => {
     let context = window.getContext("webgpu");
 
     let adapter = await WebGPU.GPU.requestAdapter({ window, preferredBackend: "Vulkan" });
-
+    
     let device = await adapter.requestDevice({ extensions: ["ray_tracing"] });
 
     let queue = device.getQueue();

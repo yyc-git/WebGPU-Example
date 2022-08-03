@@ -3,7 +3,8 @@ import { create } from "../math/Vector2.js";
 export let createTransformBuffer = (count) => {
     // let layers = [1, 2, 3, 4];
     // let layers = [0.00001, 0.00002, 0.00003, 0.00004];
-    let layers = [0.00001, 0.00002];
+    // let layers = [0.00001, 0.00002];
+    let layers = [0.00001];
     let data = [];
 
     for (let i = 0; i < count; i++) {
@@ -11,12 +12,12 @@ export let createTransformBuffer = (count) => {
         data.push(Math.random() * 2 - 1);
 
         // data.push(layers[Math.floor(Math.random() * 4)]);
-        if (i % 2 === 0) {
-            data.push(layers[0]);
-        }
-        else {
-            data.push(layers[1]);
-        }
+        // if (i % 2 === 0) {
+        data.push(layers[0]);
+        // }
+        // else {
+        //     data.push(layers[1]);
+        // }
     }
     return new Float32Array(data);
 };

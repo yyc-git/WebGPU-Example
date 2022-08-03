@@ -49,9 +49,23 @@ move layer to z?
 
 * TODO draw > 4M rings(10M, 100M)
 
+** TODO perf: optimize top level memory
 increase memory?
 
-split as?
+split tlas by layer
+
+
+# compress:
+# aabb
+
+** TODO perf: add 10 tlas for 30M rings
+
+test only one layer
+
+
+* TODO increase geometry's r and w, fps should not change too big!
+
+
 
 
 

@@ -81,7 +81,9 @@ let _build34RowMajorMatrix = (localPosition, layer) => {
 }
 
 let _createInstances = (state, geometryContainerMap) => {
-    return getAllRenderGameObjectData(state).reduce((instances, [gameObject, transform, geometry, material], instanceIndex) => {
+    // TODO should split by layer
+
+    let instances = getAllRenderGameObjectData(state).reduce((instances, [gameObject, transform, geometry, material], instanceIndex) => {
         let geometryContainer = geometryContainerMap[geometry]
         // console.log(geometryContainerMap, geometry);
 
@@ -108,6 +110,14 @@ let _createInstances = (state, geometryContainerMap) => {
 
         return instances
     }, []);
+
+
+    return [
+        instances.slice(0, 3000000),
+        instances.slice(3000000),
+        // instances.slice(0, 5),
+        // instances.slice(5),
+    ]
 }
 
 let _buildContainers = (state, device, queue) => {
@@ -145,7 +155,7 @@ let _buildContainers = (state, device, queue) => {
             let geometryContainer = device.createRayTracingAccelerationContainer({
                 level: "bottom",
                 usage: WebGPU.GPURayTracingAccelerationContainerUsage.PREFER_FAST_TRACE,
-        // usage: WebGPU.GPURayTracingAccelerationContainerUsage.PREFER_FAST_BUILD,
+                // usage: WebGPU.GPURayTracingAccelerationContainerUsage.PREFER_FAST_BUILD,
                 geometries: [
                     {
                         usage: WebGPU.GPURayTracingAccelerationGeometryUsage.OPAQUE,
@@ -182,37 +192,40 @@ let _buildContainers = (state, device, queue) => {
 
     let a2 = performance.now();
 
-    let instances = _createInstances(state, geometryContainerMap)
+    let instancesArr = _createInstances(state, geometryContainerMap)
     let a21 = performance.now();
 
-    // let a3 = performance.now();
-    // console.log(JSON.stringify(_createInstances(state, geometryContainerMap)));
-    let instanceContainer = device.createRayTracingAccelerationContainer({
-        level: "top",
-        usage: WebGPU.GPURayTracingAccelerationContainerUsage.PREFER_FAST_TRACE,
-        // usage: WebGPU.GPURayTracingAccelerationContainerUsage.ALLOW_UPDATE,
-        // usage: WebGPU.GPURayTracingAccelerationContainerUsage.PREFER_FAST_BUILD,
-        instances
-    });
+    let instanceContainerArr = instancesArr.map(instances => {
+        return device.createRayTracingAccelerationContainer({
+            level: "top",
+            usage: WebGPU.GPURayTracingAccelerationContainerUsage.PREFER_FAST_TRACE,
+            // usage: WebGPU.GPURayTracingAccelerationContainerUsage.ALLOW_UPDATE | WebGPU.GPURayTracingAccelerationContainerUsage.PREFER_FAST_TRACE,
+            // usage: WebGPU.GPURayTracingAccelerationContainerUsage.PREFER_FAST_BUILD,
+            instances
+        })
+    })
 
     {
         let commandEncoder = device.createCommandEncoder({});
-        commandEncoder.buildRayTracingAccelerationContainer(instanceContainer);
+        instanceContainerArr.forEach(instanceContainer => {
+            commandEncoder.buildRayTracingAccelerationContainer(instanceContainer);
+        })
         queue.submit([commandEncoder.finish()]);
     }
+
 
     let a3 = performance.now();
 
     console.log(a2 - a1, a21 - a2, a3 - a21)
 
-    return instanceContainer;
+    return instanceContainerArr;
 }
 
 export let exec = (state) => {
     let { device, queue } = state.webgpu
 
     let shaderBindingTable = _createShaderBindingTable(device);
-    let instanceContainer = _buildContainers(state, device, queue);
+    let [instanceContainer1, instanceContainer2] = _buildContainers(state, device, queue);
 
     let bindGroupLayout = device.createBindGroupLayout({
         entries: [
@@ -240,7 +253,12 @@ export let exec = (state) => {
                 binding: 4,
                 visibility: WebGPU.GPUShaderStage.RAY_CLOSEST_HIT,
                 type: "storage-buffer"
-            }
+            },
+            {
+                binding: 5,
+                visibility: WebGPU.GPUShaderStage.RAY_GENERATION,
+                type: "acceleration-container"
+            },
         ]
     });
 
@@ -259,7 +277,7 @@ export let exec = (state) => {
         entries: [
             {
                 binding: 0,
-                accelerationContainer: instanceContainer,
+                accelerationContainer: instanceContainer1,
                 size: 0
             },
             {
@@ -281,6 +299,11 @@ export let exec = (state) => {
                 binding: 4,
                 buffer: materialDataBuffer,
                 size: materialDataBufferSize
+            },
+            {
+                binding: 5,
+                accelerationContainer: instanceContainer2,
+                size: 0
             },
         ]
     });
