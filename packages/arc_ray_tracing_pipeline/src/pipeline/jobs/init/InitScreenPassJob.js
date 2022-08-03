@@ -1,7 +1,6 @@
 import WebGPU from "wonder-webgpu";
 import fs from "fs";
 import path from "path";
-import { getPass, setScreenPass, getWebGPU } from "../../../../mine/Repo.js";
 import { createBuffer } from "../../../webgpu/Buffer.js";
 
 let _buildResolutionBufferData = (window, device) => {

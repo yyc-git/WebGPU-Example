@@ -69,6 +69,7 @@ let _createInstances = (state, geometryContainerMap) => {
         // console.log(geometryContainerMap, geometry);
 
         let localPosition = getLocalPosition(transform, state)
+        let layer = getLayer(transform, state)
 
         instances.push(
             {
@@ -79,7 +80,7 @@ let _createInstances = (state, geometryContainerMap) => {
                 // instanceOffset: 0,
 
                 transform: {
-                    translation: { x: localPosition[0], y: localPosition[1], z: 0 },
+                    translation: { x: localPosition[0], y: localPosition[1], z: layer },
                     rotation: { x: 0, y: 0, z: 0 },
                     scale: { x: 1, y: 1, z: 1 }
                 },
@@ -106,12 +107,14 @@ let _buildContainers = (state, device, queue) => {
             arr.push(aabb.localMin[0])
             arr.push(aabb.localMin[1])
             arr.push(0)
+            // arr.push(Math.random() - 1)
             // arr.push(-0.1)
             arr.push(aabb.localMax[0])
             arr.push(aabb.localMax[1])
             arr.push(0)
+            // arr.push(Math.random() )
             // arr.push(0.1)
-            
+
 
 
             let aabbBufferData = new Float32Array(arr)

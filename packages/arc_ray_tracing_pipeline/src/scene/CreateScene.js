@@ -1,13 +1,22 @@
 import { create } from "../math/Vector2.js";
 
 export let createTransformBuffer = (count) => {
-    let layers = [1, 2, 3, 4];
+    // let layers = [1, 2, 3, 4];
+    // let layers = [0.00001, 0.00002, 0.00003, 0.00004];
+    let layers = [0.00001, 0.00002];
     let data = [];
+
     for (let i = 0; i < count; i++) {
         data.push(Math.random() * 2 - 1);
         data.push(Math.random() * 2 - 1);
 
-        data.push(layers[Math.floor(Math.random() * 4)]);
+        // data.push(layers[Math.floor(Math.random() * 4)]);
+        if (i % 2 === 0) {
+            data.push(layers[0]);
+        }
+        else {
+            data.push(layers[1]);
+        }
     }
     return new Float32Array(data);
 };
@@ -21,10 +30,12 @@ export let createGeometryBuffer = (count) => {
     // let r = 0.05
     // let w = 0.002;
     // let r = 0.005;
-    let w = 0.008
-    let r = 0.020
-    // let w = 0.001
-    // let r = 0.0025
+
+    // let w = 0.008
+    // let r = 0.020
+
+    let w = 0.08
+    let r = 0.04
     return new Float32Array([
         c[0],
         c[1],
