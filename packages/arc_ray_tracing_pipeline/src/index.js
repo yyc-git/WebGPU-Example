@@ -3,6 +3,7 @@ import { createState } from "./data/CreateData.js";
 import { exec as init } from "./pipeline/InitPipeline.js";
 import { exec as render } from "./pipeline/RenderPipeline.js";
 import { createGeometryBuffer, createMaterialBuffer, createScene, createTransformBuffer } from "./scene/CreateScene.js";
+import { computeFPS } from "./utils/fps.js";
 
 let _buildScene = (state, { transformCount, geometryCount, materialCount }) => {
     return Object.assign(Object.assign({}, state), { ecsData: createScene(transformCount), transformBuffer: createTransformBuffer(transformCount), geometryBuffer: createGeometryBuffer(geometryCount), materialBuffer: createMaterialBuffer(materialCount) });
@@ -65,10 +66,20 @@ let _main = async () => {
 
     // requestAnimationFrame(frame);
 
-    setInterval(() =>{
+
+    setInterval(() => {
+        let t1 = performance.now()
         let state = render(stateContainer.state)
 
-        stateContainer.state = state
+        let t2 = performance.now()
+
+        let [newState, fps] = computeFPS(state, t2 - t1)
+
+        if (fps !== null) {
+            console.log("fps:", fps);
+        }
+
+        stateContainer.state = newState
     }, 16)
 
     // while (true) {

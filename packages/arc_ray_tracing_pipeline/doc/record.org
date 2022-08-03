@@ -1,4 +1,4 @@
-* TODO draw one ring
+* DONE draw one ring
 
 remove camera
 
@@ -15,10 +15,10 @@ geometry count's blas, transform count's tlas;
 
 
 
-TODO fix: projection bug!
+# TODO fix: projection bug!
 
 
-* TODO show fps
+* DONE show fps
 
 
 * TODO perf: how to remove primary ray? 

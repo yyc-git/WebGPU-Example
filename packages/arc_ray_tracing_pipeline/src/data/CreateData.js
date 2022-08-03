@@ -21,6 +21,11 @@ export let createState = () => {
         },
 
 
+        fps: {
+            avgDuration: 0,
+            frameCount: 0
+        },
+
 
 
         ecsData: [],
