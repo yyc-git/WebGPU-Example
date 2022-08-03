@@ -108,7 +108,7 @@ void main() {
 
   if (_isIntersectWithRing(point, geometry)) {
     /*! should > 0.0 !*/
-    float tHit = 0.0001;
+    float tHit = 0.1;
 
     uint hitKind = 0;
 

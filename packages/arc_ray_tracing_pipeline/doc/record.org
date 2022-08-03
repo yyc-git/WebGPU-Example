@@ -37,23 +37,17 @@ handle z
 
 move layer to z? 
 
-* TODO perf: flag
-
-** DONE perf: optimize init
+* DONE perf: optimize init
 
 # log time
 
 # use transformMatrix?
 
-change flag to update?
+# change flag to update?
 
 
-** TODO perf: optimize trace
 
-skip any hit, only use closest hit
-
-
-* TODO draw >= 5M rings
+* TODO draw > 4M rings(10M, 100M)
 
 increase memory?
 
@@ -61,11 +55,20 @@ split as?
 
 
 
+* TODO perf: optimize trace
+
+skip any hit, only use closest hit
+
+in .rgen:
+gl_RayFlagsOpaqueEXT | gl_RayFlagsTerminateOnFirstHitKHR 
 
 
-* draw 3M rings
 
-can render smooth, but init is too slow
+
+
+# * draw 3M rings
+
+# can render smooth, but init is too slow
 
 
 * draw 5M rings

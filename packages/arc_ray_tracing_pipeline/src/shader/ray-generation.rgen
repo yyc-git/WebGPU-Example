@@ -66,11 +66,11 @@ void main() {
               0,                    // missIndex
               origin.xyz,           // ray origin
               // uCamera.near,         // ray min range
-              0.0001,
+              0.1,
               // direction.xyz,        // ray direction
               direction, // ray direction
               // uCamera.far,          // ray max range
-              100.0,
+              1.0,
               0 // payload (location = 0)
   );
 

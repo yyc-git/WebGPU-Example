@@ -58,12 +58,12 @@ void main() {
 
   Material material = sceneMaterialData.materials[materialIndex];
 
-  if (instanceIndex % 2 == 0) {
-    payload.radiance = vec3(1.0, 0.0, 0.0);
-  } else {
-    payload.radiance = vec3(0.0, 1.0, 0.0);
-  }
-  // payload.radiance = material.color;
+  // if (instanceIndex % 2 == 0) {
+  //   payload.radiance = vec3(1.0, 0.0, 0.0);
+  // } else {
+  //   payload.radiance = vec3(0.0, 1.0, 0.0);
+  // }
+  payload.radiance = material.color;
 
   // payload.radiance = vec3(1.0,0.0,0.0);
 }
