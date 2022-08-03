@@ -190,6 +190,8 @@ let _buildContainers = (state, device, queue) => {
     let instanceContainer = device.createRayTracingAccelerationContainer({
         level: "top",
         usage: WebGPU.GPURayTracingAccelerationContainerUsage.PREFER_FAST_TRACE,
+        // usage: WebGPU.GPURayTracingAccelerationContainerUsage.ALLOW_UPDATE,
+        // usage: WebGPU.GPURayTracingAccelerationContainerUsage.PREFER_FAST_BUILD,
         instances
     });
 
