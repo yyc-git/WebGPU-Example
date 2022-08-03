@@ -43,63 +43,72 @@ layout(std140, set = 0, binding = 3) buffer SceneGeometryData {
 }
 sceneGeometryData;
 
-// bool _isIntersectWithRing(vec2 point, Geometry geometry) {
-// bool _isIntersectWithRing(vec2 origin, vec2 direction, Geometry geometry) {
-bool _isIntersectWithRing(vec3 origin, vec3 direction, Geometry geometry) {
+// bool _isIntersectWithRing(vec3 origin, vec3 direction, Geometry geometry) {
+//   vec2 c = geometry.c;
+//   float w = geometry.w;
+//   float r = geometry.r;
+
+//   vec3 center = vec3(c, 0.0);
+
+//   vec3 u = center - origin;
+
+//   float dLen = length(direction);
+
+//   vec3 directionProjection = dot(u, direction) * direction / pow(dLen, 2);
+
+//   float distance = length(u - directionProjection);
+
+//   return distance >= r && distance <= r + w;
+// }
+
+bool _isIntersectWithRing(vec2 point, Geometry geometry) {
   vec2 c = geometry.c;
   float w = geometry.w;
   float r = geometry.r;
 
-  // vec2 center = c;
-  // float radius = r;
+  vec2 worldPosition = vec2(gl_ObjectToWorldEXT * vec4(c, 0.0, 1.0));
 
-  // // vec2 oc = origin - center;
-  // vec3 oc = origin - vec3(center, 0.0);
-  // float a = dot(direction, direction);
-  // float b = 2.0 * dot(oc, direction);
-  // float c1 = dot(oc, oc) - radius * radius;
-  // float discriminant = b * b - 4 * a * c1;
+  float distanceSquare =
+      pow(point.x - worldPosition.x, 2) + pow(point.y - worldPosition.y, 2);
 
-  // return discriminant >= 0;
-
-  vec3 center = vec3(c, 0.0);
-
-  vec3 u = center - origin;
-
-  float dLen = length(direction);
-
-  vec3 directionProjection = dot(u, direction) * direction / pow(dLen, 2);
-
-  float distance = length(u - directionProjection);
-
-  return distance >= r && distance <= r + w;
+  return distanceSquare >= pow(r, 2) && distanceSquare <= pow(r + w, 2);
 }
 
 void main() {
-  // RayPayload ray;
-  //   ray.origin    = gl_WorldRayOriginEXT;
-  //   ray.direction = gl_WorldRayDirectionEXT;
-  // ray.target = gl_ObjectRayDirectionEXT.xy;
-  // ray.target = gl_ObjectRayDirectionEXT.xy;
-
-  // vec2 point = ray.target;
-
   uint instanceIndex = gl_InstanceID;
 
   Instance instance = sceneInstanceData.instances[instanceIndex];
   uint geometryIndex = uint(instance.geometryIndex);
   Geometry geometry = sceneGeometryData.geometrys[geometryIndex];
 
-  // if (_isIntersectWithRing(point, geometry)) {
-  // if (_isIntersectWithRing(gl_WorldRayOriginEXT.xy,
-  // gl_WorldRayDirectionEXT.xy,
-  // if (_isIntersectWithRing(gl_WorldRayOriginEXT, gl_WorldRayDirectionEXT,
-  // if (_isIntersectWithRing(gl_WorldRayOriginEXT, gl_WorldRayDirectionEXT,
-  // if (_isIntersectWithRing(gl_ObjectRayOriginEXT.xy,
-  if (_isIntersectWithRing(gl_ObjectRayOriginEXT, gl_ObjectRayDirectionEXT,
-                           geometry)) {
+  // // if (_isIntersectWithRing(point, geometry)) {
+  // // if (_isIntersectWithRing(gl_WorldRayOriginEXT.xy,
+  // // gl_WorldRayDirectionEXT.xy,
+  // // if (_isIntersectWithRing(gl_WorldRayOriginEXT, gl_WorldRayDirectionEXT,
+  // // if (_isIntersectWithRing(gl_WorldRayOriginEXT, gl_WorldRayDirectionEXT,
+  // // if (_isIntersectWithRing(gl_ObjectRayOriginEXT.xy,
+  // if (_isIntersectWithRing(gl_ObjectRayOriginEXT, gl_ObjectRayDirectionEXT,
+  //                          geometry)) {
+  //   /*! should > 0.0 !*/
+  //   float tHit = 0.0001;
+
+  //   uint hitKind = 0;
+
+  //   reportIntersectionEXT(tHit, hitKind);
+  // }
+
+  const ivec2 ipos = ivec2(gl_LaunchIDEXT.xy);
+  const ivec2 resolution = ivec2(gl_LaunchSizeEXT.xy);
+
+  const vec2 sampledPixel = vec2(ipos.x + 0.5, ipos.y + 0.5);
+
+  const vec2 uv = (sampledPixel / resolution) * 2.0 - 1.0;
+
+  vec2 point = uv;
+
+  if (_isIntersectWithRing(point, geometry)) {
     /*! should > 0.0 !*/
-    float tHit = 0.1;
+    float tHit = 0.0001;
 
     uint hitKind = 0;
 
