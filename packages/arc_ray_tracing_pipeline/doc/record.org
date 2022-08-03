@@ -7,10 +7,28 @@ geometry count's blas, transform count's tlas;
 # or one blas(contain all aabbs), one 
 
 
+
+# TODO change to cicle:
+# https://www.bluebill.net/circle_ray_intersection.html
+
+# TODO change to ring!
+
+
+
+TODO fix: projection bug!
+
+
+* TODO show fps
+
+
 * TODO perf: how to remove primary ray? 
 
 
-* TODO draw 4M rings
+
+
+# * TODO draw 4M rings
+
+
 
 
 * TODO open any-hit
@@ -20,4 +38,35 @@ handle z
 move layer to z? 
 
 
-* TODO draw more rings
+* TODO perf: optimize init
+
+change flag to update?
+
+
+
+* TODO draw >= 5M rings
+
+
+
+
+
+
+
+* draw 3M rings
+
+can render smooth, but init is too slow
+
+
+* draw 5M rings
+
+Error: Out of memory Error: vkAllocateMemory failed with VK_ERROR_OUT_OF_DEVICE_MEMORY
+    at CheckVkOOMThenSuccessImpl (../../src/dawn_native/vulkan/VulkanError.cpp:94)
+    at AllocateResourceHeap (../../src/dawn_native/vulkan/ResourceMemoryAllocatorVk.cpp:87)
+    at Allocate (../../src/dawn_native/vulkan/ResourceMemoryAllocatorVk.cpp:140)
+    at Initialize (../../src/dawn_native/vulkan/BufferVk.cpp:171)
+    at Create (../../src/dawn_native/vulkan/BufferVk.cpp:125)
+    at device._onErrorCallback (D:\Github\WebGPU-Example\node_modules\wonder-webgpu\index.js:57:21)
+    at _buildContainers (file:///D:/Github/WebGPU-Example/packages/arc_ray_tracing_pipeline/src/pipeline/jobs/init/InitRayTracingPassJob.js:148:36)
+    at exec (file:///D:/Github/WebGPU-Example/packages/arc_ray_tracing_pipeline/src/pipeline/jobs/init/InitRayTracingPassJob.js:179:29)
+    at exec (file:///D:/Github/WebGPU-Example/packages/arc_ray_tracing_pipeline/src/pipeline/InitPipeline.js:19:13)
+    at async _main (file:///D:/Github/WebGPU-Example/packages/arc_ray_tracing_pipeline/src/index.js:52:13)

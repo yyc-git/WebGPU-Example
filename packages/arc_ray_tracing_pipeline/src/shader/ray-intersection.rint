@@ -46,37 +46,33 @@ sceneGeometryData;
 // bool _isIntersectWithRing(vec2 point, Geometry geometry) {
 // bool _isIntersectWithRing(vec2 origin, vec2 direction, Geometry geometry) {
 bool _isIntersectWithRing(vec3 origin, vec3 direction, Geometry geometry) {
-  // TODO change to ring!
-
   vec2 c = geometry.c;
   float w = geometry.w;
   float r = geometry.r;
 
-  vec2 center = c;
-  float radius = r;
+  // vec2 center = c;
+  // float radius = r;
 
-  // vec2 oc = origin - center;
-  vec3 oc = origin - vec3(center, 0.0);
-  float a = dot(direction, direction);
-  float b = 2.0 * dot(oc, direction);
-  float c1 = dot(oc, oc) - radius * radius;
-  float discriminant = b * b - 4 * a * c1;
+  // // vec2 oc = origin - center;
+  // vec3 oc = origin - vec3(center, 0.0);
+  // float a = dot(direction, direction);
+  // float b = 2.0 * dot(oc, direction);
+  // float c1 = dot(oc, oc) - radius * radius;
+  // float discriminant = b * b - 4 * a * c1;
 
-  return discriminant >= 0;
+  // return discriminant >= 0;
 
-  // //   var worldPosition = localPosition + c;
+  vec3 center = vec3(c, 0.0);
 
-  // //   var distanceSquare =
-  // //       pow(point.x - worldPosition.x, 2.0) + pow(point.y -
-  // //       worldPosition.y, 2.0);
+  vec3 u = center - origin;
 
-  // vec2 localPosition = c;
+  float dLen = length(direction);
 
-  // float distanceSquare =
-  //     pow(point.x - localPosition.x, 2.0) + pow(point.y -
-  //     localPosition.y, 2.0);
+  vec3 directionProjection = dot(u, direction) * direction / pow(dLen, 2);
 
-  // return distanceSquare >= pow(r, 2) && distanceSquare <= pow(r + w, 2);
+  float distance = length(u - directionProjection);
+
+  return distance >= r && distance <= r + w;
 }
 
 void main() {
