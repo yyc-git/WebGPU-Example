@@ -37,7 +37,7 @@ export let createState = () => {
             // resolutionBufferData: null
         },
         rayTracingPass: {
-            bindGroup: null,
+            bindGroups: [],
             pipeline: null
         },
         screenPass: {

@@ -90,9 +90,9 @@ let groupedSortedLayers = [
     { minLayer: 0.00001, maxLayer: 0.00004 },
 ]
 
-let maxInstanceCount = 3500000
+// let maxInstanceCount = 3500000
 // let maxInstanceCount = 3000000
-// let maxInstanceCount = 3
+let maxInstanceCount = 3
 // let maxInstanceCount = 1
 // let maxInstanceCount = 10
 
@@ -431,10 +431,7 @@ export let exec = (state) => {
     let { device, queue } = state.webgpu
 
     let shaderBindingTable = _createShaderBindingTable(device);
-    let [instanceContainer1, instanceContainer2, instanceContainer3, instanceContainer4, instanceContainer5
-        // , instanceContainer6, instanceContainer7, instanceContainer8, instanceContainer9, instanceContainer10
-
-    ] = _buildContainers(state, device, queue);
+    let instanceContainers = _buildContainers(state, device, queue);
 
     let bindGroupLayout = device.createBindGroupLayout({
         entries: [
@@ -463,26 +460,26 @@ export let exec = (state) => {
                 visibility: WebGPU.GPUShaderStage.RAY_CLOSEST_HIT,
                 type: "storage-buffer"
             },
-            {
-                binding: 5,
-                visibility: WebGPU.GPUShaderStage.RAY_GENERATION,
-                type: "acceleration-container"
-            },
-            {
-                binding: 6,
-                visibility: WebGPU.GPUShaderStage.RAY_GENERATION,
-                type: "acceleration-container"
-            },
-            {
-                binding: 7,
-                visibility: WebGPU.GPUShaderStage.RAY_GENERATION,
-                type: "acceleration-container"
-            },
-            {
-                binding: 8,
-                visibility: WebGPU.GPUShaderStage.RAY_GENERATION,
-                type: "acceleration-container"
-            },
+            // {
+            //     binding: 5,
+            //     visibility: WebGPU.GPUShaderStage.RAY_GENERATION,
+            //     type: "acceleration-container"
+            // },
+            // {
+            //     binding: 6,
+            //     visibility: WebGPU.GPUShaderStage.RAY_GENERATION,
+            //     type: "acceleration-container"
+            // },
+            // {
+            //     binding: 7,
+            //     visibility: WebGPU.GPUShaderStage.RAY_GENERATION,
+            //     type: "acceleration-container"
+            // },
+            // {
+            //     binding: 8,
+            //     visibility: WebGPU.GPUShaderStage.RAY_GENERATION,
+            //     type: "acceleration-container"
+            // },
             // {
             //     binding: 9,
             //     visibility: WebGPU.GPUShaderStage.RAY_GENERATION,
@@ -521,81 +518,43 @@ export let exec = (state) => {
     let [instanceDataBuffer, instanceDataBufferSize] = buildSceneInstanceDataBufferData(state, device);
     let [materialDataBuffer, materialDataBufferSize] = buildSceneMaterialDataBufferData(state, device);
 
-    let bindGroup = device.createBindGroup({
-        layout: bindGroupLayout,
-        entries: [
-            {
-                binding: 0,
-                accelerationContainer: instanceContainer1,
-                size: 0
-            },
-            {
-                binding: 1,
-                buffer: pixelBuffer,
-                size: pixelBufferSize
-            },
-            {
-                binding: 2,
-                buffer: instanceDataBuffer,
-                size: instanceDataBufferSize
-            },
-            {
-                binding: 3,
-                buffer: geometryDataBuffer,
-                size: geometryDataBufferSize
-            },
-            {
-                binding: 4,
-                buffer: materialDataBuffer,
-                size: materialDataBufferSize
-            },
-            {
-                binding: 5,
-                accelerationContainer: instanceContainer2,
-                size: 0
-            },
-            {
-                binding: 6,
-                accelerationContainer: instanceContainer3,
-                size: 0
-            },
-            {
-                binding: 7,
-                accelerationContainer: instanceContainer4,
-                size: 0
-            },
-            {
-                binding: 8,
-                accelerationContainer: instanceContainer5,
-                size: 0
-            },
-            // {
-            //     binding: 9,
-            //     accelerationContainer: instanceContainer6,
-            //     size: 0
-            // },
-            // {
-            //     binding: 10,
-            //     accelerationContainer: instanceContainer7,
-            //     size: 0
-            // },
-            // {
-            //     binding: 11,
-            //     accelerationContainer: instanceContainer8,
-            //     size: 0
-            // },
-            // {
-            //     binding: 12,
-            //     accelerationContainer: instanceContainer9,
-            //     size: 0
-            // },
-            // {
-            //     binding: 13,
-            //     accelerationContainer: instanceContainer10,
-            //     size: 0
-            // },
-        ]
-    });
+
+    let bindGroups = instanceContainers.reduce((bindGroups, instanceContainer) => {
+        bindGroups.push(
+            device.createBindGroup({
+                layout: bindGroupLayout,
+                entries: [
+                    {
+                        binding: 0,
+                        accelerationContainer: instanceContainer,
+                        size: 0
+                    },
+                    {
+                        binding: 1,
+                        buffer: pixelBuffer,
+                        size: pixelBufferSize
+                    },
+                    {
+                        binding: 2,
+                        buffer: instanceDataBuffer,
+                        size: instanceDataBufferSize
+                    },
+                    {
+                        binding: 3,
+                        buffer: geometryDataBuffer,
+                        size: geometryDataBufferSize
+                    },
+                    {
+                        binding: 4,
+                        buffer: materialDataBuffer,
+                        size: materialDataBufferSize
+                    },
+                ]
+            })
+        )
+
+        return bindGroups
+    }, [])
 
     let pipeline = device.createRayTracingPipeline({
         layout: device.createPipelineLayout({
@@ -610,7 +569,7 @@ export let exec = (state) => {
     return {
         ...state,
         rayTracingPass: {
-            bindGroup,
+            bindGroups,
             pipeline
         }
     }

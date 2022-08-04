@@ -11,8 +11,7 @@ struct RayPayload {
 
 layout(location = 0) rayPayloadEXT RayPayload payload;
 
-// layout(set = 0, binding = 0) uniform accelerationStructureEXT topLevelAS;
-layout(set = 0, binding = 0) uniform accelerationStructureEXT topLevelAS1;
+layout(set = 0, binding = 0) uniform accelerationStructureEXT topLevelAS;
 
 layout(std140, set = 0, binding = 1) buffer PixelBuffer { vec4 pixels[]; }
 pixelBuffer;
@@ -26,24 +25,6 @@ pixelBuffer;
 //   float pad_1;
 // }
 // uCamera;
-
-layout(set = 0, binding = 5) uniform accelerationStructureEXT topLevelAS2;
-
-layout(set = 0, binding = 6) uniform accelerationStructureEXT topLevelAS3;
-
-layout(set = 0, binding = 7) uniform accelerationStructureEXT topLevelAS4;
-
-layout(set = 0, binding = 8) uniform accelerationStructureEXT topLevelAS5;
-
-// layout(set = 0, binding = 9) uniform accelerationStructureEXT topLevelAS6;
-
-// layout(set = 0, binding = 10) uniform accelerationStructureEXT topLevelAS7;
-
-// layout(set = 0, binding = 11) uniform accelerationStructureEXT topLevelAS8;
-
-// layout(set = 0, binding = 12) uniform accelerationStructureEXT topLevelAS9;
-
-// layout(set = 0, binding = 13) uniform accelerationStructureEXT topLevelAS10;
 
 void main() {
   const ivec2 ipos = ivec2(gl_LaunchIDEXT.xy);
@@ -76,38 +57,19 @@ void main() {
 
   // payload.radiance = vec3(0.0);
 
-  // accelerationStructureEXT tlasArr[2] =
-  //     accelerationStructureEXT[2](topLevelAS1, topLevelAS2);
-
-  // float a = layer[0]
-
-  // vec3 lastTLASRadiance = vec3(0.0);
-  // vec3 radiance = vec3(0.0);
-
   const uint cullMask = 0xFF;
-  traceRayEXT(topLevelAS1,          // acceleration structure
-              gl_RayFlagsOpaqueEXT, // rayFlags
-              cullMask,             // cullMask
-              0,                    // sbtRecordOffset
-              0,                    // sbtRecordStride
-              0,                    // missIndex
-              origin.xyz,           // ray origin
-              // uCamera.near,         // ray min range
-              0.1,
-              // direction.xyz,        // ray direction
-              direction, // ray direction
-              // uCamera.far,          // ray max range
-              1.0,
-              0 // payload (location = 0)
-  );
 
-  // float currentLayer = layerOfEachTLASDesc[0];
+  const uint pixelIndex = ipos.y * resolution.x + ipos.x;
 
-  if (payload.radiance == vec3(0.0)) {
-    // lastTLASRadiance = payload.radiance;
-    // currentLayer = layerOfEachTLASDesc[1];
+  // if (vec3(pixelBuffer.pixels[pixelIndex]) == vec3(0.0)) {
+  // if (pixelBuffer.pixels[pixelIndex].r == 0.0) {
 
-    traceRayEXT(topLevelAS2,          // acceleration structure
+  // TODO use bool
+  // if (pixelBuffer.pixels[pixelIndex].r > (0.0 - 0.1) ||
+  //     pixelBuffer.pixels[pixelIndex].r < (0.0 + 0.1)) {
+  if (pixelBuffer.pixels[pixelIndex].r != 1.0) {
+    // if (pixelBuffer.pixels[pixelIndex].w == 1.0) {
+    traceRayEXT(topLevelAS,           // acceleration structure
                 gl_RayFlagsOpaqueEXT, // rayFlags
                 cullMask,             // cullMask
                 0,                    // sbtRecordOffset
@@ -122,159 +84,36 @@ void main() {
                 1.0,
                 0 // payload (location = 0)
     );
+  } else {
+    payload.radiance = vec3(pixelBuffer.pixels[pixelIndex]);
   }
-
-  if (payload.radiance == vec3(0.0) ) {
-    traceRayEXT(topLevelAS3,          // acceleration structure
-                gl_RayFlagsOpaqueEXT, // rayFlags
-                cullMask,             // cullMask
-                0,                    // sbtRecordOffset
-                0,                    // sbtRecordStride
-                0,                    // missIndex
-                origin.xyz,           // ray origin
-                // uCamera.near,         // ray min range
-                0.1,
-                // direction.xyz,        // ray direction
-                direction, // ray direction
-                // uCamera.far,          // ray max range
-                1.0,
-                0 // payload (location = 0)
-    );
-  }
-
-
-  if (payload.radiance == vec3(0.0) ) {
-    traceRayEXT(topLevelAS4,          // acceleration structure
-                gl_RayFlagsOpaqueEXT, // rayFlags
-                cullMask,             // cullMask
-                0,                    // sbtRecordOffset
-                0,                    // sbtRecordStride
-                0,                    // missIndex
-                origin.xyz,           // ray origin
-                // uCamera.near,         // ray min range
-                0.1,
-                // direction.xyz,        // ray direction
-                direction, // ray direction
-                // uCamera.far,          // ray max range
-                1.0,
-                0 // payload (location = 0)
-    );
-  }
-
-  if (payload.radiance == vec3(0.0) ) {
-    traceRayEXT(topLevelAS5,          // acceleration structure
-                gl_RayFlagsOpaqueEXT, // rayFlags
-                cullMask,             // cullMask
-                0,                    // sbtRecordOffset
-                0,                    // sbtRecordStride
-                0,                    // missIndex
-                origin.xyz,           // ray origin
-                // uCamera.near,         // ray min range
-                0.1,
-                // direction.xyz,        // ray direction
-                direction, // ray direction
-                // uCamera.far,          // ray max range
-                1.0,
-                0 // payload (location = 0)
-    );
-  }
-
-
-  // if (payload.radiance == vec3(0.0) ) {
-  //   traceRayEXT(topLevelAS6,          // acceleration structure
-  //               gl_RayFlagsOpaqueEXT, // rayFlags
-  //               cullMask,             // cullMask
-  //               0,                    // sbtRecordOffset
-  //               0,                    // sbtRecordStride
-  //               0,                    // missIndex
-  //               origin.xyz,           // ray origin
-  //               // uCamera.near,         // ray min range
-  //               0.1,
-  //               // direction.xyz,        // ray direction
-  //               direction, // ray direction
-  //               // uCamera.far,          // ray max range
-  //               1.0,
-  //               0 // payload (location = 0)
-  //   );
-  // }
-  // if (payload.radiance == vec3(0.0) ) {
-  //   traceRayEXT(topLevelAS7,          // acceleration structure
-  //               gl_RayFlagsOpaqueEXT, // rayFlags
-  //               cullMask,             // cullMask
-  //               0,                    // sbtRecordOffset
-  //               0,                    // sbtRecordStride
-  //               0,                    // missIndex
-  //               origin.xyz,           // ray origin
-  //               // uCamera.near,         // ray min range
-  //               0.1,
-  //               // direction.xyz,        // ray direction
-  //               direction, // ray direction
-  //               // uCamera.far,          // ray max range
-  //               1.0,
-  //               0 // payload (location = 0)
-  //   );
-  // }
-  // if (payload.radiance == vec3(0.0) ) {
-  //   traceRayEXT(topLevelAS8,          // acceleration structure
-  //               gl_RayFlagsOpaqueEXT, // rayFlags
-  //               cullMask,             // cullMask
-  //               0,                    // sbtRecordOffset
-  //               0,                    // sbtRecordStride
-  //               0,                    // missIndex
-  //               origin.xyz,           // ray origin
-  //               // uCamera.near,         // ray min range
-  //               0.1,
-  //               // direction.xyz,        // ray direction
-  //               direction, // ray direction
-  //               // uCamera.far,          // ray max range
-  //               1.0,
-  //               0 // payload (location = 0)
-  //   );
-  // }
-  // if (payload.radiance == vec3(0.0) ) {
-  //   traceRayEXT(topLevelAS9,          // acceleration structure
-  //               gl_RayFlagsOpaqueEXT, // rayFlags
-  //               cullMask,             // cullMask
-  //               0,                    // sbtRecordOffset
-  //               0,                    // sbtRecordStride
-  //               0,                    // missIndex
-  //               origin.xyz,           // ray origin
-  //               // uCamera.near,         // ray min range
-  //               0.1,
-  //               // direction.xyz,        // ray direction
-  //               direction, // ray direction
-  //               // uCamera.far,          // ray max range
-  //               1.0,
-  //               0 // payload (location = 0)
-  //   );
-  // }
-  // if (payload.radiance == vec3(0.0) ) {
-  //   traceRayEXT(topLevelAS10,          // acceleration structure
-  //               gl_RayFlagsOpaqueEXT, // rayFlags
-  //               cullMask,             // cullMask
-  //               0,                    // sbtRecordOffset
-  //               0,                    // sbtRecordStride
-  //               0,                    // missIndex
-  //               origin.xyz,           // ray origin
-  //               // uCamera.near,         // ray min range
-  //               0.1,
-  //               // direction.xyz,        // ray direction
-  //               direction, // ray direction
-  //               // uCamera.far,          // ray max range
-  //               1.0,
-  //               0 // payload (location = 0)
-  //   );
-  // }
-
-  // if (payload.radiance == vec3(0.0)) {
-  //   radiance = lastTLASRadiance;
-  // } else {
-  //   radiance = payload.radiance;
-  // }
+  // traceRayEXT(topLevelAS,          // acceleration structure
+  //             gl_RayFlagsOpaqueEXT, // rayFlags
+  //             cullMask,             // cullMask
+  //             0,                    // sbtRecordOffset
+  //             0,                    // sbtRecordStride
+  //             0,                    // missIndex
+  //             origin.xyz,           // ray origin
+  //             // uCamera.near,         // ray min range
+  //             0.1,
+  //             // direction.xyz,        // ray direction
+  //             direction, // ray direction
+  //             // uCamera.far,          // ray max range
+  //             1.0,
+  //             0 // payload (location = 0)
+  // );
 
   // payload.radiance = vec3(1.0,0.0,0.0);
 
-  const uint pixelIndex = ipos.y * resolution.x + ipos.x;
+  // float w;
+  // if (payload.radiance == vec3(0.0)) {
+  //   w = 0.0;
+  // } else {
+  //   w = 1.0;
+  // }
+
+  // const uint pixelIndex = ipos.y * resolution.x + ipos.x;
   pixelBuffer.pixels[pixelIndex] = vec4(payload.radiance, 1.0);
+  // pixelBuffer.pixels[pixelIndex] = vec4(payload.radiance, w);
   // pixelBuffer.pixels[pixelIndex] = vec4(radiance, 1.0);
 }
