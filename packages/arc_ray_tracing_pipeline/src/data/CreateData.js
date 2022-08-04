@@ -34,6 +34,7 @@ export let createState = () => {
         materialBuffer: null,
         pass: {
             pixelBufferData: null,
+            pixelIsMissBufferData: null,
             // resolutionBufferData: null
         },
         rayTracingPass: {

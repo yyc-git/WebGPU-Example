@@ -16,6 +16,9 @@ layout(set = 0, binding = 0) uniform accelerationStructureEXT topLevelAS;
 layout(std140, set = 0, binding = 1) buffer PixelBuffer { vec4 pixels[]; }
 pixelBuffer;
 
+layout(scalar, set = 0, binding = 5) buffer PixelIsMissBuffer { uint isMiss[]; }
+pixelIsMissBuffer;
+
 // layout(std140, set = 0, binding = 5) uniform Camera {
 //   mat4 viewInverse;
 //   mat4 projectionInverse;
@@ -61,14 +64,7 @@ void main() {
 
   const uint pixelIndex = ipos.y * resolution.x + ipos.x;
 
-  // if (vec3(pixelBuffer.pixels[pixelIndex]) == vec3(0.0)) {
-  // if (pixelBuffer.pixels[pixelIndex].r == 0.0) {
-
-  // TODO use bool
-  // if (pixelBuffer.pixels[pixelIndex].r > (0.0 - 0.1) ||
-  //     pixelBuffer.pixels[pixelIndex].r < (0.0 + 0.1)) {
-  if (pixelBuffer.pixels[pixelIndex].r != 1.0) {
-    // if (pixelBuffer.pixels[pixelIndex].w == 1.0) {
+  if (pixelIsMissBuffer.isMiss[pixelIndex] == 0) {
     traceRayEXT(topLevelAS,           // acceleration structure
                 gl_RayFlagsOpaqueEXT, // rayFlags
                 cullMask,             // cullMask
@@ -87,30 +83,13 @@ void main() {
   } else {
     payload.radiance = vec3(pixelBuffer.pixels[pixelIndex]);
   }
-  // traceRayEXT(topLevelAS,          // acceleration structure
-  //             gl_RayFlagsOpaqueEXT, // rayFlags
-  //             cullMask,             // cullMask
-  //             0,                    // sbtRecordOffset
-  //             0,                    // sbtRecordStride
-  //             0,                    // missIndex
-  //             origin.xyz,           // ray origin
-  //             // uCamera.near,         // ray min range
-  //             0.1,
-  //             // direction.xyz,        // ray direction
-  //             direction, // ray direction
-  //             // uCamera.far,          // ray max range
-  //             1.0,
-  //             0 // payload (location = 0)
-  // );
-
   // payload.radiance = vec3(1.0,0.0,0.0);
 
-  // float w;
-  // if (payload.radiance == vec3(0.0)) {
-  //   w = 0.0;
-  // } else {
-  //   w = 1.0;
-  // }
+  if (payload.radiance == vec3(0.0)) {
+    pixelIsMissBuffer.isMiss[pixelIndex] = 0;
+  } else {
+    pixelIsMissBuffer.isMiss[pixelIndex] = 1;
+  }
 
   // const uint pixelIndex = ipos.y * resolution.x + ipos.x;
   pixelBuffer.pixels[pixelIndex] = vec4(payload.radiance, 1.0);

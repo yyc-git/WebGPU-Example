@@ -460,6 +460,11 @@ export let exec = (state) => {
                 visibility: WebGPU.GPUShaderStage.RAY_CLOSEST_HIT,
                 type: "storage-buffer"
             },
+            {
+                binding: 5,
+                visibility: WebGPU.GPUShaderStage.RAY_GENERATION,
+                type: "storage-buffer"
+            },
             // {
             //     binding: 5,
             //     visibility: WebGPU.GPUShaderStage.RAY_GENERATION,
@@ -508,8 +513,9 @@ export let exec = (state) => {
         ]
     });
 
-    let { pixelBufferData } = state.pass
+    let { pixelBufferData, pixelIsMissBufferData } = state.pass
     let [pixelBuffer, pixelBufferSize] = pixelBufferData;
+    let [pixelIsMissBuffer, pixelIsMissBufferSize] = pixelIsMissBufferData;
 
     // let { cameraBufferData } = getCamera();
     // let [cameraBuffer, cameraData] = cameraBufferData;
@@ -548,6 +554,11 @@ export let exec = (state) => {
                         binding: 4,
                         buffer: materialDataBuffer,
                         size: materialDataBufferSize
+                    },
+                    {
+                        binding: 5,
+                        buffer: pixelIsMissBuffer,
+                        size: pixelIsMissBufferSize
                     },
                 ]
             })
