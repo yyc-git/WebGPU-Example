@@ -7,6 +7,7 @@ import { getColor } from "../scene/Material.js";
 
 export let buildSceneInstanceDataBufferData = (state, device) => {
     let bufferDataArr = getAllRenderGameObjectData(state).reduce((bufferDataArr, [gameObject, transform, geometry, material]) => {
+    // let bufferDataArr = getAllRenderGameObjectData(state).slice(0, 10).reduce((bufferDataArr, [gameObject, transform, geometry, material]) => {
         // bufferDataArr.push(geometry, material, 0, 0);
         let stride = 4
         bufferDataArr[transform * stride] = geometry

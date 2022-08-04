@@ -82,15 +82,32 @@ let _build34RowMajorMatrix = (localPosition, layer) => {
 
 let _createAllInstances = (state, geometryContainerMap) => {
     // TODO get groupedSortedLayers
+    // let groupedSortedLayers = [
+    //     { minLayer: 0.00004, maxLayer: 0.00004 },
+    //     // { minLayer: 0.00004, maxLayer: 0.00004 },
+    //     // { minLayer: 0.00003, maxLayer: 0.00004 },
+    //     { minLayer: 0.00003, maxLayer: 0.00003 },
+    //     // { minLayer: 0.00003, maxLayer: 0.00003 },
+    //     // { minLayer: 0.00002, maxLayer: 0.00003 },
+    //     // { minLayer: 0.00002, maxLayer: 0.00002 },
+    //     // { minLayer: 0.00001, maxLayer: 0.00002 },
+    //     { minLayer: 0.00002, maxLayer: 0.00002 },
+    //     // { minLayer: 0.00001, maxLayer: 0.00001 },
+    //     // { minLayer: 0.00001, maxLayer: 0.00001 },
+    //     { minLayer: 0.00001, maxLayer: 0.00002 },
+    //     { minLayer: 0.00001, maxLayer: 0.00001 },
+    // ]
     let groupedSortedLayers = [
-        { minLayer: 0.00004, maxLayer: 0.00004 },
-        // { minLayer: 0.00003, maxLayer: 0.00004 },
-        { minLayer: 0.00003, maxLayer: 0.00003 },
-        // { minLayer: 0.00001, maxLayer: 0.00002 },
-        { minLayer: 0.00001, maxLayer: 0.00002 },
+        { minLayer: 0.00001, maxLayer: 0.00004 },
+        { minLayer: 0.00001, maxLayer: 0.00004 },
+        { minLayer: 0.00001, maxLayer: 0.00004 },
+        { minLayer: 0.00001, maxLayer: 0.00004 },
+        { minLayer: 0.00001, maxLayer: 0.00004 },
     ]
 
-    let maxInstanceCount = 10
+    let maxInstanceCount = 3500000
+    // let maxInstanceCount = 1
+    // let maxInstanceCount = 10
 
     let epsion = 0.000001
 
@@ -100,6 +117,10 @@ let _createAllInstances = (state, geometryContainerMap) => {
 
     let _getInstancesIndex = (layer, maxInstanceCount, epsion, instancesArr, groupedSortedLayers) => {
         return groupedSortedLayers.reduce((result, { minLayer, maxLayer }, index) => {
+            if (result !== -1) {
+                return result
+            }
+
             if (layer >= minLayer - epsion && layer <= maxLayer + epsion && instancesArr[index].length < maxInstanceCount) {
                 result = index
             }
@@ -125,6 +146,7 @@ let _createAllInstances = (state, geometryContainerMap) => {
     }
 
     let instancesArr = getAllRenderGameObjectData(state).reduce((instancesArr, [gameObject, transform, geometry, material], instanceIndex) => {
+        // let instancesArr = getAllRenderGameObjectData(state).slice(0, 20).reduce((instancesArr, [gameObject, transform, geometry, material], instanceIndex) => {
         let geometryContainer = geometryContainerMap[geometry]
         // console.log(geometryContainerMap, geometry);
 
@@ -133,10 +155,15 @@ let _createAllInstances = (state, geometryContainerMap) => {
 
         let instancesIndex = _getInstancesIndex(layer, maxInstanceCount, epsion, instancesArr, groupedSortedLayers)
 
-        // console.log(instancesIndex, layer, maxInstanceCount);
+        // console.log(instancesIndex, layer, 
+        //     instancesArr.map(instances => instances.length)
+        //     );
 
 
         if (instancesIndex === -1) {
+            console.log(instancesIndex, layer,
+                instancesArr.map(instances => instances.length)
+            );
             throw new Error("instances are too many")
         }
 
@@ -285,7 +312,10 @@ export let exec = (state) => {
     let { device, queue } = state.webgpu
 
     let shaderBindingTable = _createShaderBindingTable(device);
-    let [instanceContainer1, instanceContainer2, instanceContainer3] = _buildContainers(state, device, queue);
+    let [instanceContainer1, instanceContainer2, instanceContainer3, instanceContainer4, instanceContainer5
+        // , instanceContainer6, instanceContainer7, instanceContainer8, instanceContainer9, instanceContainer10
+
+    ] = _buildContainers(state, device, queue);
 
     let bindGroupLayout = device.createBindGroupLayout({
         entries: [
@@ -324,6 +354,41 @@ export let exec = (state) => {
                 visibility: WebGPU.GPUShaderStage.RAY_GENERATION,
                 type: "acceleration-container"
             },
+            {
+                binding: 7,
+                visibility: WebGPU.GPUShaderStage.RAY_GENERATION,
+                type: "acceleration-container"
+            },
+            {
+                binding: 8,
+                visibility: WebGPU.GPUShaderStage.RAY_GENERATION,
+                type: "acceleration-container"
+            },
+            // {
+            //     binding: 9,
+            //     visibility: WebGPU.GPUShaderStage.RAY_GENERATION,
+            //     type: "acceleration-container"
+            // },
+            // {
+            //     binding: 10,
+            //     visibility: WebGPU.GPUShaderStage.RAY_GENERATION,
+            //     type: "acceleration-container"
+            // },
+            // {
+            //     binding: 11,
+            //     visibility: WebGPU.GPUShaderStage.RAY_GENERATION,
+            //     type: "acceleration-container"
+            // },
+            // {
+            //     binding: 12,
+            //     visibility: WebGPU.GPUShaderStage.RAY_GENERATION,
+            //     type: "acceleration-container"
+            // },
+            // {
+            //     binding: 13,
+            //     visibility: WebGPU.GPUShaderStage.RAY_GENERATION,
+            //     type: "acceleration-container"
+            // },
         ]
     });
 
@@ -375,7 +440,41 @@ export let exec = (state) => {
                 accelerationContainer: instanceContainer3,
                 size: 0
             },
-
+            {
+                binding: 7,
+                accelerationContainer: instanceContainer4,
+                size: 0
+            },
+            {
+                binding: 8,
+                accelerationContainer: instanceContainer5,
+                size: 0
+            },
+            // {
+            //     binding: 9,
+            //     accelerationContainer: instanceContainer6,
+            //     size: 0
+            // },
+            // {
+            //     binding: 10,
+            //     accelerationContainer: instanceContainer7,
+            //     size: 0
+            // },
+            // {
+            //     binding: 11,
+            //     accelerationContainer: instanceContainer8,
+            //     size: 0
+            // },
+            // {
+            //     binding: 12,
+            //     accelerationContainer: instanceContainer9,
+            //     size: 0
+            // },
+            // {
+            //     binding: 13,
+            //     accelerationContainer: instanceContainer10,
+            //     size: 0
+            // },
         ]
     });
 
