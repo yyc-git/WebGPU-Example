@@ -80,6 +80,24 @@ let _build34RowMajorMatrix = (localPosition, layer) => {
     ]);
 }
 
+
+// TODO refactor
+let groupedSortedLayers = [
+    { minLayer: 0.00001, maxLayer: 0.00004 },
+    { minLayer: 0.00001, maxLayer: 0.00004 },
+    { minLayer: 0.00001, maxLayer: 0.00004 },
+    { minLayer: 0.00001, maxLayer: 0.00004 },
+    { minLayer: 0.00001, maxLayer: 0.00004 },
+]
+
+let maxInstanceCount = 3500000
+// let maxInstanceCount = 3000000
+// let maxInstanceCount = 3
+// let maxInstanceCount = 1
+// let maxInstanceCount = 10
+
+let epsion = 0.000001
+
 let _createAllInstances = (state, geometryContainerMap) => {
     // TODO get groupedSortedLayers
     // let groupedSortedLayers = [
@@ -97,31 +115,19 @@ let _createAllInstances = (state, geometryContainerMap) => {
     //     { minLayer: 0.00001, maxLayer: 0.00002 },
     //     { minLayer: 0.00001, maxLayer: 0.00001 },
     // ]
-    let groupedSortedLayers = [
-        { minLayer: 0.00001, maxLayer: 0.00004 },
-        { minLayer: 0.00001, maxLayer: 0.00004 },
-        { minLayer: 0.00001, maxLayer: 0.00004 },
-        { minLayer: 0.00001, maxLayer: 0.00004 },
-        { minLayer: 0.00001, maxLayer: 0.00004 },
-    ]
 
-    let maxInstanceCount = 3500000
-    // let maxInstanceCount = 1
-    // let maxInstanceCount = 10
-
-    let epsion = 0.000001
-
-    let _createInstancesArr = (groupedSortedLayers) => {
-        return groupedSortedLayers.map(_ => [])
+    let _createInstancesArr = (groupedSortedLayersLength, stride, maxInstanceCount) => {
+        // return groupedSortedLayers.map(_ => [])
+        return new Float32Array(groupedSortedLayersLength * stride * maxInstanceCount)
     }
 
-    let _getInstancesIndex = (layer, maxInstanceCount, epsion, instancesArr, groupedSortedLayers) => {
+    let _getInstancesIndex = (layer, maxInstanceCount, epsion, instancesCountArr, groupedSortedLayers) => {
         return groupedSortedLayers.reduce((result, { minLayer, maxLayer }, index) => {
             if (result !== -1) {
                 return result
             }
 
-            if (layer >= minLayer - epsion && layer <= maxLayer + epsion && instancesArr[index].length < maxInstanceCount) {
+            if (layer >= minLayer - epsion && layer <= maxLayer + epsion && instancesCountArr[index] < maxInstanceCount) {
                 result = index
             }
 
@@ -129,35 +135,106 @@ let _createAllInstances = (state, geometryContainerMap) => {
         }, -1)
     }
 
-    let _handleEmptyInstances = (instancesArr, geometryContainerMap) => {
-        return instancesArr.map(instances => {
-            if (instances.length === 0) {
-                instances.push({
-                    usage: WebGPU.GPURayTracingAccelerationInstanceUsage.FORCE_OPAQUE,
-                    mask: 0xFF,
-                    instanceId: 0,
-                    transformMatrix: _build34RowMajorMatrix([100000, 1000000], 100),
-                    geometryContainer: geometryContainerMap[0]
-                })
-            }
+    // let _handleEmptyInstances = (instancesArr, geometryContainerMap) => {
+    //     return instancesArr.map(instances => {
+    //         if (instances.length === 0) {
+    //             instances.push({
+    //                 usage: WebGPU.GPURayTracingAccelerationInstanceUsage.FORCE_OPAQUE,
+    //                 mask: 0xFF,
+    //                 instanceId: 0,
+    //                 transformMatrix: _build34RowMajorMatrix([100000, 1000000], 100),
+    //                 geometryContainer: geometryContainerMap[0]
+    //             })
+    //         }
 
-            return instances
-        })
+    //         return instances
+    //     })
+    // }
+
+
+
+
+    // let [f1, f2] = getAllRenderGameObjectData(state).reduce(([f1, f2], [gameObject, transform, geometry, material], instanceIndex) => {
+    //     let localPosition = getLocalPosition(transform, state)
+    //     let layer = getLayer(transform, state)
+
+    //     let f, startIndex
+
+    //     if (instanceIndex < maxInstanceCount) {
+    //         // _build34RowMajorMatrix(localPosition, layer)
+    //         f = f1
+    //         startIndex = instanceIndex * 12
+    //         // endIndex = instanceIndex * 12 + 12
+    //     }
+    //     else {
+    //         f = f2
+    //         startIndex = instanceIndex * 12 - maxInstanceCount
+    //         // endIndex = instanceIndex * 12 + 12 - maxInstanceCount
+    //     }
+
+    //     f[startIndex] = 1
+    //     f[startIndex + 1] = 0
+    //     f[startIndex + 2] = 0
+    //     f[startIndex + 3] = localPosition[0]
+
+    //     f[startIndex + 4] = 0
+    //     f[startIndex + 5] = 1
+    //     f[startIndex + 6] = 0
+    //     f[startIndex + 7] = localPosition[1]
+
+    //     f[startIndex + 8] = 0
+    //     f[startIndex + 9] = 0
+    //     f[startIndex + 10] = 1
+    //     f[startIndex + 11] = layer
+
+    //     return [f1, f2]
+    // }, [new Float32Array(maxInstanceCount * 12), new Float32Array(maxInstanceCount * 12)])
+
+    // console.log([f1.length, f2.length, f3.length, f4.length]);
+
+
+    // TODO move out
+    let _createInstancesCountArr = (groupedSortedLayers) => {
+        return groupedSortedLayers.map(_ => 0)
     }
 
-    let instancesArr = getAllRenderGameObjectData(state).reduce((instancesArr, [gameObject, transform, geometry, material], instanceIndex) => {
+
+
+    let [instancesArr, instancesCountArr] = getAllRenderGameObjectData(state).reduce(([instancesArr, instancesCountArr], [gameObject, transform, geometry, material], instanceIndex) => {
+        if (instanceIndex == 10000) {
+            console.log("10000");
+        }
+        else if (instanceIndex == 1000000) {
+            console.log("1000000");
+        }
+        else if (instanceIndex == 5000000) {
+            console.log("5000000");
+        }
+        else if (instanceIndex == 8000000) {
+            console.log("8000000");
+        }
+        else if (instanceIndex == 9000000) {
+            console.log("9000000");
+        }
+        else if (instanceIndex == 9500000) {
+            console.log("9500000");
+        }
+        else if (instanceIndex == 10000000) {
+            console.log("10000000");
+        }
+        else if (instanceIndex == 12000000) {
+            console.log("12000000");
+        }
+
         // let instancesArr = getAllRenderGameObjectData(state).slice(0, 20).reduce((instancesArr, [gameObject, transform, geometry, material], instanceIndex) => {
-        let geometryContainer = geometryContainerMap[geometry]
+        // let geometryContainer = geometryContainerMap[geometry]
         // console.log(geometryContainerMap, geometry);
 
         let localPosition = getLocalPosition(transform, state)
         let layer = getLayer(transform, state)
 
-        let instancesIndex = _getInstancesIndex(layer, maxInstanceCount, epsion, instancesArr, groupedSortedLayers)
+        let instancesIndex = _getInstancesIndex(layer, maxInstanceCount, epsion, instancesCountArr, groupedSortedLayers)
 
-        // console.log(instancesIndex, layer, 
-        //     instancesArr.map(instances => instances.length)
-        //     );
 
 
         if (instancesIndex === -1) {
@@ -168,42 +245,41 @@ let _createAllInstances = (state, geometryContainerMap) => {
         }
 
 
-        instancesArr[instancesIndex].push(
-            {
-                usage: WebGPU.GPURayTracingAccelerationInstanceUsage.FORCE_OPAQUE,
-                mask: 0xFF,
-                instanceId: instanceIndex,
-                // TODO handle instanceOffset?
-                // instanceOffset: 0,
+        instancesCountArr[instancesIndex] += 1
 
-                // transform: {
-                //     translation: { x: localPosition[0], y: localPosition[1], z: layer },
-                //     rotation: { x: 0, y: 0, z: 0 },
-                //     scale: { x: 1, y: 1, z: 1 }
-                // },
-                transformMatrix: _build34RowMajorMatrix(localPosition, layer),
-                geometryContainer: geometryContainer
-            }
-        )
+        let instancesCount = instancesCountArr[instancesIndex]
 
-        return instancesArr
-    }, _createInstancesArr(groupedSortedLayers));
+        // console.log(instancesIndex, layer, instancesCount, instancesCountArr);
+        let offset = (instancesCount - 1) * 14 + instancesIndex * maxInstanceCount * 14
+
+        instancesArr[offset] = instanceIndex
+
+        instancesArr[offset + 1] = 1
+        instancesArr[offset + 2] = 0
+        instancesArr[offset + 3] = 0
+        instancesArr[offset + 4] = localPosition[0]
+
+        instancesArr[offset + 5] = 0
+        instancesArr[offset + 6] = 1
+        instancesArr[offset + 7] = 0
+        instancesArr[offset + 8] = localPosition[1]
+
+        instancesArr[offset + 9] = 0
+        instancesArr[offset + 10] = 0
+        instancesArr[offset + 11] = 1
+        instancesArr[offset + 12] = layer
+
+        instancesArr[offset + 13] = geometry
+
+        return [instancesArr, instancesCountArr]
+    }, [_createInstancesArr(groupedSortedLayers.length, 14, maxInstanceCount), _createInstancesCountArr(groupedSortedLayers)])
 
 
-    return _handleEmptyInstances(instancesArr, geometryContainerMap)
+    // console.log("aaa", JSON.stringify(instancesArr), instancesCountArr);
+    console.log("aaa");
 
-
-    // TODO ensure check: not exceed maxInstanceCount
-
-
-    // return [
-    //     // instances.slice(0, 3000000),
-    //     // instances.slice(3000000, 4000000),
-    //     // instances.slice(4000000),
-    //     instances.slice(0, 5),
-    //     instances.slice(5, 8),
-    //     instances.slice(8),
-    // ]
+    // return _handleEmptyInstances(instancesArr, geometryContainerMap)
+    return [instancesArr, instancesCountArr]
 }
 
 let _buildContainers = (state, device, queue) => {
@@ -278,19 +354,62 @@ let _buildContainers = (state, device, queue) => {
 
     let a2 = performance.now();
 
-    let instancesArr = _createAllInstances(state, geometryContainerMap)
+    // TODO rename instancesArr
+    let [instancesArr, instancesCountArr] = _createAllInstances(state, geometryContainerMap)
+    console.log("bbb");
     // console.log(instancesArr);
     let a21 = performance.now();
 
-    let instanceContainerArr = instancesArr.map(instances => {
-        return device.createRayTracingAccelerationContainer({
-            level: "top",
-            usage: WebGPU.GPURayTracingAccelerationContainerUsage.PREFER_FAST_TRACE,
-            // usage: WebGPU.GPURayTracingAccelerationContainerUsage.ALLOW_UPDATE | WebGPU.GPURayTracingAccelerationContainerUsage.PREFER_FAST_TRACE,
-            // usage: WebGPU.GPURayTracingAccelerationContainerUsage.PREFER_FAST_BUILD,
-            instances
-        })
-    })
+    let instanceContainerArr = []
+    let instanceIndex = 0
+
+    for (let i = 0; i < instancesArr.length; i += 14 * maxInstanceCount) {
+        let instances = []
+
+        let instancesCount = instancesCountArr[instanceIndex]
+
+        //handle empty
+        if (instancesCount === 0) {
+            instances.push({
+                usage: WebGPU.GPURayTracingAccelerationInstanceUsage.FORCE_OPAQUE,
+                mask: 0xFF,
+                instanceId: 0,
+                transformMatrix: _build34RowMajorMatrix([100000, 1000000], 100),
+                // TODO get geometryContainer for empty
+                geometryContainer: geometryContainerMap[0]
+            })
+        }
+        else {
+            for (let j = 0; j < 14 * instancesCount; j += 14) {
+                instances.push({
+                    usage: WebGPU.GPURayTracingAccelerationInstanceUsage.FORCE_OPAQUE,
+                    mask: 0xFF,
+                    instanceId: instancesArr[i + j],
+                    // TODO handle instanceOffset?
+                    // instanceOffset: 0,
+
+                    transformMatrix: instancesArr.slice(i + j + 1, i + j + 13),
+                    geometryContainer: geometryContainerMap[instancesArr[i + j + 13]]
+                })
+            }
+        }
+
+
+        // console.log(instances.length);
+
+        instanceContainerArr.push(
+            device.createRayTracingAccelerationContainer({
+                level: "top",
+                usage: WebGPU.GPURayTracingAccelerationContainerUsage.PREFER_FAST_TRACE,
+                // usage: WebGPU.GPURayTracingAccelerationContainerUsage.ALLOW_UPDATE | WebGPU.GPURayTracingAccelerationContainerUsage.PREFER_FAST_TRACE,
+                // usage: WebGPU.GPURayTracingAccelerationContainerUsage.PREFER_FAST_BUILD,
+                instances: instances
+            })
+        )
+
+        instanceIndex += 1
+    }
+
 
     {
         let commandEncoder = device.createCommandEncoder({});

@@ -63,7 +63,79 @@ split tlas by layer
 
 ** TODO perf: add 10 tlas for 30M rings
 
-test only one layer
+# test only one layer
+
+pass 10M rings with 5 tlas
+
+
+
+
+
+20M rings with 10 tlas error:
+
+
+<--- Last few GCs --->
+
+[10104:000001D6927646E0]   101980 ms: Mark-sweep 4057.6 (4140.0) -> 4042.6 (4140.1) MB, 5106.3 / 0.0 ms  (average mu = 0.632, current mu = 0.003) allocation failure scavenge might not succeed
+[10104:000001D6927646E0]   106885 ms: Mark-sweep 4065.0 (4162.5) -> 4050.1 (4147.5) MB, 4893.3 / 0.0 ms  (average mu = 0.444, current mu = 0.002) allocation failure scavenge might not succeed
+
+
+<--- JS stacktrace --->
+
+FATAL ERROR: Reached heap limit Allocation failed - JavaScript heap out of memory
+ 1: 00007FF756DF30AF v8::internal::CodeObjectRegistry::~CodeObjectRegistry+112511
+ 2: 00007FF756D82216 DSA_meth_get_flags+65542
+ 3: 00007FF756D830CD node::OnFatalError+301
+ 4: 00007FF7576B4B6E v8::Isolate::ReportExternalAllocationLimitReached+94
+ 5: 00007FF75769F09D v8::SharedArrayBuffer::Externalize+781
+ 6: 00007FF75754268C v8::internal::Heap::EphemeronKeyWriteBarrierFromCode+1468
+ 7: 00007FF75753F7C4 v8::internal::Heap::CollectGarbage+4244
+ 8: 00007FF75753D140 v8::internal::Heap::AllocateExternalBackingStore+2000
+ 9: 00007FF75755ADB0 v8::internal::FreeListManyCached::Reset+1408
+10: 00007FF75755B465 v8::internal::Factory::AllocateRaw+37
+11: 00007FF75756D15E v8::internal::FactoryBase<v8::internal::Factory>::AllocateRawArray+46
+12: 00007FF75756FDBA v8::internal::FactoryBase<v8::internal::Factory>::NewFixedArrayWithFiller+74
+13: 00007FF75756FCDD v8::internal::FactoryBase<v8::internal::Factory>::NewFixedArray+77
+14: 00007FF7574194F3 v8::internal::FeedbackNexus::ic_state+62771
+15: 00007FF757430050 v8::Message::GetIsolate+15840
+16: 00007FF7572A4711 v8::internal::CompilationCache::IsEnabledScriptAndEval+26849
+17: 00007FF757742541 v8::internal::SetupIsolateDelegate::SetupHeap+494417
+18: 000001D694371760
+
+
+
+
+# instancesArr exceed 1.7GB????
+# instancesArr exceed 4GB
+
+
+
+# deploy 4.5GB
+
+set -max-old-space-size not work! always 4.5GB!
+
+
+
+instancesArr exceed max length!
+
+
+
+
+TODO extract big array utils
+
+
+
+
+
+
+
+
+
+
+* DONE fix: fix buildRenderData->geometry, material buffer data
+
+
+* TODO split instance buffer
 
 
 * TODO increase geometry's r and w, fps should not change too big!
@@ -83,7 +155,10 @@ in .rgen:
 gl_RayFlagsOpaqueEXT | gl_RayFlagsTerminateOnFirstHitKHR 
 
 
+* TODO perf: optimize build
 
+
+use flag: perfer build
 
 
 # * draw 3M rings
