@@ -246,6 +246,17 @@ should add ring with position in [972-974, 1003-1004] to test!
 
 
 
+* TODO fix: fix buildRenderData->buffer data
+
+
+
+* TODO draw > 4M rings(10M, 100M)
+
+** TODO perf: optimize top level memory
+
+split tlas by layer
+
+
 
 * TODO perf: optimize Traversal bvh on gpu
 
@@ -269,9 +280,6 @@ https://www.pure.ed.ac.uk/ws/portalfiles/portal/60657582/bulk_synchronous_parall
 ** TODO perf: traverse bvh: use stack-less
 
 not limit maxDepth when build bvh!
-
-
-
 
 
 
