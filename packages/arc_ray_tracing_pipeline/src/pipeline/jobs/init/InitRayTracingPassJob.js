@@ -2,11 +2,11 @@ import WebGPU from "wonder-webgpu";
 import fs from "fs";
 import path from "path";
 import { getAllRenderGameObjectData } from "../../../scene/Scene.js";
-import { getC, getR, getW } from "../../../scene/Geometry.js"
+import { getC, getC2, getR, getR2, getW, getW2 } from "../../../scene/Geometry.js";
 import { getLayer, getLocalPosition } from "../../../scene/Transform.js";
 import { createBuffer } from "../../../webgpu/Buffer.js";
-import { addToSceneInstanceDataBufferDataArr, buildSceneGeometryDataBufferData, buildSceneMaterialDataBufferData } from "../../../render_data/buildRenderData.js";
-import { computeRingAABB } from "../../../math/AABB2D.js";
+import { addToSceneInstanceDataBufferDataArr, buildSceneGeometryDataBufferData2, buildSceneMaterialDataBufferData } from "../../../render_data/buildRenderData.js";
+import { computeRingAABB, computeWholeAABBData } from "../../../math/AABB2D.js";
 
 let _createShaderBindingTable = device => {
     let dirname = path.join(process.cwd(), "src/shader/");
@@ -307,8 +307,13 @@ let _buildContainers = (state, device, queue) => {
             let c = getC(geometry, state)
             let w = getW(geometry, state)
             let r = getR(geometry, state)
+            let c2 = getC2(geometry, state);
+            let w2 = getW2(geometry, state);
+            let r2 = getR2(geometry, state);
 
-            let aabb = computeRingAABB(c, r, w)
+            let aabb1 = computeRingAABB(c, r, w)
+            let aabb2 = computeRingAABB(c2, r2, w2)
+            let aabb = computeWholeAABBData([aabb1, aabb2], 0, 2)
 
             let arr = []
 
@@ -442,7 +447,7 @@ export let exec = (state) => {
     // let { cameraBufferData } = getCamera();
     // let [cameraBuffer, cameraData] = cameraBufferData;
 
-    let [geometryDataBuffer, geometryDataBufferSize] = buildSceneGeometryDataBufferData(state, device);
+    let [geometryDataBuffer, geometryDataBufferSize] = buildSceneGeometryDataBufferData2(state, device);
     let [materialDataBuffer, materialDataBufferSize] = buildSceneMaterialDataBufferData(state, device);
 
 

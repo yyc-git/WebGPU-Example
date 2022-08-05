@@ -2,11 +2,11 @@ import { log } from "./log/Log.js";
 import { createState } from "./data/CreateData.js";
 import { exec as init } from "./pipeline/InitPipeline.js";
 import { exec as render } from "./pipeline/RenderPipeline.js";
-import { createGeometryBuffer, createMaterialBuffer, createScene, createTransformBuffer } from "./scene/CreateScene.js";
+import { createGeometryBuffer2, createMaterialBuffer, createScene, createTransformBuffer } from "./scene/CreateScene.js";
 import { computeFPS } from "./utils/fps.js";
 
 let _buildScene = (state, { transformCount, geometryCount, materialCount }) => {
-    return Object.assign(Object.assign({}, state), { ecsData: createScene(transformCount), transformBuffer: createTransformBuffer(transformCount), geometryBuffer: createGeometryBuffer(geometryCount), materialBuffer: createMaterialBuffer(materialCount) });
+    return Object.assign(Object.assign({}, state), { ecsData: createScene(transformCount), transformBuffer: createTransformBuffer(transformCount), geometryBuffer: createGeometryBuffer2(geometryCount), materialBuffer: createMaterialBuffer(materialCount) });
 
     // return {
     //     ...state,

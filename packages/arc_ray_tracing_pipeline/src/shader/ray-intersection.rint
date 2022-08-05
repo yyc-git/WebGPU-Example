@@ -27,10 +27,19 @@ struct Instance {
   float pad_1;
 };
 
-struct Geometry {
+// struct Geometry {
+//   vec2 c;
+//   float w;
+//   float r;
+// };
+struct Geometry2 {
   vec2 c;
   float w;
   float r;
+
+  vec2 c2;
+  float w2;
+  float r2;
 };
 
 layout(std140, set = 0, binding = 2) buffer SceneInstanceData {
@@ -38,10 +47,15 @@ layout(std140, set = 0, binding = 2) buffer SceneInstanceData {
 }
 sceneInstanceData;
 
-layout(std140, set = 0, binding = 3) buffer SceneGeometryData {
-  Geometry geometrys[];
+// layout(std140, set = 0, binding = 3) buffer SceneGeometryData {
+//   Geometry geometrys[];
+// }
+// sceneGeometryData;
+
+layout(std140, set = 0, binding = 3) buffer SceneGeometryData2 {
+  Geometry2 geometrys[];
 }
-sceneGeometryData;
+sceneGeometryData2;
 
 // bool _isIntersectWithRing(vec3 origin, vec3 direction, Geometry geometry) {
 //   vec2 c = geometry.c;
@@ -61,17 +75,41 @@ sceneGeometryData;
 //   return distance >= r && distance <= r + w;
 // }
 
-bool _isIntersectWithRing(vec2 point, Geometry geometry) {
+// bool _isIntersectWithRing(vec2 point, Geometry geometry) {
+//   vec2 c = geometry.c;
+//   float w = geometry.w;
+//   float r = geometry.r;
+
+//   vec2 worldPosition = vec2(gl_ObjectToWorldEXT * vec4(c, 0.0, 1.0));
+
+//   float distanceSquare =
+//       pow(point.x - worldPosition.x, 2) + pow(point.y - worldPosition.y, 2);
+
+//   return distanceSquare >= pow(r, 2) && distanceSquare <= pow(r + w, 2);
+// }
+
+bool _isIntersectWithRing2(vec2 point, Geometry2 geometry) {
   vec2 c = geometry.c;
   float w = geometry.w;
   float r = geometry.r;
+
+  vec2 c2 = geometry.c2;
+  float w2 = geometry.w2;
+  float r2 = geometry.r2;
 
   vec2 worldPosition = vec2(gl_ObjectToWorldEXT * vec4(c, 0.0, 1.0));
 
   float distanceSquare =
       pow(point.x - worldPosition.x, 2) + pow(point.y - worldPosition.y, 2);
 
-  return distanceSquare >= pow(r, 2) && distanceSquare <= pow(r + w, 2);
+  vec2 worldPosition2 = vec2(gl_ObjectToWorldEXT * vec4(c2, 0.0, 1.0));
+
+  float distanceSquare2 =
+      pow(point.x - worldPosition2.x, 2) + pow(point.y - worldPosition2.y, 2);
+
+  return distanceSquare >= pow(r, 2) && distanceSquare <= pow(r + w, 2) ||
+         (distanceSquare2 >= pow(r2, 2) && distanceSquare2 <= pow(r2 + w2, 2));
+  // return distanceSquare2 >= pow(r2, 2) && distanceSquare2 <= pow(r2 + w2, 2);
 }
 
 void main() {
@@ -79,7 +117,8 @@ void main() {
 
   Instance instance = sceneInstanceData.instances[instanceIndex];
   uint geometryIndex = uint(instance.geometryIndex);
-  Geometry geometry = sceneGeometryData.geometrys[geometryIndex];
+  // Geometry geometry = sceneGeometryData.geometrys[geometryIndex];
+  Geometry2 geometry = sceneGeometryData2.geometrys[geometryIndex];
 
   // // if (_isIntersectWithRing(point, geometry)) {
   // // if (_isIntersectWithRing(gl_WorldRayOriginEXT.xy,
@@ -106,7 +145,8 @@ void main() {
 
   vec2 point = uv;
 
-  if (_isIntersectWithRing(point, geometry)) {
+  // if (_isIntersectWithRing(point, geometry)) {
+  if (_isIntersectWithRing2(point, geometry)) {
     /*! should > 0.0 !*/
     float tHit = 0.1;
 

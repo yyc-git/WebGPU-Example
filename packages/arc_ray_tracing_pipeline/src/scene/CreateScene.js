@@ -17,31 +17,57 @@ export let createTransformBuffer = (count) => {
     return new Float32Array(data);
 };
 
-export let createGeometryBuffer = (count) => {
+// export let createGeometryBuffer = (count) => {
+//     let c = create(0, 0);
+//     // let w = 2.0
+//     // let r = 5.0
+//     // let w = 0.2
+//     // let r = 0.5
+//     // let w = 0.02
+//     // let r = 0.05
+//     // let w = 0.002;
+//     // let r = 0.005;
+//     let w = 0.004;
+//     let r = 0.010;
+
+//     // let w = 0.008
+//     // let r = 0.020
+
+//     // let w = 0.08
+//     // let r = 0.04
+//     return new Float32Array([
+//         c[0],
+//         c[1],
+//         w,
+//         r
+//     ]);
+// };
+
+
+export let createGeometryBuffer2 = (count) => {
     let c = create(0, 0);
-    // let w = 2.0
-    // let r = 5.0
-    // let w = 0.2
-    // let r = 0.5
-    // let w = 0.02
-    // let r = 0.05
-    // let w = 0.002;
-    // let r = 0.005;
     let w = 0.004;
     let r = 0.010;
 
-    // let w = 0.008
-    // let r = 0.020
+    // let c2 = create(0.01, 0.01);
+    let c2 = create(0.0, 0.0);
+    let w2 = 0.004;
+    let r2 = 0.010;
 
-    // let w = 0.08
-    // let r = 0.04
+
     return new Float32Array([
         c[0],
         c[1],
         w,
-        r
+        r,
+
+        c2[0],
+        c2[1],
+        w2,
+        r2
     ]);
 };
+
 export let createMaterialBuffer = (count) => {
     let color = [
         1.0, 0.0, 0.0

@@ -1,6 +1,6 @@
 import WebGPU from "wonder-webgpu";
 import { getAllRenderGameObjectData } from "../scene/Scene.js";
-import { getC, getR, getW } from "../scene/Geometry.js";
+import { getC, getC2, getR, getR2, getW, getW2 } from "../scene/Geometry.js";
 // import { computeRingAABB } from "../math/AABB2D.js";
 import { createBuffer } from "../webgpu/Buffer.js";
 import { getColor } from "../scene/Material.js";
@@ -37,17 +37,44 @@ export let addToSceneInstanceDataBufferDataArr = (bufferDataArr, instanceIndex, 
     return bufferDataArr
 };
 
-export let buildSceneGeometryDataBufferData = (state, device) => {
+// export let buildSceneGeometryDataBufferData = (state, device) => {
+//     let bufferDataArr = getAllRenderGameObjectData(state).reduce((bufferDataArr, [gameObject, transform, geometry, material], geometryIndex) => {
+//         let c = getC(geometry, state);
+//         let w = getW(geometry, state);
+//         let r = getR(geometry, state);
+//         // bufferDataArr.push(c[0], c[1], w, r);
+//         let stride = 4
+//         bufferDataArr[geometry * stride] = c[0]
+//         bufferDataArr[geometry * stride + 1] = c[1]
+//         bufferDataArr[geometry * stride + 2] = w
+//         bufferDataArr[geometry * stride + 3] = r
+
+//         return bufferDataArr;
+//     }, []);
+//     let bufferData = new Float32Array(bufferDataArr);
+//     let buffer = createBuffer(device, WebGPU.GPUBufferUsage.STORAGE | WebGPU.GPUBufferUsage.COPY_DST, bufferData);
+//     return [buffer, bufferData.byteLength];
+// };
+
+
+export let buildSceneGeometryDataBufferData2 = (state, device) => {
     let bufferDataArr = getAllRenderGameObjectData(state).reduce((bufferDataArr, [gameObject, transform, geometry, material], geometryIndex) => {
         let c = getC(geometry, state);
         let w = getW(geometry, state);
         let r = getR(geometry, state);
+        let c2 = getC2(geometry, state);
+        let w2 = getW2(geometry, state);
+        let r2 = getR2(geometry, state);
         // bufferDataArr.push(c[0], c[1], w, r);
-        let stride = 4
+        let stride = 8
         bufferDataArr[geometry * stride] = c[0]
         bufferDataArr[geometry * stride + 1] = c[1]
         bufferDataArr[geometry * stride + 2] = w
         bufferDataArr[geometry * stride + 3] = r
+        bufferDataArr[geometry * stride + 4] = c2[0]
+        bufferDataArr[geometry * stride + 5] = c2[1]
+        bufferDataArr[geometry * stride + 6] = w2
+        bufferDataArr[geometry * stride + 7] = r2
 
         return bufferDataArr;
     }, []);
@@ -55,6 +82,7 @@ export let buildSceneGeometryDataBufferData = (state, device) => {
     let buffer = createBuffer(device, WebGPU.GPUBufferUsage.STORAGE | WebGPU.GPUBufferUsage.COPY_DST, bufferData);
     return [buffer, bufferData.byteLength];
 };
+
 export let buildSceneMaterialDataBufferData = (state, device) => {
     let bufferDataArr = getAllRenderGameObjectData(state).reduce((bufferDataArr, [gameObject, transform, geometry, material], geometryIndex) => {
         let color = getColor(geometry, state);

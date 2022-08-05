@@ -245,6 +245,35 @@ gl_RayFlagsOpaqueEXT | gl_RayFlagsTerminateOnFirstHitEXT
 
 
 
+
+
+* DONE perf: draw >20M rings
+
+
+** DONE perf: change BLAS with two rings
+
+draw 40M rings:
+fps change from 45 to 22
+(mainly because the BLAS's aabb increase!
+
+when I not change aabb(make two rings overlap), FPS is 45 !
+)
+
+
+
+
+
+
+
+# ** TODO perf: draw different pass in two frames
+draw 40M rings
+
+这个其实还不如“那两个圆环作为一个整体放到加速结构中，应该也可以达到4千万”，因为这样fps会下降一倍
+
+另外，这样子也应该是不可行的，因为实际上总的加速结构限制是2千万。不管分成几次draw，都需要把所有数据载入到加速结构gpu内存中，从而一样会受限于2千万
+
+
+
 * TODO commit
 
 # trace very fast, so render 2d and 3d very fast!
