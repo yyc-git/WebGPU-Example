@@ -190,18 +190,25 @@ test 2M
 should be desc! next's max should <= front's min!
 
 
-* TODO draw 30M rings
+# * TODO draw 30M rings
 
 multiple pipeline:
 multi shaderBindingTable
 
 
-* TODO increase geometry's r and w, fps should not change too big!
+* DONE increase geometry's r and w, fps should not change too big!
 
-traverse order bug?:
-max layer
+# traverse order bug?:
+# max layer
 
-test arc code with no traverse order!!!
+
+analyze reason:
+
+test arc code with no traverse order:
+fps drop when increase
+
+
+geometry's r and w more bigger, more overlapped gameObjects!
 
 
 * TODO perf: optimize build

@@ -249,6 +249,9 @@ should add ring with position in [972-974, 1003-1004] to test!
 * TODO fix: fix buildRenderData->buffer data
 
 
+* TODO refactor: remove resolution buffer
+use: 
+const ivec2 resolution = ivec2(gl_LaunchSizeEXT.xy);
 
 * TODO draw > 4M rings(10M, 100M)
 
@@ -256,6 +259,8 @@ should add ring with position in [972-974, 1003-1004] to test!
 
 split tlas by layer
 
+
+** TODO multiple render
 
 
 * TODO perf: optimize Traversal bvh on gpu
@@ -283,7 +288,7 @@ not limit maxDepth when build bvh!
 
 
 
-* TODO feat: build,update bvh on CPU
+* TODO feat: build bvh on CPU
 
 use HLBVH:
 https://blog.csdn.net/qq_39300235/article/details/107006830
@@ -308,8 +313,6 @@ index.html:1 Binding size (160000000) is larger than the maximum binding size (1
 Expected entry layout: { binding: 1, visibility: ShaderStage::Compute, buffer: { type: BufferBindingType::ReadOnlyStorage, hasDynamicOffset: 0, minBindingSize: 0 } }
  - While validating [BindGroupDescriptor] against [BindGroupLayout]
  - While calling [Device].CreateBindGroup([BindGroupDescriptor]).
-
-
 
 
 
