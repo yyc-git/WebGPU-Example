@@ -175,7 +175,7 @@ not the all tlas's count, but the all tlas's whole size exceed?
 # * TODO fix: sometimes instanceIndex === -1
 
 
-* TODO split instance buffer
+* DONE split instance buffer
 
     /*!  TODO perf: remove instancesTypeArr
 1.sort getAllRenderGameObjectData by instancesIndex
@@ -186,6 +186,8 @@ not the all tlas's count, but the all tlas's whole size exceed?
 
 test 2M
 
+* TODO fix: fix groupedSortedLayers
+should be desc! next's max should <= front's min!
 
 
 * TODO increase geometry's r and w, fps should not change too big!

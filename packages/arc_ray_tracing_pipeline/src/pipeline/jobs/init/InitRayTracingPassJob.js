@@ -118,22 +118,22 @@ let _createAllInstances = (state, geometryContainerMap, device) => {
     //     { minLayer: 0.00001, maxLayer: 0.00001 },
     // ]
 
-    let _createInstancesMap = (groupedSortedLayers) => {
-        return groupedSortedLayers.reduce((map, _, index) => {
-            map[index] = []
-
-            return map
-        }, {})
-        // return new Float32Array(groupedSortedLayersLength * stride * maxInstanceCount)
+    let _createInstancesGroupTypeArr = (groupedSortedLayers, maxInstanceCount) => {
+        return new Float32Array(groupedSortedLayers.length * 5 * maxInstanceCount)
     }
 
-    let _getInstancesIndex = (layer, maxInstanceCount, epsion, map, groupedSortedLayers) => {
+    let _createInstancesGroupCountArr = (groupedSortedLayers) => {
+        return groupedSortedLayers.map(_ => 0)
+    }
+
+
+    let _getInstancesIndex = (layer, maxInstanceCount, epsion, instancesGroupCountArr, groupedSortedLayers) => {
         return groupedSortedLayers.reduce((result, { minLayer, maxLayer }, index) => {
             if (result !== -1) {
                 return result
             }
 
-            if (layer >= minLayer - epsion && layer <= maxLayer + epsion && map[index].length < maxInstanceCount) {
+            if (layer >= minLayer - epsion && layer <= maxLayer + epsion && instancesGroupCountArr[index] < maxInstanceCount) {
                 result = index
             }
 
@@ -142,12 +142,12 @@ let _createAllInstances = (state, geometryContainerMap, device) => {
     }
 
     let _group = () => {
-        return getAllRenderGameObjectData(state).reduce((map, [gameObject, transform, geometry, material]) => {
+        return getAllRenderGameObjectData(state).reduce(([instancesGroupTypeArr, instancesGroupCountArr], [gameObject, transform, geometry, material]) => {
             let localPosition = getLocalPosition(transform, state)
             let layer = getLayer(transform, state)
 
 
-            let instancesIndex = _getInstancesIndex(layer, maxInstanceCount, epsion, map, groupedSortedLayers)
+            let instancesIndex = _getInstancesIndex(layer, maxInstanceCount, epsion, instancesGroupCountArr, groupedSortedLayers)
 
 
             if (instancesIndex === -1) {
@@ -156,13 +156,25 @@ let _createAllInstances = (state, geometryContainerMap, device) => {
             }
 
 
-            map[instancesIndex].push([localPosition, layer, geometry, material])
+            let offset = instancesGroupCountArr[instancesIndex] * 5 + instancesIndex * maxInstanceCount * 5
 
-            return map
-        }, _createInstancesMap(groupedSortedLayers))
+            instancesGroupTypeArr[offset] = localPosition[0]
+            instancesGroupTypeArr[offset + 1] = localPosition[1]
+            instancesGroupTypeArr[offset + 2] = layer
+            instancesGroupTypeArr[offset + 3] = geometry
+            instancesGroupTypeArr[offset + 4] = material
+
+            instancesGroupCountArr[instancesIndex] += 1
+
+            return [instancesGroupTypeArr, instancesGroupCountArr]
+        }, [_createInstancesGroupTypeArr(groupedSortedLayers, maxInstanceCount), _createInstancesGroupCountArr(groupedSortedLayers)])
+
+        // return instancesGroupTypeArr
     }
 
-    let _buildInstanceContainerArrAndSceneInstanceDataBufferDataArr = (map) => {
+    let _buildInstanceContainerArrAndSceneInstanceDataBufferDataArr = ([instancesGroupTypeArr, instancesGroupCountArr]) => {
+        let instancesIndex = 0
+
         let instanceContainerArr = []
         let instances = []
         let instancesActualLength = -1
@@ -171,15 +183,16 @@ let _createAllInstances = (state, geometryContainerMap, device) => {
         let sceneInstanceDataBufferDataArr = []
         let sceneInstanceDataBufferData
 
-        for (let instancesIndex in map) {
-            if (!map.hasOwnProperty(instancesIndex)) {
-                throw new Error("error")
-            }
-
+        // for (let instancesIndex in map) {
+        //     if (!map.hasOwnProperty(instancesIndex)) {
+        //         throw new Error("error")
+        //     }
+        for (let i = 0; i < instancesGroupTypeArr.length; i += 5 * maxInstanceCount) {
             sceneInstanceDataBufferData = []
 
-            let renderGameObjectDataGroup = map[instancesIndex]
-            let instancesCount = renderGameObjectDataGroup.length
+            // let renderGameObjectDataGroup = map[instancesIndex]
+            // let instancesCount = renderGameObjectDataGroup.length
+            let instancesCount = instancesGroupCountArr[instancesIndex]
 
             // index = 0
 
@@ -201,8 +214,8 @@ let _createAllInstances = (state, geometryContainerMap, device) => {
                 // index += 1
             }
             else {
-                // TODO use reduce?
-                renderGameObjectDataGroup.forEach(([localPosition, layer, geometry, material], instanceIndex) => {
+                let instanceIndex = 0
+                for (let j = 0; j < 5 * instancesCount; j += 5) {
                     instances[instanceIndex] = {
                         usage: WebGPU.GPURayTracingAccelerationInstanceUsage.FORCE_OPAQUE,
                         mask: 0xFF,
@@ -210,15 +223,20 @@ let _createAllInstances = (state, geometryContainerMap, device) => {
                         // TODO handle instanceOffset?
                         // instanceOffset: 0,
 
-                        transformMatrix: _build34RowMajorMatrix(localPosition, layer),
-                        geometryContainer: geometryContainerMap[geometry]
+                        transformMatrix: _build34RowMajorMatrix([
+                            instancesGroupTypeArr[i + j],
+                            instancesGroupTypeArr[i + j + 1]
+                        ], instancesGroupTypeArr[i + j + 2]),
+                        geometryContainer: geometryContainerMap[instancesGroupTypeArr[i + j + 3]]
                     }
 
-                    sceneInstanceDataBufferData = addToSceneInstanceDataBufferDataArr(sceneInstanceDataBufferData, instanceIndex, geometry, material)
-                })
 
+                    sceneInstanceDataBufferData = addToSceneInstanceDataBufferDataArr(sceneInstanceDataBufferData, instanceIndex, instancesGroupTypeArr[i + j + 3], instancesGroupTypeArr[i + j + 4])
 
-                instancesActualLength = renderGameObjectDataGroup.length
+                    instanceIndex += 1
+                }
+
+                instancesActualLength = instancesCount
             }
 
 
@@ -252,7 +270,7 @@ let _createAllInstances = (state, geometryContainerMap, device) => {
 
             console.log("bbbbbb1");
 
-            // instanceIndex += 1
+            instancesIndex += 1
 
             lastIndex = instancesActualLength
         }
@@ -262,10 +280,11 @@ let _createAllInstances = (state, geometryContainerMap, device) => {
 
 
     // console.log("a");
-    let map = _group()
-    console.log(map);
+    let [instancesGroupTypeArr, instancesGroupCountArr] = _group()
+    // console.log([instancesGroupTypeArr, instancesGroupCountArr]);
+    console.log("after group");
 
-    return _buildInstanceContainerArrAndSceneInstanceDataBufferDataArr(map)
+    return _buildInstanceContainerArrAndSceneInstanceDataBufferDataArr([instancesGroupTypeArr, instancesGroupCountArr])
 }
 
 let _buildContainers = (state, device, queue) => {
