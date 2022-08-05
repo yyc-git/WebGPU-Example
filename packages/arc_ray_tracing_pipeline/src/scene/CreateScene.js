@@ -11,8 +11,8 @@ export let createTransformBuffer = (count) => {
         data.push(Math.random() * 2 - 1);
         data.push(Math.random() * 2 - 1);
 
-        data.push(layers[Math.floor(Math.random() * 4)]);
-        // data.push(layers[i % 4]);
+        // data.push(layers[Math.floor(Math.random() * 4)]);
+        data.push(layers[i % 4]);
     }
     return new Float32Array(data);
 };
@@ -53,6 +53,7 @@ export let createScene = (transformCount) => {
     for (let i = 0; i < transformCount; i++) {
         allRenderGameObjectData.push([i, i, 0, 0]);
     }
+    console.log(allRenderGameObjectData[allRenderGameObjectData.length - 1]);
     return allRenderGameObjectData;
 };
 //# sourceMappingURL=CreateScene.js.map

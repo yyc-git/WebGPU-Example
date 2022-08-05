@@ -134,16 +134,45 @@ TODO extract big array utils
 
 * DONE fix: fix buildRenderData->geometry, material buffer data
 
-* TODO multiple render
+* DONE multiple render
 
 5 bg
 
-** TODO use bool
+** DONE use bool
 
 
-* TODO draw 20M rings
+* DONE draw 20M rings
 
-* TODO fix: sometimes instanceIndex === -1
+= 20M, pass
+
+
+if > 20M, error:
+Error: Out of memory Error: vkAllocateMemory failed with VK_ERROR_OUT_OF_DEVICE_MEMORY
+    at CheckVkOOMThenSuccessImpl (../../src/dawn_native/vulkan/VulkanError.cpp:94)
+    at AllocateResourceHeap (../../src/dawn_native/vulkan/ResourceMemoryAllocatorVk.cpp:87)
+    at Allocate (../../src/dawn_native/vulkan/ResourceMemoryAllocatorVk.cpp:140)
+    at AllocateScratchMemory (../../src/dawn_native/vulkan/RayTracingAccelerationContainerVk.cpp:320)
+    at Initialize (../../src/dawn_native/vulkan/RayTracingAccelerationContainerVk.cpp:225)
+    at Create (../../src/dawn_native/vulkan/RayTracingAccelerationContainerVk.cpp:63)
+    at CreateRayTracingAccelerationContainerInternal (../../src/dawn_native/Device.cpp:894)
+    at device._onErrorCallback (D:\Github\WebGPU-Example\node_modules\wonder-webgpu\index.js:57:21)
+    at GPUDevice.createRayTracingAccelerationContainer (<anonymous>)
+    at _buildContainers (file:///D:/Github/WebGPU-Example/packages/arc_ray_tracing_pipeline/src/pipeline/jobs/init/InitRayTracingPassJob.js:456:20)
+    at exec (file:///D:/Github/WebGPU-Example/packages/arc_ray_tracing_pipeline/src/pipeline/jobs/init/InitRayTracingPassJob.js:525:30)
+    at exec (file:///D:/Github/WebGPU-Example/packages/arc_ray_tracing_pipeline/src/pipeline/InitPipeline.js:19:13)
+    at async _main (file:///D:/Github/WebGPU-Example/packages/arc_ray_tracing_pipeline/src/index.js:61:13)
+
+
+not the all tlas's count, but the all tlas's whole size exceed?
+
+
+
+# * TODO remove big array?
+
+
+
+
+# * TODO fix: sometimes instanceIndex === -1
 
 
 * TODO split instance buffer
