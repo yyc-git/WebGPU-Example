@@ -84,6 +84,7 @@ let _build34RowMajorMatrix = (localPosition, layer) => {
 // TODO refactor
 let groupedSortedLayers = [
     { minLayer: 0.00004, maxLayer: 0.00004 },
+    { minLayer: 0.00004, maxLayer: 0.00004 },
     { minLayer: 0.00003, maxLayer: 0.00003 },
     { minLayer: 0.00003, maxLayer: 0.00003 },
     { minLayer: 0.00002, maxLayer: 0.00002 },
@@ -94,6 +95,7 @@ let groupedSortedLayers = [
 
 // let maxInstanceCount = 3500000
 let maxInstanceCount = 3000000
+// let maxInstanceCount = 2500000
 // let maxInstanceCount = 3
 // let maxInstanceCount = 1
 // let maxInstanceCount = 10
@@ -151,7 +153,7 @@ let _createAllInstances = (state, geometryContainerMap, device) => {
 
 
             if (instancesIndex === -1) {
-                console.log(instancesIndex, layer);
+                console.log(instancesIndex, layer, transform);
                 throw new Error("instances are too many")
             }
 
@@ -256,9 +258,11 @@ let _createAllInstances = (state, geometryContainerMap, device) => {
                 else if (lastIndex > instancesActualLength) {
                     instancesResult = instances.slice(0, instancesActualLength)
                 }
-                else {
-                    throw new Error("error")
-                }
+                // else {
+                //     console.log(lastIndex, instancesActualLength)
+
+                //     throw new Error("error")
+                // }
             }
             // console.log(instancesResult);
 
@@ -289,7 +293,7 @@ let _createAllInstances = (state, geometryContainerMap, device) => {
 
     // console.log("a");
     let [instancesGroupTypeArr, instancesGroupCountArr] = _group()
-    console.log([instancesGroupTypeArr, instancesGroupCountArr]);
+    // console.log([instancesGroupTypeArr, instancesGroupCountArr]);
     console.log("after group");
 
     return _buildInstanceContainerArrAndSceneInstanceDataBufferDataArr([instancesGroupTypeArr, instancesGroupCountArr])
