@@ -182,12 +182,18 @@ not the all tlas's count, but the all tlas's whole size exceed?
 2.reduce it, only use one instances for one group layer(use set instead of push) 
 */
 
-* TODO perf: if empty, skip!
+* DONE perf: if empty, skip!
 
 test 2M
 
-* TODO fix: fix groupedSortedLayers
+* DONE fix: fix groupedSortedLayers
 should be desc! next's max should <= front's min!
+
+
+* TODO draw 30M rings
+
+multiple pipeline:
+multi shaderBindingTable
 
 
 * TODO increase geometry's r and w, fps should not change too big!

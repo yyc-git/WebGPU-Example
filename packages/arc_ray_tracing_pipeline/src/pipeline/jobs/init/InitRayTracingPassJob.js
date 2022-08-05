@@ -83,13 +83,13 @@ let _build34RowMajorMatrix = (localPosition, layer) => {
 
 // TODO refactor
 let groupedSortedLayers = [
-    { minLayer: 0.00001, maxLayer: 0.00004 },
-    { minLayer: 0.00001, maxLayer: 0.00004 },
-    { minLayer: 0.00001, maxLayer: 0.00004 },
-    { minLayer: 0.00001, maxLayer: 0.00004 },
-    { minLayer: 0.00001, maxLayer: 0.00004 },
-    { minLayer: 0.00001, maxLayer: 0.00004 },
-    { minLayer: 0.00001, maxLayer: 0.00004 },
+    { minLayer: 0.00004, maxLayer: 0.00004 },
+    { minLayer: 0.00003, maxLayer: 0.00003 },
+    { minLayer: 0.00003, maxLayer: 0.00003 },
+    { minLayer: 0.00002, maxLayer: 0.00002 },
+    { minLayer: 0.00002, maxLayer: 0.00002 },
+    { minLayer: 0.00001, maxLayer: 0.00001 },
+    { minLayer: 0.00001, maxLayer: 0.00001 },
 ]
 
 // let maxInstanceCount = 3500000
@@ -198,20 +198,22 @@ let _createAllInstances = (state, geometryContainerMap, device) => {
 
             //handle empty
             if (instancesCount === 0) {
-                instances[0] = {
-                    usage: WebGPU.GPURayTracingAccelerationInstanceUsage.FORCE_OPAQUE,
-                    mask: 0xFF,
-                    instanceId: 0,
-                    transformMatrix: _build34RowMajorMatrix([100000, 1000000], 100),
-                    // TODO get geometryContainer for empty
-                    geometryContainer: geometryContainerMap[0]
-                }
+                // instances[0] = {
+                //     usage: WebGPU.GPURayTracingAccelerationInstanceUsage.FORCE_OPAQUE,
+                //     mask: 0xFF,
+                //     instanceId: 0,
+                //     transformMatrix: _build34RowMajorMatrix([100000, 1000000], 100),
+                //     // TODO get geometryContainer for empty
+                //     geometryContainer: geometryContainerMap[0]
+                // }
 
-                instancesActualLength = 1
+                // instancesActualLength = 1
 
-                sceneInstanceDataBufferData = addToSceneInstanceDataBufferDataArr(sceneInstanceDataBufferData, 0, 0, 0)
+                // sceneInstanceDataBufferData = addToSceneInstanceDataBufferDataArr(sceneInstanceDataBufferData, 0, 0, 0)
 
-                // index += 1
+                // break
+
+                instancesActualLength = 0
             }
             else {
                 let instanceIndex = 0
@@ -242,31 +244,37 @@ let _createAllInstances = (state, geometryContainerMap, device) => {
 
             console.log("bbbbbb0: ", instancesActualLength);
 
-            let instancesResult
+            let instancesResult = null
 
-            if (lastIndex === null || lastIndex === instancesActualLength) {
-                instancesResult = instances
-            }
-            else if (lastIndex > instancesActualLength) {
-                instancesResult = instances.slice(0, instancesActualLength)
+            if (instancesActualLength === 0) {
+                instancesResult = null
             }
             else {
-                throw new Error("error")
+                if (lastIndex === null || lastIndex === instancesActualLength || lastIndex === 0) {
+                    instancesResult = instances
+                }
+                else if (lastIndex > instancesActualLength) {
+                    instancesResult = instances.slice(0, instancesActualLength)
+                }
+                else {
+                    throw new Error("error")
+                }
             }
             // console.log(instancesResult);
 
-            instanceContainerArr.push(
-                device.createRayTracingAccelerationContainer({
-                    level: "top",
-                    usage: WebGPU.GPURayTracingAccelerationContainerUsage.PREFER_FAST_TRACE,
-                    // usage: WebGPU.GPURayTracingAccelerationContainerUsage.ALLOW_UPDATE | WebGPU.GPURayTracingAccelerationContainerUsage.PREFER_FAST_TRACE,
-                    // usage: WebGPU.GPURayTracingAccelerationContainerUsage.PREFER_FAST_BUILD,
-                    instances: instancesResult
-                })
-            )
+            if (instancesResult !== null) {
+                instanceContainerArr.push(
+                    device.createRayTracingAccelerationContainer({
+                        level: "top",
+                        usage: WebGPU.GPURayTracingAccelerationContainerUsage.PREFER_FAST_TRACE,
+                        // usage: WebGPU.GPURayTracingAccelerationContainerUsage.ALLOW_UPDATE | WebGPU.GPURayTracingAccelerationContainerUsage.PREFER_FAST_TRACE,
+                        // usage: WebGPU.GPURayTracingAccelerationContainerUsage.PREFER_FAST_BUILD,
+                        instances: instancesResult
+                    })
+                )
 
-            sceneInstanceDataBufferDataArr.push(sceneInstanceDataBufferData)
-
+                sceneInstanceDataBufferDataArr.push(sceneInstanceDataBufferData)
+            }
 
             console.log("bbbbbb1");
 
@@ -281,7 +289,7 @@ let _createAllInstances = (state, geometryContainerMap, device) => {
 
     // console.log("a");
     let [instancesGroupTypeArr, instancesGroupCountArr] = _group()
-    // console.log([instancesGroupTypeArr, instancesGroupCountArr]);
+    console.log([instancesGroupTypeArr, instancesGroupCountArr]);
     console.log("after group");
 
     return _buildInstanceContainerArrAndSceneInstanceDataBufferDataArr([instancesGroupTypeArr, instancesGroupCountArr])
