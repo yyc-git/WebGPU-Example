@@ -65,20 +65,21 @@ void main() {
   const uint pixelIndex = ipos.y * resolution.x + ipos.x;
 
   if (pixelIsMissBuffer.isMiss[pixelIndex] == 0) {
-    traceRayEXT(topLevelAS,           // acceleration structure
-                gl_RayFlagsOpaqueEXT, // rayFlags
-                cullMask,             // cullMask
-                0,                    // sbtRecordOffset
-                0,                    // sbtRecordStride
-                0,                    // missIndex
-                origin.xyz,           // ray origin
-                // uCamera.near,         // ray min range
-                0.1,
-                // direction.xyz,        // ray direction
-                direction, // ray direction
-                // uCamera.far,          // ray max range
-                1.0,
-                0 // payload (location = 0)
+    traceRayEXT(
+        topLevelAS, // acceleration structure
+        gl_RayFlagsOpaqueEXT | gl_RayFlagsTerminateOnFirstHitEXT, // rayFlags
+        cullMask,                                                 // cullMask
+        0,          // sbtRecordOffset
+        0,          // sbtRecordStride
+        0,          // missIndex
+        origin.xyz, // ray origin
+        // uCamera.near,         // ray min range
+        0.1,
+        // direction.xyz,        // ray direction
+        direction, // ray direction
+        // uCamera.far,          // ray max range
+        1.0,
+        0 // payload (location = 0)
     );
   } else {
     payload.radiance = vec3(pixelBuffer.pixels[pixelIndex]);

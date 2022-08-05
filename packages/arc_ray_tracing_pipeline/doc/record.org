@@ -211,28 +211,59 @@ fps drop when increase
 geometry's r and w more bigger, more overlapped gameObjects!
 
 
-* TODO perf: optimize build
+* DONE perf: optimize build
 
 
 use flag: perfer build
 
 
-test build time(4M)
+test build time(4M):
+24s > 10s
 
 
-* TODO perf: optimize trace
+test build time(20M):
+150s
+
+
+* DONE perf: optimize trace
+
+
+test fps(20M+trace all):
+45(fast build)
+
+
+
+test fps(20M+trace all):
+45(fast trace)
+
 
 skip any hit, only use closest hit
 
 in .rgen:
-gl_RayFlagsOpaqueEXT | gl_RayFlagsTerminateOnFirstHitKHR 
+gl_RayFlagsOpaqueEXT | gl_RayFlagsTerminateOnFirstHitEXT 
 
 
 
 
 * TODO commit
 
-trace very fast, so render 2d and 3d very fast!
+# trace very fast, so render 2d and 3d very fast!
+
+
+
+
+
+
+
+
+
+
+
+
+
+* TODO optimize build
+
+** TODO move to a worker
 
 
 
@@ -241,16 +272,16 @@ trace very fast, so render 2d and 3d very fast!
 # can render smooth, but init is too slow
 
 
-* draw 5M rings
+# * draw 5M rings
 
-Error: Out of memory Error: vkAllocateMemory failed with VK_ERROR_OUT_OF_DEVICE_MEMORY
-    at CheckVkOOMThenSuccessImpl (../../src/dawn_native/vulkan/VulkanError.cpp:94)
-    at AllocateResourceHeap (../../src/dawn_native/vulkan/ResourceMemoryAllocatorVk.cpp:87)
-    at Allocate (../../src/dawn_native/vulkan/ResourceMemoryAllocatorVk.cpp:140)
-    at Initialize (../../src/dawn_native/vulkan/BufferVk.cpp:171)
-    at Create (../../src/dawn_native/vulkan/BufferVk.cpp:125)
-    at device._onErrorCallback (D:\Github\WebGPU-Example\node_modules\wonder-webgpu\index.js:57:21)
-    at _buildContainers (file:///D:/Github/WebGPU-Example/packages/arc_ray_tracing_pipeline/src/pipeline/jobs/init/InitRayTracingPassJob.js:148:36)
-    at exec (file:///D:/Github/WebGPU-Example/packages/arc_ray_tracing_pipeline/src/pipeline/jobs/init/InitRayTracingPassJob.js:179:29)
-    at exec (file:///D:/Github/WebGPU-Example/packages/arc_ray_tracing_pipeline/src/pipeline/InitPipeline.js:19:13)
-    at async _main (file:///D:/Github/WebGPU-Example/packages/arc_ray_tracing_pipeline/src/index.js:52:13)
+# Error: Out of memory Error: vkAllocateMemory failed with VK_ERROR_OUT_OF_DEVICE_MEMORY
+#     at CheckVkOOMThenSuccessImpl (../../src/dawn_native/vulkan/VulkanError.cpp:94)
+#     at AllocateResourceHeap (../../src/dawn_native/vulkan/ResourceMemoryAllocatorVk.cpp:87)
+#     at Allocate (../../src/dawn_native/vulkan/ResourceMemoryAllocatorVk.cpp:140)
+#     at Initialize (../../src/dawn_native/vulkan/BufferVk.cpp:171)
+#     at Create (../../src/dawn_native/vulkan/BufferVk.cpp:125)
+#     at device._onErrorCallback (D:\Github\WebGPU-Example\node_modules\wonder-webgpu\index.js:57:21)
+#     at _buildContainers (file:///D:/Github/WebGPU-Example/packages/arc_ray_tracing_pipeline/src/pipeline/jobs/init/InitRayTracingPassJob.js:148:36)
+#     at exec (file:///D:/Github/WebGPU-Example/packages/arc_ray_tracing_pipeline/src/pipeline/jobs/init/InitRayTracingPassJob.js:179:29)
+#     at exec (file:///D:/Github/WebGPU-Example/packages/arc_ray_tracing_pipeline/src/pipeline/InitPipeline.js:19:13)
+#     at async _main (file:///D:/Github/WebGPU-Example/packages/arc_ray_tracing_pipeline/src/index.js:52:13)

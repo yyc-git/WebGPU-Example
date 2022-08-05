@@ -270,9 +270,9 @@ let _createAllInstances = (state, geometryContainerMap, device) => {
                 instanceContainerArr.push(
                     device.createRayTracingAccelerationContainer({
                         level: "top",
-                        usage: WebGPU.GPURayTracingAccelerationContainerUsage.PREFER_FAST_TRACE,
+                        // usage: WebGPU.GPURayTracingAccelerationContainerUsage.PREFER_FAST_TRACE,
                         // usage: WebGPU.GPURayTracingAccelerationContainerUsage.ALLOW_UPDATE | WebGPU.GPURayTracingAccelerationContainerUsage.PREFER_FAST_TRACE,
-                        // usage: WebGPU.GPURayTracingAccelerationContainerUsage.PREFER_FAST_BUILD,
+                        usage: WebGPU.GPURayTracingAccelerationContainerUsage.PREFER_FAST_BUILD,
                         instances: instancesResult
                     })
                 )
@@ -333,8 +333,8 @@ let _buildContainers = (state, device, queue) => {
 
             let geometryContainer = device.createRayTracingAccelerationContainer({
                 level: "bottom",
-                usage: WebGPU.GPURayTracingAccelerationContainerUsage.PREFER_FAST_TRACE,
-                // usage: WebGPU.GPURayTracingAccelerationContainerUsage.PREFER_FAST_BUILD,
+                // usage: WebGPU.GPURayTracingAccelerationContainerUsage.PREFER_FAST_TRACE,
+                usage: WebGPU.GPURayTracingAccelerationContainerUsage.PREFER_FAST_BUILD,
                 geometries: [
                     {
                         usage: WebGPU.GPURayTracingAccelerationGeometryUsage.OPAQUE,
