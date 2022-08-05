@@ -177,6 +177,16 @@ not the all tlas's count, but the all tlas's whole size exceed?
 
 * TODO split instance buffer
 
+    /*!  TODO perf: remove instancesTypeArr
+1.sort getAllRenderGameObjectData by instancesIndex
+2.reduce it, only use one instances for one group layer(use set instead of push) 
+*/
+
+* TODO perf: if empty, skip!
+
+test 2M
+
+
 
 * TODO increase geometry's r and w, fps should not change too big!
 
@@ -192,6 +202,9 @@ test arc code with no traverse order!!!
 use flag: perfer build
 
 
+test build time(4M)
+
+
 * TODO perf: optimize trace
 
 skip any hit, only use closest hit
@@ -203,6 +216,8 @@ gl_RayFlagsOpaqueEXT | gl_RayFlagsTerminateOnFirstHitKHR
 
 
 * TODO commit
+
+trace very fast, so render 2d and 3d very fast!
 
 
 
