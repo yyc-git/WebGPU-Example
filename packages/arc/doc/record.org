@@ -234,7 +234,7 @@ should add ring with position in [972-974, 1003-1004] to test!
 
 
 
-* TODO implement ray tracing pipeline Demo!
+* DONE implement ray tracing pipeline Demo!
 
 ** TODO implement
 
@@ -246,26 +246,13 @@ should add ring with position in [972-974, 1003-1004] to test!
 
 
 
-* TODO fix: fix buildRenderData->buffer data
-
-
-* TODO refactor: remove resolution buffer
-use: 
-const ivec2 resolution = ivec2(gl_LaunchSizeEXT.xy);
-
-* TODO draw > 4M rings(10M, 100M)
-
-** TODO perf: optimize top level memory
-
-split tlas by layer
-
-
-** TODO multiple render
-
 
 * TODO perf: optimize Traversal bvh on gpu
 
 refer to https://zhuanlan.zhihu.com/p/70387497
+
+
+# ** TODO change to one layer
 
 ** TODO perf: 基于Ray Packet的并行
 
@@ -285,6 +272,66 @@ https://www.pure.ed.ac.uk/ws/portalfiles/portal/60657582/bulk_synchronous_parall
 ** TODO perf: traverse bvh: use stack-less
 
 not limit maxDepth when build bvh!
+
+
+
+# ** TODO restore to multiple layers
+
+
+* TODO fix: fix buildRenderData->buffer data
+
+
+* TODO refactor: remove resolution buffer
+use: 
+const ivec2 resolution = ivec2(gl_LaunchSizeEXT.xy);
+
+
+* TODO fix TopLevel, BottomLevel
+
+struct BVHNode {
+  worldMin : vec2<f32>,
+  worldMax : vec2<f32>,
+
+#   transformMatrix : mat3x2<f32>,
+  
+leafInstanceTopLevelIndex:f32,
+maxLayer:f32,
+
+	child1Index: f32,
+
+	TODO remove child2Index, make child2 next to child1!!!
+	# child2Index: f32
+
+
+}
+
+
+struct TopLevel {
+  transformMatrix : mat3x2<f32>,
+  
+	leafInstanceOffset: f32,
+	leafInstanceCount: f32,
+
+instanceIndex: f32,
+}
+
+
+struct BottomLevel {
+  localMin : vec2<f32>,
+  localMax : vec2<f32>,
+}
+
+* TODO draw > 4M rings(10M, 100M)
+
+** TODO perf: optimize top level memory
+
+split tlas by layer
+
+
+** TODO multiple render
+
+
+* TODO perf: if intersectResult.layer === tlas group's max layer, stop traverse!
 
 
 
