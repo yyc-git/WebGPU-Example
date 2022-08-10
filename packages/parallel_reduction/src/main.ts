@@ -1,5 +1,5 @@
 const wgsl = `
-override workgroupSize = 64;
+const workgroupSize = 64;
 
 var<workgroup> shareData: array<f32,workgroupSize>;
 
@@ -108,7 +108,7 @@ export async function test() {
 
 
 	await readBuf.mapAsync(GPUMapMode.READ);
-	const result = new Float32Array(readBuf.getMappedRange());
+	const result = new Float32Array(readBuf.getMappedRange().slice(0));
 	readBuf.unmap();
 
 	// buf.destroy();
@@ -116,6 +116,15 @@ export async function test() {
 
 	console.log(source);
 	console.log(result);
+
+
+	console.log(source.slice(0, 64).reduce((sum, value) => {
+		return sum + value
+	}, 0))
+
+	console.log(source.slice(64, 128).reduce((sum, value) => {
+		return sum + value
+	}, 0))
 }
 
 test()
