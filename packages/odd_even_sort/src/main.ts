@@ -1,11 +1,9 @@
 const wgsl = `
 const workgroupSize = 64;
+// TODO why can't use?
 // const elementCount = 128;
 
-// var<workgroup> arrOfTwoElements: array<f32,elementCount>;
 var<workgroup> arrOfTwoElements: array<f32,128>;
-var<workgroup> isSwap: bool;
-var<workgroup> stepCount: u32;
 
 struct BeforeSortData {
   data : array<f32, 128>
@@ -33,85 +31,42 @@ var index = GlobalInvocationID.x * 2;
 arrOfTwoElements[index] = beforeSortData.data[index];
 arrOfTwoElements[index+ 1 ] = beforeSortData.data[index + 1];
 
-// set to any value only if > 0
-// isSwap = 1;
-isSwap = false;
-
-stepCount = 0;
-
 workgroupBarrier();
-
-
-// while(isSwap != 0){
-while(true){
-// isSwap = 0;
-
-// workgroupBarrier();
-
-// u32 index = GlobalInvocationID.x * 2;
-
-// f32 a = beforeSortData.data[index];
-// f32 b = beforeSortData.data[index + 1];
-
-// bool hasOnlyOneElement = false;
 
 var firstIndex:u32;
 var secondIndex:u32;
 
-if(stepCount % 2 == 0){
+for (var i: u32 = 0; i < workgroupSize; i += 1) {
+	// TODO extract odd, even sort
+
 firstIndex = index;
 secondIndex = index + 1;
-}
-else{
-// firstIndex = index;
-// secondIndex = index + 1;
 
-// if(LocalInvocationIndex == 0 || LocalInvocationIndex == ){
-// hasOnlyOneElement = true;
-// }
-// else{
-// hasOnlyOneElement = false;
-
-// firstIndex = index - 1;
-// secondIndex = index;
-// }
-
-
-firstIndex = index - 1;
-secondIndex = index;
-}
-
-if(firstIndex >= 0){
-var a = arrOfTwoElements[firstIndex];
-var b = arrOfTwoElements[secondIndex];
-
-if(a > b){
-arrOfTwoElements[firstIndex] = b;
-arrOfTwoElements[secondIndex] = a;
-
-// isSwap += 1;
-// isSwap += 1;
-isSwap = true;
-}
-// else{
-// arrOfTwoElements[index] = a;
-// arrOfTwoElements[index + 1] = b;
-// }
-
-
-stepCount += 1;
+if(arrOfTwoElements[firstIndex] > arrOfTwoElements[secondIndex]){
+	var temp = arrOfTwoElements[firstIndex];
+arrOfTwoElements[firstIndex] = arrOfTwoElements[secondIndex];
+arrOfTwoElements[secondIndex] = temp;
 }
 
 workgroupBarrier();
 
-if(!isSwap){
-    break;
+firstIndex = index + 1;
+secondIndex = index + 2;
+
+// TODO extract 128 to be elementCount
+if(secondIndex <128 && arrOfTwoElements[firstIndex] > arrOfTwoElements[secondIndex]){
+	// TODO duplicate
+	var temp = arrOfTwoElements[firstIndex];
+arrOfTwoElements[firstIndex] = arrOfTwoElements[secondIndex];
+arrOfTwoElements[secondIndex] = temp;
 }
 
+workgroupBarrier();
 }
 
 afterSortData.data[index] = arrOfTwoElements[index];
 afterSortData.data[index + 1] = arrOfTwoElements[index + 1];
+
 }
 `;
 
