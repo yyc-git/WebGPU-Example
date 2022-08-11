@@ -1,65 +1,118 @@
-const num = 1000;
-const minX = 0,
-	maxX = 2,
-	minY = 0,
-	maxY = 2;
-const invSize = 1 / Math.max(maxX - minX, maxY - minY);
 const wgsl = `
-    struct Obj {
-        minX: f32,
-        maxX: f32,
-        minY: f32,
-        maxY: f32,
-        zOrder: u32,
-    }
+const workgroupSize = 64;
+// const elementCount = 128;
 
-    @binding(0) @group(0) var<storage, read_write> objs: array<Obj>;
+// var<workgroup> arrOfTwoElements: array<f32,elementCount>;
+var<workgroup> arrOfTwoElements: array<f32,128>;
+var<workgroup> isSwap: bool;
+var<workgroup> stepCount: u32;
 
-    fn setZOrder(i: u32){
-        let obj = objs[i];
-        var x = u32(32767 * ((obj.minX + obj.maxX) / 2 - ${minX}) * ${invSize});
-        var y = u32(32767 * ((obj.minY + obj.maxY) / 2 - ${minX}) * ${invSize});
+struct BeforeSortData {
+  data : array<f32, 128>
+}
 
-        x = (x | (x << 8)) & 0x00ff00ff;
-        x = (x | (x << 4)) & 0x0f0f0f0f;
-        x = (x | (x << 2)) & 0x33333333;
-        x = (x | (x << 1)) & 0x55555555;
-        
-        y = (y | (y << 8)) & 0x00ff00ff;
-        y = (y | (y << 4)) & 0x0f0f0f0f;
-        y = (y | (y << 2)) & 0x33333333;
-        y = (y | (y << 1)) & 0x55555555;
+struct AfterSortData {
+  data : array<f32, 128>
+}
 
-        objs[i].zOrder = x | (y << 1);
-    }
 
-    fn bSort(start: i32, end: i32){
-        for(var i = start; i < end; i++){
-            var last = objs[end - 1];
-            for(var j = end - 2; j >= i; j--){
-                let cur = objs[j];
-                if(cur.zOrder - last.zOrder > 0){
-                    objs[j + 1] = cur;
-                    objs[j] = last;
-                }else{
-                    last = cur;
-                }
-            }
-        }
-    }
+@binding(0) @group(0) var<storage, read> beforeSortData : BeforeSortData;
+@binding(1) @group(0) var<storage, read_write> afterSortData :  AfterSortData;
 
-	@compute @workgroup_size(64, 1, 1)
-	fn main(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>) {
-        if(coord.x != 0){
-            return;
-        }
+// for only one group, 64 items
 
-        for(var i:u32 = 0; i < ${num}; i++){
-            setZOrder(i);
-        }
-        bSort(0, ${num});
+@compute @workgroup_size(workgroupSize, 1, 1)
+fn main(
+@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>, 
+@builtin(local_invocation_index) LocalInvocationIndex : u32,
+@builtin(workgroup_id) WorkgroupID : vec3<u32>
+) {
 
-    }
+var index = GlobalInvocationID.x * 2;
+
+arrOfTwoElements[index] = beforeSortData.data[index];
+arrOfTwoElements[index+ 1 ] = beforeSortData.data[index + 1];
+
+// set to any value only if > 0
+// isSwap = 1;
+isSwap = false;
+
+stepCount = 0;
+
+workgroupBarrier();
+
+
+// while(isSwap != 0){
+while(true){
+// isSwap = 0;
+
+// workgroupBarrier();
+
+// u32 index = GlobalInvocationID.x * 2;
+
+// f32 a = beforeSortData.data[index];
+// f32 b = beforeSortData.data[index + 1];
+
+// bool hasOnlyOneElement = false;
+
+var firstIndex:u32;
+var secondIndex:u32;
+
+if(stepCount % 2 == 0){
+firstIndex = index;
+secondIndex = index + 1;
+}
+else{
+// firstIndex = index;
+// secondIndex = index + 1;
+
+// if(LocalInvocationIndex == 0 || LocalInvocationIndex == ){
+// hasOnlyOneElement = true;
+// }
+// else{
+// hasOnlyOneElement = false;
+
+// firstIndex = index - 1;
+// secondIndex = index;
+// }
+
+
+firstIndex = index - 1;
+secondIndex = index;
+}
+
+if(firstIndex >= 0){
+var a = arrOfTwoElements[firstIndex];
+var b = arrOfTwoElements[secondIndex];
+
+if(a > b){
+arrOfTwoElements[firstIndex] = b;
+arrOfTwoElements[secondIndex] = a;
+
+// isSwap += 1;
+// isSwap += 1;
+isSwap = true;
+}
+// else{
+// arrOfTwoElements[index] = a;
+// arrOfTwoElements[index + 1] = b;
+// }
+
+
+stepCount += 1;
+}
+
+workgroupBarrier();
+
+if(!isSwap){
+    break;
+}
+
+}
+
+afterSortData.data[index] = arrOfTwoElements[index];
+afterSortData.data[index + 1] = arrOfTwoElements[index + 1];
+}
 `;
 
 export async function test() {
@@ -76,22 +129,24 @@ export async function test() {
 		},
 	});
 
-	const objsF32 = new Float32Array(num * 5);
-	for (let i = 0; i < num; i++) {
-		objsF32[i * 5] = Math.random();
-		objsF32[i * 5 + 1] = Math.random() + objsF32[i * 5];
-		objsF32[i * 5 + 2] = Math.random();
-		objsF32[i * 5 + 3] = Math.random() + objsF32[i * 5 + 2];
+	const beforeSortData = new Float32Array(64 * 2);
+	for (let i = 0; i < 64 * 2; i++) {
+	// for (let i = 64 * 2 -1; i >= 0; i--) {
+		// beforeSortData[i] = Math.random();
+		beforeSortData[i] = 64 * 2 - i - 1;
 	}
 
-	const buf = device.createBuffer({
-		size: objsF32.byteLength,
-		usage:
-			GPUBufferUsage.STORAGE |
-			GPUBufferUsage.COPY_DST |
-			GPUBufferUsage.COPY_SRC,
+	const beforeSortDataBuffer = device.createBuffer({
+		size: beforeSortData.byteLength,
+		usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
 	});
-	device.queue.writeBuffer(buf, 0, objsF32.buffer);
+	device.queue.writeBuffer(beforeSortDataBuffer, 0, beforeSortData.buffer);
+
+	const afterSortBufferSize = 64 * 2 * Float32Array.BYTES_PER_ELEMENT;
+	const afterSortBuffer = device.createBuffer({
+		size: afterSortBufferSize,
+		usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC
+	});
 
 	const bindGroup = device.createBindGroup({
 		layout: computePipeline.getBindGroupLayout(0),
@@ -99,38 +154,48 @@ export async function test() {
 			{
 				binding: 0,
 				resource: {
-					buffer: buf,
+					buffer: beforeSortDataBuffer,
+					size: beforeSortData.byteLength
+				},
+			},
+			{
+				binding: 1,
+				resource: {
+					buffer: afterSortBuffer,
+					size: afterSortBufferSize
 				},
 			},
 		],
-	});
-
-	const readBuf = device.createBuffer({
-		size: buf.size,
-		usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
 	});
 
 	const commandEncoder = device.createCommandEncoder();
 	const passEncoder = commandEncoder.beginComputePass();
 	passEncoder.setPipeline(computePipeline);
 	passEncoder.setBindGroup(0, bindGroup);
-	passEncoder.dispatchWorkgroups(1);
+	passEncoder.dispatchWorkgroups(1, 1, 1);
 	passEncoder.end();
-	commandEncoder.copyBufferToBuffer(buf, 0, readBuf, 0, buf.size);
+
+
+	const readBuf = device.createBuffer({
+		size: afterSortBufferSize,
+		usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
+	});
+
+	commandEncoder.copyBufferToBuffer(afterSortBuffer, 0, readBuf, 0, afterSortBufferSize);
+
+
 	device.queue.submit([commandEncoder.finish()]);
 
+
 	await readBuf.mapAsync(GPUMapMode.READ);
-	const result = new Uint32Array(readBuf.getMappedRange().slice(0));
+	const afterSort = new Float32Array(readBuf.getMappedRange().slice(0));
 	readBuf.unmap();
 
-	buf.destroy();
-	readBuf.destroy();
+	// buf.destroy();
+	// readBuf.destroy();
 
-	for (let i = 0; i < num - 1; i++) {
-		if (result[i * 5 + 4] > result[(i + 1) * 5 + 4]) {
-			console.log('=======invalid=======');
-			break;
-		}
-	}
-	console.log('+++++++++++++');
+	console.log(beforeSortData);
+	console.log(afterSort);
 }
+
+test()
