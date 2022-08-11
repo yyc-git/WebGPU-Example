@@ -1,7 +1,5 @@
 const wgsl = `
 const workgroupSize = 64;
-// TODO why can't use?
-// const elementCount = 128;
 
 var<workgroup> arrOfTwoElements: array<f32,128>;
 
@@ -16,6 +14,32 @@ struct AfterSortData {
 
 @binding(0) @group(0) var<storage, read> beforeSortData : BeforeSortData;
 @binding(1) @group(0) var<storage, read_write> afterSortData :  AfterSortData;
+
+
+fn _swap(firstIndex:u32, secondIndex:u32){
+var temp = arrOfTwoElements[firstIndex];
+arrOfTwoElements[firstIndex] = arrOfTwoElements[secondIndex];
+arrOfTwoElements[secondIndex] = temp;
+}
+
+fn _oddSort(index:u32) {
+var firstIndex = index;
+var secondIndex = index + 1;
+
+if(arrOfTwoElements[firstIndex] > arrOfTwoElements[secondIndex]){
+	_swap(firstIndex, secondIndex);
+}
+}
+
+fn _evenSort(index:u32) {
+var firstIndex = index + 1;
+var secondIndex = index + 2;
+
+// TODO extract 128 to be elementCount
+if(secondIndex <128 && arrOfTwoElements[firstIndex] > arrOfTwoElements[secondIndex]){
+	_swap(firstIndex, secondIndex);
+}
+}
 
 // for only one group, 64 items
 
@@ -37,30 +61,10 @@ var firstIndex:u32;
 var secondIndex:u32;
 
 for (var i: u32 = 0; i < workgroupSize; i += 1) {
-	// TODO extract odd, even sort
-
-firstIndex = index;
-secondIndex = index + 1;
-
-if(arrOfTwoElements[firstIndex] > arrOfTwoElements[secondIndex]){
-	var temp = arrOfTwoElements[firstIndex];
-arrOfTwoElements[firstIndex] = arrOfTwoElements[secondIndex];
-arrOfTwoElements[secondIndex] = temp;
-}
-
+_oddSort(index);
 workgroupBarrier();
 
-firstIndex = index + 1;
-secondIndex = index + 2;
-
-// TODO extract 128 to be elementCount
-if(secondIndex <128 && arrOfTwoElements[firstIndex] > arrOfTwoElements[secondIndex]){
-	// TODO duplicate
-	var temp = arrOfTwoElements[firstIndex];
-arrOfTwoElements[firstIndex] = arrOfTwoElements[secondIndex];
-arrOfTwoElements[secondIndex] = temp;
-}
-
+_evenSort(index);
 workgroupBarrier();
 }
 
@@ -86,7 +90,7 @@ export async function test() {
 
 	const beforeSortData = new Float32Array(64 * 2);
 	for (let i = 0; i < 64 * 2; i++) {
-	// for (let i = 64 * 2 -1; i >= 0; i--) {
+		// for (let i = 64 * 2 -1; i >= 0; i--) {
 		// beforeSortData[i] = Math.random();
 		beforeSortData[i] = 64 * 2 - i - 1;
 	}
@@ -123,6 +127,8 @@ export async function test() {
 		],
 	});
 
+	let a1 = performance.now()
+
 	const commandEncoder = device.createCommandEncoder();
 	const passEncoder = commandEncoder.beginComputePass();
 	passEncoder.setPipeline(computePipeline);
@@ -140,6 +146,11 @@ export async function test() {
 
 
 	device.queue.submit([commandEncoder.finish()]);
+
+
+	let a2 = performance.now()
+
+	console.log(a2 - a1)
 
 
 	await readBuf.mapAsync(GPUMapMode.READ);
