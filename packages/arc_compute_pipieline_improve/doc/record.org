@@ -1,0 +1,143 @@
+* TODO perf: optimize Traversal bvh on gpu
+
+refer to https://zhuanlan.zhihu.com/p/70387497
+
+
+# ** TODO change to one layer
+
+** TODO perf: 基于Ray Packet的并行
+
+packet size: 8*8?
+
+if the whole aabb of packet not intersect with node's whole aabb, skip it;
+
+
+
+** TODO study Bulk-Synchronous Parallel Simultaneous BVH Traversal for Collision Detection on GPUs
+
+refer to:
+https://www.pure.ed.ac.uk/ws/portalfiles/portal/60657582/bulk_synchronous_parallel_bvh_traversal_for_collision_detection_on_gpus_authorversion_.pdf
+
+
+
+** TODO perf: traverse bvh: use stack-less
+
+not limit maxDepth when build bvh!
+
+
+
+# ** TODO restore to multiple layers
+
+
+* TODO fix: fix buildRenderData->buffer data
+
+
+* TODO refactor: remove resolution buffer
+use: 
+const ivec2 resolution = ivec2(gl_LaunchSizeEXT.xy);
+
+
+* TODO fix TopLevel, BottomLevel
+
+struct BVHNode {
+  worldMin : vec2<f32>,
+  worldMax : vec2<f32>,
+
+#   transformMatrix : mat3x2<f32>,
+  
+leafInstanceTopLevelIndex:f32,
+maxLayer:f32,
+
+	child1Index: f32,
+
+	TODO remove child2Index, make child2 next to child1!!!
+	# child2Index: f32
+
+
+}
+
+
+struct TopLevel {
+  transformMatrix : mat3x2<f32>,
+  
+	leafInstanceOffset: f32,
+	leafInstanceCount: f32,
+
+instanceIndex: f32,
+}
+
+
+struct BottomLevel {
+  localMin : vec2<f32>,
+  localMax : vec2<f32>,
+}
+
+* TODO draw > 4M rings(10M, 100M)
+
+** TODO perf: optimize top level memory
+
+split tlas by layer
+
+
+** TODO multiple render
+
+
+* TODO perf: if intersectResult.layer === tlas group's max layer, stop traverse!
+
+
+
+* TODO feat: build bvh on CPU
+
+use HLBVH:
+https://blog.csdn.net/qq_39300235/article/details/107006830
+https://research.nvidia.com/sites/default/files/pubs/2010-06_HLBVH-Hierarchical-LBVH/HLBVH-final.pdf
+
+or HLBVH with work queues:
+https://research.nvidia.com/publication/simpler-and-faster-hlbvh-work-queues
+
+or GPU-based Out-of-Core HLBVH Construction: https://diglib.eg.org/bitstream/handle/10.2312/sre20151165/041-050.pdf?sequence=1
+
+
+
+
+
+
+* TODO spilit BottomLevel to multiple storage buffers
+
+
+fix error:
+index.html:1 Binding size (160000000) is larger than the maximum binding size (134217728).
+ - While validating entries[1] as a Buffer.
+Expected entry layout: { binding: 1, visibility: ShaderStage::Compute, buffer: { type: BufferBindingType::ReadOnlyStorage, hasDynamicOffset: 0, minBindingSize: 0 } }
+ - While validating [BindGroupDescriptor] against [BindGroupLayout]
+ - While calling [Device].CreateBindGroup([BindGroupDescriptor]).
+
+
+
+
+
+
+* TODO perf: bvh
+
+
+** TODO feat: build,update bvh on gpu
+
+** TODO feat: update bvh
+
+refer to:
+https://zhuanlan.zhihu.com/p/374748734
+Fast, Effective BVH Updates for Animated Scenes: https://hwrt.cs.utah.edu/papers/hwrt_rotations.pdf
+
+
+** TODO perf: optimize Traversal bvh on gpu
+
+refer to https://zhuanlan.zhihu.com/p/70387497
+
+*** TODO perf: traverse bvh: use stack-less
+
+not limit maxDepth when build bvh!
+
+
+
+
+
