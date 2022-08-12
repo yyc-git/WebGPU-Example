@@ -4,7 +4,7 @@ struct RayPayload {
 }
 
 struct Ray {
-   target: vec2<f32>,
+   rayTarget: vec2<f32>,
 }
 
 
@@ -111,17 +111,17 @@ struct Material {
 @binding(6) @group(0) var<uniform> screenDimension : ScreenDimension;
 
 // fn _isIntersectWithAABB2D(ray: Ray, aabb: AABB2D) -> bool {
-//   var target = ray.target;
+//   var rayTarget = ray.rayTarget;
 //   var worldMin = aabb.worldMin;
 //   var worldMax = aabb.worldMax;
 
-// return target.x > worldMin.x && target.x < worldMax.x && target.y > worldMin.y && target.y < worldMax.y;
+// return rayTarget.x > worldMin.x && rayTarget.x < worldMax.x && rayTarget.y > worldMin.y && rayTarget.y < worldMax.y;
 // }
 
 
 // fn _isIntersectWithRing(ray: Ray, instance: Instance, geometry: Geometry) -> bool {
-fn _isIntersectWithRing(point: vec2<f32>, instance: Instance, geometry: Geometry) -> bool {
-  // var target = ray.target;
+fn _isIntersectWithRing(pointInScreen: vec2<f32>, instance: Instance, geometry: Geometry) -> bool {
+  // var rayTarget = ray.rayTarget;
 
 var localPosition = instance.localPosition;
 
@@ -131,17 +131,17 @@ var localPosition = instance.localPosition;
 
   var worldPosition = localPosition + c;
 
-  var distanceSquare = pow(point.x - worldPosition.x, 2.0) + pow( point.y - worldPosition.y, 2.0);
+  var distanceSquare = pow(pointInScreen.x - worldPosition.x, 2.0) + pow( pointInScreen.y - worldPosition.y, 2.0);
 
   return distanceSquare >= pow(r, 2) && distanceSquare <= pow(r + w, 2);
 }
 
-fn _isPointIntersectWithAABB(point: vec2<f32>, worldMin: vec2<f32>, worldMax: vec2<f32>) -> bool {
-return point.x > worldMin.x && point.x < worldMax.x && point.y > worldMin.y && point.y < worldMax.y;
+fn _isPointIntersectWithAABB(pointInScreen: vec2<f32>, worldMin: vec2<f32>, worldMax: vec2<f32>) -> bool {
+return pointInScreen.x > worldMin.x && pointInScreen.x < worldMax.x && pointInScreen.y > worldMin.y && pointInScreen.y < worldMax.y;
 }
 
-fn _isPointIntersectWithTopLevelNode(point: vec2<f32>, node: TopLevel) -> bool {
-return _isPointIntersectWithAABB(point, node.worldMin, node. worldMax);
+fn _isPointIntersectWithTopLevelNode(pointInScreen: vec2<f32>, node: TopLevel) -> bool {
+return _isPointIntersectWithAABB(pointInScreen, node.worldMin, node. worldMax);
 }
 
 fn _isLeafNode(leafInstanceCount:u32) -> bool {
@@ -160,7 +160,7 @@ fn _getLeafInstanceCount(leafInstanceCountAndMaxLayer: u32) -> u32 {
   return (leafInstanceCountAndMaxLayer >> 8) & 0xffffff;
 }
 
-// fn _handleIntersectWithLeafNode (intersectResult, isIntersectWithInstance, point, node: topLevelNodeData, bottomLevelArr: bottomLevelArr) -> void {
+// fn _handleIntersectWithLeafNode (intersectResult, isIntersectWithInstance, pointInScreen, node: topLevelNodeData, bottomLevelArr: bottomLevelArr) -> void {
 // }
 
 fn _intersectScene(ray: Ray)->RingIntersect {
@@ -171,7 +171,7 @@ const MAX_DEPTH = 20;
   intersectResult.isClosestHit = false;
   intersectResult.layer = 0;
 
-var point = ray.target;
+var pointInScreen = ray.rayTarget;
 
 var rootNode = topLevel.topLevels[0];
 
@@ -205,12 +205,12 @@ while(stackSize > 0){
    continue;
  }
 
-		if (_isPointIntersectWithTopLevelNode(point, currentNode)) {
+		if (_isPointIntersectWithTopLevelNode(pointInScreen, currentNode)) {
 			var leafInstanceCount = _getLeafInstanceCount(leafInstanceCountAndMaxLayer);
 
 
 			if (_isLeafNode(leafInstanceCount)) {
-				// _handleIntersectWithLeafNode(intersectResult, isIntersectWithInstance, point, currentNode, bottomLevelArr);
+				// _handleIntersectWithLeafNode(intersectResult, isIntersectWithInstance, pointInScreen, currentNode, bottomLevelArr);
 
 var leafInstanceOffset = u32(currentNode.leafInstanceOffset);
 // var leafInstanceCount = u32(currentNode.leafInstanceCount);
@@ -220,13 +220,13 @@ var leafInstanceOffset = u32(currentNode.leafInstanceOffset);
 while(leafInstanceCount > 0){
 var bottomLevel = bottomLevel.bottomLevels[leafInstanceOffset];
 
-if(_isPointIntersectWithAABB(point, bottomLevel.worldMin, bottomLevel.worldMax)){
+if(_isPointIntersectWithAABB(pointInScreen, bottomLevel.worldMin, bottomLevel.worldMax)){
 var instance: Instance = sceneInstanceData.instances[u32(bottomLevel.instanceIndex)];
 var geometryIndex = u32(instance.geometryIndex);
  var geometry:Geometry = sceneGeometryData.geometrys[geometryIndex];
 
 
-      if (_isIntersectWithRing(point,instance, geometry)) {
+      if (_isIntersectWithRing(pointInScreen,instance, geometry)) {
  var layer = u32(bottomLevel.layer);
 
         if (!intersectResult.isClosestHit || layer > intersectResult.layer) {
@@ -313,13 +313,13 @@ fn main(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>) {
 
     var uv = (sampledPixel / resolution) * 2.0 - 1.0;
 
-    // vec4 target = uCamera.projectionInverse * (vec4(uv.x, uv.y, -1, 1));
-    // var target = vec4<f32>(uv.x, uv.y, -1, 1);
-    var target = vec3<f32>(uv.x, uv.y, 1);
+    // vec4 rayTarget = uCamera.projectionInverse * (vec4(uv.x, uv.y, -1, 1));
+    // var rayTarget = vec4<f32>(uv.x, uv.y, -1, 1);
+    var rayTarget = vec3<f32>(uv.x, uv.y, 1);
 
     // var direction =
-    //     // normalize(uCamera.viewInverse * vec4(normalize(target.xyz), 0));
-    //     vec4<f32>(normalize(target.xyz), 0);
+    //     // normalize(uCamera.viewInverse * vec4(normalize(rayTarget.xyz), 0));
+    //     vec4<f32>(normalize(rayTarget.xyz), 0);
 
     // var wi = direction.xyz;
 
@@ -328,7 +328,7 @@ fn main(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>) {
     payload.radiance = vec3<f32>(0.0, 0.0, 0.0);
 
 
-var isContinueBounce = _traceRay( Ray(target.xy), &payload);
+var isContinueBounce = _traceRay( Ray(rayTarget.xy), &payload);
 
 
     pixelColor = payload.radiance;
