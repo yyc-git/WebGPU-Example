@@ -1,7 +1,8 @@
 const wgsl = `
 const workgroupSize = 64;
 
-var<workgroup> arrOfTwoElements: array<f32,128>;
+// TODO why can't use const itemCount?
+var<workgroup> sharedData: array<f32,128>;
 
 struct BeforeSortData {
   data : array<f32, 128>
@@ -17,16 +18,16 @@ struct AfterSortData {
 
 
 fn _swap(firstIndex:u32, secondIndex:u32){
-var temp = arrOfTwoElements[firstIndex];
-arrOfTwoElements[firstIndex] = arrOfTwoElements[secondIndex];
-arrOfTwoElements[secondIndex] = temp;
+var temp = sharedData[firstIndex];
+sharedData[firstIndex] = sharedData[secondIndex];
+sharedData[secondIndex] = temp;
 }
 
 fn _oddSort(index:u32) {
 var firstIndex = index;
 var secondIndex = index + 1;
 
-if(arrOfTwoElements[firstIndex] > arrOfTwoElements[secondIndex]){
+if(sharedData[firstIndex] > sharedData[secondIndex]){
 	_swap(firstIndex, secondIndex);
 }
 }
@@ -35,25 +36,20 @@ fn _evenSort(index:u32) {
 var firstIndex = index + 1;
 var secondIndex = index + 2;
 
-// TODO extract 128 to be elementCount
-if(secondIndex <128 && arrOfTwoElements[firstIndex] > arrOfTwoElements[secondIndex]){
+if(secondIndex <128 && sharedData[firstIndex] > sharedData[secondIndex]){
 	_swap(firstIndex, secondIndex);
 }
 }
 
-// for only one group, 64 items
-
 @compute @workgroup_size(workgroupSize, 1, 1)
 fn main(
-@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>, 
-@builtin(local_invocation_index) LocalInvocationIndex : u32,
-@builtin(workgroup_id) WorkgroupID : vec3<u32>
+@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>,
 ) {
 
 var index = GlobalInvocationID.x * 2;
 
-arrOfTwoElements[index] = beforeSortData.data[index];
-arrOfTwoElements[index+ 1 ] = beforeSortData.data[index + 1];
+sharedData[index] = beforeSortData.data[index];
+sharedData[index+ 1 ] = beforeSortData.data[index + 1];
 
 workgroupBarrier();
 
@@ -68,8 +64,8 @@ _evenSort(index);
 workgroupBarrier();
 }
 
-afterSortData.data[index] = arrOfTwoElements[index];
-afterSortData.data[index + 1] = arrOfTwoElements[index + 1];
+afterSortData.data[index] = sharedData[index];
+afterSortData.data[index + 1] = sharedData[index + 1];
 
 }
 `;
