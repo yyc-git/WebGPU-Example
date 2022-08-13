@@ -13,7 +13,7 @@ if the whole aabb of packet not intersect with node's whole aabb, skip it;
 
 
 
-*** TODO cpu draft
+*** DONE cpu draft
 
 8*8
 
@@ -22,23 +22,30 @@ first relate to node
 
 rebuild aabb of first-
 
-commit: pass bdd test; change coordinate system from world to screen
+
+
+
+
+*** DONE pass cpu run test
 
 
 *** TODO gpu draft
-
-
-*** TODO pass cpu run test
-
-test: increase r
-
 
 *** TODO pass gpu run test
 
 
 test: increase r
 
+*** TODO benchmark compare
 
+
+*** TODO gpu draft: perf: judge maxLayer
+
+
+
+*** TODO pass gpu run test
+
+*** TODO benchmark compare
 
 
 ** TODO perf: N branch BVH tree

@@ -246,15 +246,21 @@ let _handleIntersectWithLeafNode = (
 		// maxLayer
 	] = node
 
+	let oneRayLeafInstanceCount
+	let oneRayLeafInstanceOffset
 
-	while (leafInstanceCount > 0) {
-		// let [screenMinX, screenMinY, screenMaxX, screenMaxY, instanceIndex] = bottomLevelArr[leafInstanceOffset]
-		let [screenMinX, screenMinY, screenMaxX, screenMaxY, instanceIndex, layer] = bottomLevelArr[leafInstanceOffset]
 
-		console.log("b1", firstActiveRayIndex)
-		for (let i = firstActiveRayIndex; i < rayPacketPoints.length; i++) {
-			let point = rayPacketPoints[i]
-			let intersectResult = intersectResults[i]
+	for (let i = firstActiveRayIndex; i < rayPacketPoints.length; i++) {
+		let point = rayPacketPoints[i]
+		let intersectResult = intersectResults[i]
+
+		oneRayLeafInstanceCount = leafInstanceCount
+		oneRayLeafInstanceOffset = leafInstanceOffset
+
+		while (oneRayLeafInstanceCount > 0) {
+			let [screenMinX, screenMinY, screenMaxX, screenMaxY, instanceIndex, layer] = bottomLevelArr[leafInstanceOffset]
+
+			console.log("b1", firstActiveRayIndex)
 
 			if (_isPointIntersectWithAABB(
 				point,
@@ -273,17 +279,16 @@ let _handleIntersectWithLeafNode = (
 						intersectResult.layer = layer
 						intersectResult.instanceIndex = instanceIndex
 
-						// TODO restore
-						// if (layer == maxLayer) {
-						//     break
-						// }
+						if (layer == maxLayer) {
+							break
+						}
 					}
 				}
 			}
-		}
 
-		leafInstanceCount -= 1
-		leafInstanceOffset += 1
+			oneRayLeafInstanceCount -= 1
+			oneRayLeafInstanceOffset += 1
+		}
 	}
 }
 
@@ -306,6 +311,12 @@ let _isAABBIntersectWithTopLevelNode = (aabb, node: topLevelNodeData) => {
 		screenMin: Vector2.create(wholeScreenMinX, wholeScreenMinY),
 		screenMax: Vector2.create(wholeScreenMaxX, wholeScreenMaxY)
 	})
+}
+
+let _getMinLayerOfActiveIntersectResults = (intersectResults, firstActiveRayIndex) => {
+	return intersectResults.slice(firstActiveRayIndex).reduce((result, { layer }) => {
+		return Math.min(result, layer)
+	}, +Infinity)
 }
 
 export let traverse = (isIntersectWithInstance, rayPacketPoints, topLevelArr, bottomLevelArr: bottomLevelArr): Array<traverseResult> => {
@@ -336,19 +347,19 @@ export let traverse = (isIntersectWithInstance, rayPacketPoints, topLevelArr, bo
 		console.log(stackSize)
 		let currentNode = stackContainer[stackSize - 1]
 
-
 		stackSize -= 1
 
 		let leafInstanceCountAndMaxLayer = currentNode[leafInstanceCountAndMaxLayerOffset]
 
 		let maxLayer = _getMaxLayer(leafInstanceCountAndMaxLayer)
 
-		// TODO restore
-		// if (maxLayer <= intersectResult.layer) {
-		// 	continue
-		// }
-
 		var firstActiveRayIndex = bvhNodeFirstActiveRayIndexs[stackSize];
+
+		let minLayerOfActiveIntersectResults = _getMinLayerOfActiveIntersectResults(intersectResults, firstActiveRayIndex)
+
+		if (maxLayer <= minLayerOfActiveIntersectResults) {
+			continue
+		}
 
 		let pointInScreen = rayPacketPoints[firstActiveRayIndex]
 
