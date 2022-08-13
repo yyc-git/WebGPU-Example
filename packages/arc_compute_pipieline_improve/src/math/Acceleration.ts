@@ -296,11 +296,11 @@ let _hasChild = (node, childIndexOffset) => {
 	return node[childIndexOffset] !== 0
 }
 
-let _buildAABB = (firstActiveRayIndex, rayPacketPoints) => {
+let _buildRayPacketAABB = (firstActiveRayIndex, rayPacketPoints) => {
 	return setByPoints(rayPacketPoints.slice(firstActiveRayIndex))
 }
 
-let _isAABBIntersectWithTopLevelNode = (aabb, node: topLevelNodeData) => {
+let _isRayPacketAABBIntersectWithTopLevelNode = (aabb, node: topLevelNodeData) => {
 	let [
 		wholeScreenMinX, wholeScreenMinY, wholeScreenMaxX, wholeScreenMaxY,
 	] = node
@@ -368,7 +368,7 @@ export let traverse = (isIntersectWithInstance, rayPacketPoints, topLevelArr, bo
 			pointInScreen,
 		)
 
-		if (!_isAABBIntersectWithTopLevelNode(_buildAABB(firstActiveRayIndex, rayPacketPoints), currentNode)) {
+		if (!_isRayPacketAABBIntersectWithTopLevelNode(_buildRayPacketAABB(firstActiveRayIndex, rayPacketPoints), currentNode)) {
 			console.log("aaa")
 			continue;
 		}

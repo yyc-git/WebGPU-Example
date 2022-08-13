@@ -29,7 +29,7 @@ rebuild aabb of first-
 *** DONE pass cpu run test
 
 
-*** TODO gpu draft
+*** DONE gpu draft
 
 *** TODO pass gpu run test
 
