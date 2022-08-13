@@ -1,6 +1,8 @@
 import { layer } from "../type/LayerType"
 import { log } from "../utils/LogUtils"
+import { isAABBIntersection, setByPoints } from "./AABB2D"
 import { tree } from "./LBVH2D"
+import * as Vector2 from "./Vector2"
 
 // type instanceOffset = number
 // type instanceCount = number
@@ -228,9 +230,14 @@ let _isLeafNode = (leafInstanceCount) => {
 	return leafInstanceCount !== 0
 }
 
-let _handleIntersectWithLeafNode = (intersectResult, isIntersectWithInstance, point,
+let _handleIntersectWithLeafNode = (
+	intersectResults,
+	isIntersectWithInstance,
+	rayPacketPoints,
+	firstActiveRayIndex,
 	leafInstanceCount, maxLayer, node: topLevelNodeData,
-	bottomLevelArr: bottomLevelArr) => {
+	bottomLevelArr: bottomLevelArr,
+) => {
 	let [
 		wholeWorldMinX, wholeWorldMinY, wholeWorldMaxX, wholeWorldMaxY,
 		leafInstanceOffset,
@@ -243,23 +250,29 @@ let _handleIntersectWithLeafNode = (intersectResult, isIntersectWithInstance, po
 		// let [worldMinX, worldMinY, worldMaxX, worldMaxY, instanceIndex] = bottomLevelArr[leafInstanceOffset]
 		let [worldMinX, worldMinY, worldMaxX, worldMaxY, instanceIndex, layer] = bottomLevelArr[leafInstanceOffset]
 
-		if (_isPointIntersectWithAABB(
-			point,
-			worldMinX, worldMinY, worldMaxX, worldMaxY
-		)) {
-			if (isIntersectWithInstance(point, instanceIndex)) {
-				// let layer = getInstanceLayer(instanceIndex)
+		for (let i = firstActiveRayIndex; i < rayPacketPoints.length; i++) {
+			let point = rayPacketPoints[i]
+			let intersectResult = intersectResults[i]
 
-				// if (!intersectResult.isClosestHit || layer >= intersectResult.layer) {
-				if (!intersectResult.isClosestHit || layer > intersectResult.layer) {
-					// log("hit")
+			if (_isPointIntersectWithAABB(
+				point,
+				worldMinX, worldMinY, worldMaxX, worldMaxY
+			)) {
+				if (isIntersectWithInstance(point, instanceIndex)) {
+					// let layer = getInstanceLayer(instanceIndex)
 
-					intersectResult.isClosestHit = true
-					intersectResult.layer = layer
-					intersectResult.instanceIndex = instanceIndex
+					// if (!intersectResult.isClosestHit || layer >= intersectResult.layer) {
+					if (!intersectResult.isClosestHit || layer > intersectResult.layer) {
+						// log("hit")
 
-					if (layer == maxLayer) {
-						break
+						intersectResult.isClosestHit = true
+						intersectResult.layer = layer
+						intersectResult.instanceIndex = instanceIndex
+
+						// TODO restore
+						// if (layer == maxLayer) {
+						//     break
+						// }
 					}
 				}
 			}
@@ -274,24 +287,44 @@ let _hasChild = (node, childIndexOffset) => {
 	return node[childIndexOffset] !== 0
 }
 
-export let traverse = (isIntersectWithInstance, point, topLevelArr: topLevelArr, bottomLevelArr: bottomLevelArr): traverseResult => {
+let _buildAABB = (firstActiveRayIndex, rayPacketPoints) => {
+	return setByPoints(rayPacketPoints.slice(firstActiveRayIndex))
+}
+
+let _isAABBIntersectWithTopLevelNode = (aabb, node: topLevelNodeData) => {
+	let [
+		wholeWorldMinX, wholeWorldMinY, wholeWorldMaxX, wholeWorldMaxY,
+	] = node
+
+	return isAABBIntersection(aabb, {
+		worldMin: Vector2.create(wholeWorldMinX, wholeWorldMinY),
+		worldMax: Vector2.create(wholeWorldMaxX, wholeWorldMaxY)
+	})
+}
+
+export let traverse = (isIntersectWithInstance, rayPacketPoints, topLevelArr, bottomLevelArr: bottomLevelArr): Array<traverseResult> => {
 	let rootNode = topLevelArr[0]
 
 	let leafInstanceCountAndMaxLayerOffset = 5
 	let child1IndexOffset = 6
 	let child2IndexOffset = 7
 
-	// let node = rootNode
-
 	let stackContainer = [rootNode]
 	let stackSize = 1
 
-	let intersectResult: traverseResult = {
-		isClosestHit: false,
-		// layer: -1,
-		layer: 0,
-		instanceIndex: null
-	}
+	let rayCount = rayPacketPoints.length
+
+	let intersectResults: Array<traverseResult> = new Array(rayCount).map(_ => {
+		return {
+			isClosestHit: false,
+			// layer: -1,
+			layer: 0,
+			instanceIndex: null
+		}
+	})
+
+	let maxDepth = 20
+	let bvhNodeFirstActiveRayIndexs = new Array(maxDepth).map(_ => 0)
 
 	while (stackSize > 0) {
 		let currentNode = stackContainer[stackSize - 1]
@@ -302,45 +335,69 @@ export let traverse = (isIntersectWithInstance, point, topLevelArr: topLevelArr,
 
 		let maxLayer = _getMaxLayer(leafInstanceCountAndMaxLayer)
 
-		if (maxLayer <= intersectResult.layer) {
-			continue
+		// TODO restore
+		// if (maxLayer <= intersectResult.layer) {
+		// 	continue
+		// }
+
+		var firstActiveRayIndex = bvhNodeFirstActiveRayIndexs[stackSize];
+
+		let pointInScreen = rayPacketPoints[firstActiveRayIndex]
+
+		if (!_isAABBIntersectWithTopLevelNode(_buildAABB(firstActiveRayIndex, rayPacketPoints), currentNode)) {
+			continue;
 		}
 
-		// log("stackSize: ", stackSize)
+		// _findFirstActiveRayIndex
+		while (!_isPointIntersectWithTopLevelNode(pointInScreen, currentNode)) {
+			// firstActiveRayIndex = _findFirstActiveRayIndex(firstActiveRayIndex)
+			firstActiveRayIndex = firstActiveRayIndex + 1
 
-		if (_isPointIntersectWithTopLevelNode(point, currentNode)) {
-			// log(
-			// 	"_isPointIntersectWithTopLevelNode true:",
-			// 	currentNode,
-			// 	_isLeafNode(currentNode),
-			// 	_hasChild(currentNode, child1IndexOffset),
-			// 	_hasChild(currentNode, child2IndexOffset),
-			// )
+			// if(firstActiveRayIndex >= rayPacketPoints.length){
+			//     break;
+			// }
 
-			let leafInstanceCount = _getLeafInstanceCount(leafInstanceCountAndMaxLayer)
+			pointInScreen = rayPacketPoints[firstActiveRayIndex]
+		}
+
+		// TODO ensure check: should firstActiveRayIndex < rayPacketPoints.length
+		if (firstActiveRayIndex >= rayPacketPoints.length) {
+			throw new Error("error");
+		}
+
+		let leafInstanceCount = _getLeafInstanceCount(leafInstanceCountAndMaxLayer)
 
 
-			if (_isLeafNode(leafInstanceCount)) {
-				_handleIntersectWithLeafNode(intersectResult, isIntersectWithInstance, point, leafInstanceCount, maxLayer, currentNode, bottomLevelArr)
+		if (_isLeafNode(leafInstanceCount)) {
+			_handleIntersectWithLeafNode(
+				intersectResults,
+				rayPacketPoints,
+				firstActiveRayIndex,
+				isIntersectWithInstance, leafInstanceCount, maxLayer, currentNode, bottomLevelArr)
+		}
+		else {
+			// log("judge child")
 
-				// if (intersectResult.isClosestHit) {
-				// 	break
-				// }
+			// TODO perf: 如果Packet与两个子节点都相交则优先遍历相交Ray数目多的那个节点
+
+			if (_hasChild(currentNode, child1IndexOffset)) {
+				stackContainer[stackSize] = topLevelArr[currentNode[child1IndexOffset]]
+
+				bvhNodeFirstActiveRayIndexs[stackSize] = firstActiveRayIndex
+
+				stackSize += 1
+
 			}
-			else {
-				// log("judge child")
+			if (_hasChild(currentNode, child2IndexOffset)) {
+				stackContainer[stackSize] = topLevelArr[currentNode[child2IndexOffset]]
 
-				if (_hasChild(currentNode, child1IndexOffset)) {
-					stackContainer[stackSize] = topLevelArr[currentNode[child1IndexOffset]]
-					stackSize += 1
-				}
-				if (_hasChild(currentNode, child2IndexOffset)) {
-					stackContainer[stackSize] = topLevelArr[currentNode[child2IndexOffset]]
-					stackSize += 1
-				}
+				bvhNodeFirstActiveRayIndexs[stackSize] = firstActiveRayIndex
+
+				stackSize += 1
 			}
 		}
+
 	}
 
-	return intersectResult
+	return intersectResults
 }

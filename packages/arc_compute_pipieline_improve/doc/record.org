@@ -13,7 +13,36 @@ if the whole aabb of packet not intersect with node's whole aabb, skip it;
 
 
 
-** TODO study Bulk-Synchronous Parallel Simultaneous BVH Traversal for Collision Detection on GPUs
+*** TODO cpu draft
+
+8*8
+
+first relate to node
+# , end?
+
+rebuild aabb of first-
+
+
+*** TODO gpu draft
+
+
+*** TODO pass cpu run test
+
+test: increase r
+
+
+*** TODO pass gpu run test
+
+
+test: increase r
+
+
+
+
+** TODO perf: N branch BVH tree
+
+
+# ** TODO study Bulk-Synchronous Parallel Simultaneous BVH Traversal for Collision Detection on GPUs
 
 refer to:
 https://www.pure.ed.ac.uk/ws/portalfiles/portal/60657582/bulk_synchronous_parallel_bvh_traversal_for_collision_detection_on_gpus_authorversion_.pdf

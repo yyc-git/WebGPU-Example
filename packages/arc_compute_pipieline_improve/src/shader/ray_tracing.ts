@@ -1,10 +1,6 @@
 export var computeShader = `
-struct RayPayload {
-   radiance: vec3<f32>,
-}
-
 struct Ray {
-   rayTarget: vec2<f32>,
+  rayTarget: vec2<f32>,
 }
 
 
@@ -13,6 +9,33 @@ struct RingIntersect {
   layer: u32,
   instanceIndex: f32,
 }
+
+
+// struct RayPacket {
+//   rays: array<Ray,64>;
+
+//   // worldMin : vec2<f32>,
+//   // worldMax : vec2<f32>,
+
+//   // first:u32;
+// }
+
+// var<workgroup> rayPacket: RayPacket;
+// var<workgroup> firstActiveRayIndex: u32;
+
+var<workgroup> rayPacketRingIntersect: array<RingIntersect, 64>;
+
+
+struct RayPayload {
+   radiance: vec3<f32>,
+}
+
+
+struct RayPacketBVHNodeIntersect {
+  first:u32;
+
+}
+
 
 // struct AABB2D {
 //   worldMin : vec2<f32>,

@@ -29,3 +29,35 @@ export let computeCenter = ({ worldMin, worldMax }: t) => {
 		(worldMax[1] + worldMin[1]) / 2
 	)
 }
+export let setByPoints = (points): t => {
+	let minX = +Infinity
+	let minY = +Infinity
+	let maxX = -Infinity
+	let maxY = -Infinity
+
+	for (let i = 0; i < points.length; i++) {
+		let [x, y] = points[i]
+		if (x > maxX) {
+			maxX = x
+		} else if (x < minX) {
+			minX = x
+		} else if (y > maxY) {
+			maxY = y
+		}
+		else if (y < minY) {
+			minY = y
+		}
+	}
+
+	return {
+		worldMin: Vector2.create(minX, minY),
+		worldMax: Vector2.create(maxX, maxY),
+	}
+}
+
+export let isAABBIntersection = (aabb1: t, aabb2: t): boolean => {
+	return !(aabb2.worldMin[0] > aabb1.worldMax[0]
+		|| aabb2.worldMax[0] < aabb1.worldMin[0]
+		|| aabb2.worldMax[1] > aabb1.worldMin[1]
+		|| aabb2.worldMin[1] < aabb1.worldMax[1])
+}
