@@ -14,8 +14,8 @@ struct RingIntersect {
 // struct RayPacket {
 //   rays: array<Ray,64>;
 
-//   // worldMin : vec2<f32>,
-//   // worldMax : vec2<f32>,
+//   // screenMin : vec2<f32>,
+//   // screenMax : vec2<f32>,
 
 //   // first:u32;
 // }
@@ -38,14 +38,14 @@ struct RayPacketBVHNodeIntersect {
 
 
 // struct AABB2D {
-//   worldMin : vec2<f32>,
-//   worldMax : vec2<f32>,
+//   screenMin : vec2<f32>,
+//   screenMax : vec2<f32>,
 // }
 
 
 struct TopLevel {
-  worldMin : vec2<f32>,
-  worldMax : vec2<f32>,
+  screenMin : vec2<f32>,
+  screenMax : vec2<f32>,
 
 	leafInstanceOffset: f32,
 	leafInstanceCountAndMaxLayer: f32,
@@ -54,8 +54,8 @@ struct TopLevel {
 }
 
 struct BottomLevel {
-  worldMin : vec2<f32>,
-  worldMax : vec2<f32>,
+  screenMin : vec2<f32>,
+  screenMax : vec2<f32>,
 
   instanceIndex: f32,
   layer: f32,
@@ -135,10 +135,10 @@ struct Material {
 
 // fn _isIntersectWithAABB2D(ray: Ray, aabb: AABB2D) -> bool {
 //   var rayTarget = ray.rayTarget;
-//   var worldMin = aabb.worldMin;
-//   var worldMax = aabb.worldMax;
+//   var screenMin = aabb.screenMin;
+//   var screenMax = aabb.screenMax;
 
-// return rayTarget.x > worldMin.x && rayTarget.x < worldMax.x && rayTarget.y > worldMin.y && rayTarget.y < worldMax.y;
+// return rayTarget.x > screenMin.x && rayTarget.x < screenMax.x && rayTarget.y > screenMin.y && rayTarget.y < screenMax.y;
 // }
 
 
@@ -152,19 +152,19 @@ var localPosition = instance.localPosition;
   var w = geometry.w;
   var r = geometry.r;
 
-  var worldPosition = localPosition + c;
+  var screenPosition = localPosition + c;
 
-  var distanceSquare = pow(pointInScreen.x - worldPosition.x, 2.0) + pow( pointInScreen.y - worldPosition.y, 2.0);
+  var distanceSquare = pow(pointInScreen.x - screenPosition.x, 2.0) + pow( pointInScreen.y - screenPosition.y, 2.0);
 
   return distanceSquare >= pow(r, 2) && distanceSquare <= pow(r + w, 2);
 }
 
-fn _isPointIntersectWithAABB(pointInScreen: vec2<f32>, worldMin: vec2<f32>, worldMax: vec2<f32>) -> bool {
-return pointInScreen.x > worldMin.x && pointInScreen.x < worldMax.x && pointInScreen.y > worldMin.y && pointInScreen.y < worldMax.y;
+fn _isPointIntersectWithAABB(pointInScreen: vec2<f32>, screenMin: vec2<f32>, screenMax: vec2<f32>) -> bool {
+return pointInScreen.x > screenMin.x && pointInScreen.x < screenMax.x && pointInScreen.y > screenMin.y && pointInScreen.y < screenMax.y;
 }
 
 fn _isPointIntersectWithTopLevelNode(pointInScreen: vec2<f32>, node: TopLevel) -> bool {
-return _isPointIntersectWithAABB(pointInScreen, node.worldMin, node. worldMax);
+return _isPointIntersectWithAABB(pointInScreen, node.screenMin, node. screenMax);
 }
 
 fn _isLeafNode(leafInstanceCount:u32) -> bool {
@@ -243,7 +243,7 @@ var leafInstanceOffset = u32(currentNode.leafInstanceOffset);
 while(leafInstanceCount > 0){
 var bottomLevel = bottomLevel.bottomLevels[leafInstanceOffset];
 
-if(_isPointIntersectWithAABB(pointInScreen, bottomLevel.worldMin, bottomLevel.worldMax)){
+if(_isPointIntersectWithAABB(pointInScreen, bottomLevel.screenMin, bottomLevel.screenMax)){
 var instance: Instance = sceneInstanceData.instances[u32(bottomLevel.instanceIndex)];
 var geometryIndex = u32(instance.geometryIndex);
  var geometry:Geometry = sceneGeometryData.geometrys[geometryIndex];

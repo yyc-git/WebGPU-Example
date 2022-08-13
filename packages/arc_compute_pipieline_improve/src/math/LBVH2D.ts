@@ -25,11 +25,11 @@ let _getGridXBitCount = () => 10
 let _getGridYBitCount = () => 10
 
 let _computeWholeAABBData = (allAABBData: Array<aabbData>, dataStartIndex, dataLength): wholeAABBData => {
-	let worldMin = Vector2.create(
+	let screenMin = Vector2.create(
 		Infinity,
 		Infinity,
 	)
-	let worldMax = Vector2.create(
+	let screenMax = Vector2.create(
 		-Infinity,
 		-Infinity,
 	)
@@ -39,21 +39,21 @@ let _computeWholeAABBData = (allAABBData: Array<aabbData>, dataStartIndex, dataL
 	for (let i = dataStartIndex; i < dataStartIndex + dataLength; i++) {
 		let { aabb, layer } = allAABBData[i]
 
-		let aabbWorldMin = aabb.worldMin
-		let aabbWorldMax = aabb.worldMax
+		let aabbScreenMin = aabb.screenMin
+		let aabbScreenMax = aabb.screenMax
 
-		if (aabbWorldMin[0] < worldMin[0]) {
-			worldMin[0] = aabbWorldMin[0]
+		if (aabbScreenMin[0] < screenMin[0]) {
+			screenMin[0] = aabbScreenMin[0]
 		}
-		if (aabbWorldMin[1] < worldMin[1]) {
-			worldMin[1] = aabbWorldMin[1]
+		if (aabbScreenMin[1] < screenMin[1]) {
+			screenMin[1] = aabbScreenMin[1]
 		}
 
-		if (aabbWorldMax[0] > worldMax[0]) {
-			worldMax[0] = aabbWorldMax[0]
+		if (aabbScreenMax[0] > screenMax[0]) {
+			screenMax[0] = aabbScreenMax[0]
 		}
-		if (aabbWorldMax[1] > worldMax[1]) {
-			worldMax[1] = aabbWorldMax[1]
+		if (aabbScreenMax[1] > screenMax[1]) {
+			screenMax[1] = aabbScreenMax[1]
 		}
 
 		if (layer > maxLayer) {
@@ -62,17 +62,17 @@ let _computeWholeAABBData = (allAABBData: Array<aabbData>, dataStartIndex, dataL
 	}
 
 	return {
-		aabb: create(worldMin, worldMax),
+		aabb: create(screenMin, screenMax),
 		maxLayer
 	}
 }
 
 let _buildGridPosition = ({ aabb }: wholeAABBData, allAABBData: Array<aabbData>) => {
-	let { worldMin, worldMax } = aabb
-	let minX = worldMin[0]
-	let maxX = worldMax[0]
-	let minY = worldMin[1]
-	let maxY = worldMax[1]
+	let { screenMin, screenMax } = aabb
+	let minX = screenMin[0]
+	let maxX = screenMax[0]
+	let minY = screenMin[1]
+	let maxY = screenMax[1]
 
 	let stepX = (maxX - minX) / Math.pow(2, _getGridXBitCount())
 	let stepY = (maxY - minY) / Math.pow(2, _getGridYBitCount())

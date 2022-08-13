@@ -22,6 +22,8 @@ first relate to node
 
 rebuild aabb of first-
 
+commit: pass bdd test; change coordinate system from world to screen
+
 
 *** TODO gpu draft
 

@@ -1,6 +1,7 @@
 import { layer } from "../type/LayerType"
 import { log } from "../utils/LogUtils"
 import { isAABBIntersection, setByPoints } from "./AABB2D"
+import { range } from "./Array"
 import { tree } from "./LBVH2D"
 import * as Vector2 from "./Vector2"
 
@@ -9,10 +10,10 @@ import * as Vector2 from "./Vector2"
 
 // type accelerationStructures = Array<[instanceOffset, instanceCount]>
 
-type wholeWorldMinX = number
-type wholeWorldMinY = number
-type wholeWorldMaxX = number
-type wholeWorldMaxY = number
+type wholeScreenMinX = number
+type wholeScreenMinY = number
+type wholeScreenMaxX = number
+type wholeScreenMaxY = number
 
 type leafInstanceOffset = number
 // type leafInstanceCount = number
@@ -21,7 +22,7 @@ type child1Index = number
 type child2Index = number
 
 type topLevelNodeData = [
-	wholeWorldMinX, wholeWorldMinY, wholeWorldMaxX, wholeWorldMaxY,
+	wholeScreenMinX, wholeScreenMinY, wholeScreenMaxX, wholeScreenMaxY,
 	leafInstanceOffset,
 	// leafInstanceCount,
 	// maxLayer,
@@ -33,14 +34,14 @@ type topLevelNodeData = [
 type topLevelArr = Array<topLevelNodeData>
 
 
-type worldMinX = number
-type worldMinY = number
-type worldMaxX = number
-type worldMaxY = number
+type screenMinX = number
+type screenMinY = number
+type screenMaxX = number
+type screenMaxY = number
 
 type instanceIndex = number
 
-type bottomLevelArr = Array<[worldMinX, worldMinY, worldMaxX, worldMaxY, instanceIndex, layer]>
+type bottomLevelArr = Array<[screenMinX, screenMinY, screenMaxX, screenMaxY, instanceIndex, layer]>
 
 let _merge24BitValueAnd8BitValue = (value1, value2) => {
 	return (value1 << 8) | value2
@@ -63,7 +64,7 @@ let _getMaxLayer = (
 // let _build = (node, topLevelArr, hierachyArr, bottomLevelArr): void => {
 let _build = (node, topLevelArr, child1Arr, child2Arr, bottomLevelArr: bottomLevelArr): void => {
 	let { aabb, maxLayer } = node.wholeAABBData
-	let { worldMin, worldMax } = aabb
+	let { screenMin, screenMax } = aabb
 
 	if (node.leafAllAABBData !== null) {
 		// TODO require check
@@ -79,23 +80,23 @@ let _build = (node, topLevelArr, child1Arr, child2Arr, bottomLevelArr: bottomLev
 
 		topLevelArr.push(
 			[
-				worldMin[0],
-				worldMin[1],
-				worldMax[0],
-				worldMax[1],
+				screenMin[0],
+				screenMin[1],
+				screenMax[0],
+				screenMax[1],
 				bottomLevelArr.length,
 				// _merge24BitValueAnd8BitValue(node.leafAllAABBData.length, maxLayer)
 				leafInstanceCountAndMaxLayer
 			]
 		)
 		node.leafAllAABBData.reduce((arr, { aabb, instanceIndex, layer }) => {
-			let { worldMin, worldMax } = aabb
+			let { screenMin, screenMax } = aabb
 
 			arr.push([
-				worldMin[0],
-				worldMin[1],
-				worldMax[0],
-				worldMax[1],
+				screenMin[0],
+				screenMin[1],
+				screenMax[0],
+				screenMax[1],
 				instanceIndex,
 				layer
 			])
@@ -108,10 +109,10 @@ let _build = (node, topLevelArr, child1Arr, child2Arr, bottomLevelArr: bottomLev
 
 	topLevelArr.push(
 		[
-			worldMin[0],
-			worldMin[1],
-			worldMax[0],
-			worldMax[1],
+			screenMin[0],
+			screenMin[1],
+			screenMax[0],
+			screenMax[1],
 			0,
 			_merge24BitValueAnd8BitValue(0, maxLayer)
 		]
@@ -206,19 +207,19 @@ type traverseResult = {
 
 let _isPointIntersectWithAABB = (
 	point,
-	wholeWorldMinX, wholeWorldMinY, wholeWorldMaxX, wholeWorldMaxY,
+	wholeScreenMinX, wholeScreenMinY, wholeScreenMaxX, wholeScreenMaxY,
 ) => {
-	return point[0] > wholeWorldMinX && point[0] < wholeWorldMaxX && point[1] > wholeWorldMinY && point[1] < wholeWorldMaxY
+	return point[0] > wholeScreenMinX && point[0] < wholeScreenMaxX && point[1] > wholeScreenMinY && point[1] < wholeScreenMaxY
 }
 
 let _isPointIntersectWithTopLevelNode = (point, node: topLevelNodeData) => {
 	let [
-		wholeWorldMinX, wholeWorldMinY, wholeWorldMaxX, wholeWorldMaxY,
+		wholeScreenMinX, wholeScreenMinY, wholeScreenMaxX, wholeScreenMaxY,
 	] = node
 
 	return _isPointIntersectWithAABB(
 		point,
-		wholeWorldMinX, wholeWorldMinY, wholeWorldMaxX, wholeWorldMaxY,
+		wholeScreenMinX, wholeScreenMinY, wholeScreenMaxX, wholeScreenMaxY,
 	)
 }
 
@@ -232,14 +233,14 @@ let _isLeafNode = (leafInstanceCount) => {
 
 let _handleIntersectWithLeafNode = (
 	intersectResults,
-	isIntersectWithInstance,
 	rayPacketPoints,
 	firstActiveRayIndex,
+	isIntersectWithInstance,
 	leafInstanceCount, maxLayer, node: topLevelNodeData,
 	bottomLevelArr: bottomLevelArr,
 ) => {
 	let [
-		wholeWorldMinX, wholeWorldMinY, wholeWorldMaxX, wholeWorldMaxY,
+		wholeScreenMinX, wholeScreenMinY, wholeScreenMaxX, wholeScreenMaxY,
 		leafInstanceOffset,
 		// leafInstanceCount,
 		// maxLayer
@@ -247,18 +248,21 @@ let _handleIntersectWithLeafNode = (
 
 
 	while (leafInstanceCount > 0) {
-		// let [worldMinX, worldMinY, worldMaxX, worldMaxY, instanceIndex] = bottomLevelArr[leafInstanceOffset]
-		let [worldMinX, worldMinY, worldMaxX, worldMaxY, instanceIndex, layer] = bottomLevelArr[leafInstanceOffset]
+		// let [screenMinX, screenMinY, screenMaxX, screenMaxY, instanceIndex] = bottomLevelArr[leafInstanceOffset]
+		let [screenMinX, screenMinY, screenMaxX, screenMaxY, instanceIndex, layer] = bottomLevelArr[leafInstanceOffset]
 
+		console.log("b1", firstActiveRayIndex)
 		for (let i = firstActiveRayIndex; i < rayPacketPoints.length; i++) {
 			let point = rayPacketPoints[i]
 			let intersectResult = intersectResults[i]
 
 			if (_isPointIntersectWithAABB(
 				point,
-				worldMinX, worldMinY, worldMaxX, worldMaxY
+				screenMinX, screenMinY, screenMaxX, screenMaxY
 			)) {
+				console.log("bbb")
 				if (isIntersectWithInstance(point, instanceIndex)) {
+					console.log("ccc")
 					// let layer = getInstanceLayer(instanceIndex)
 
 					// if (!intersectResult.isClosestHit || layer >= intersectResult.layer) {
@@ -293,12 +297,14 @@ let _buildAABB = (firstActiveRayIndex, rayPacketPoints) => {
 
 let _isAABBIntersectWithTopLevelNode = (aabb, node: topLevelNodeData) => {
 	let [
-		wholeWorldMinX, wholeWorldMinY, wholeWorldMaxX, wholeWorldMaxY,
+		wholeScreenMinX, wholeScreenMinY, wholeScreenMaxX, wholeScreenMaxY,
 	] = node
 
+	// console.log(aabb, node)
+
 	return isAABBIntersection(aabb, {
-		worldMin: Vector2.create(wholeWorldMinX, wholeWorldMinY),
-		worldMax: Vector2.create(wholeWorldMaxX, wholeWorldMaxY)
+		screenMin: Vector2.create(wholeScreenMinX, wholeScreenMinY),
+		screenMax: Vector2.create(wholeScreenMaxX, wholeScreenMaxY)
 	})
 }
 
@@ -314,7 +320,7 @@ export let traverse = (isIntersectWithInstance, rayPacketPoints, topLevelArr, bo
 
 	let rayCount = rayPacketPoints.length
 
-	let intersectResults: Array<traverseResult> = new Array(rayCount).map(_ => {
+	let intersectResults: Array<traverseResult> = range(0, rayCount - 1).map(_ => {
 		return {
 			isClosestHit: false,
 			// layer: -1,
@@ -324,10 +330,12 @@ export let traverse = (isIntersectWithInstance, rayPacketPoints, topLevelArr, bo
 	})
 
 	let maxDepth = 20
-	let bvhNodeFirstActiveRayIndexs = new Array(maxDepth).map(_ => 0)
+	let bvhNodeFirstActiveRayIndexs = range(0, maxDepth - 1).map(_ => 0)
 
 	while (stackSize > 0) {
+		console.log(stackSize)
 		let currentNode = stackContainer[stackSize - 1]
+
 
 		stackSize -= 1
 
@@ -344,7 +352,13 @@ export let traverse = (isIntersectWithInstance, rayPacketPoints, topLevelArr, bo
 
 		let pointInScreen = rayPacketPoints[firstActiveRayIndex]
 
+		console.log(
+			firstActiveRayIndex,
+			pointInScreen,
+		)
+
 		if (!_isAABBIntersectWithTopLevelNode(_buildAABB(firstActiveRayIndex, rayPacketPoints), currentNode)) {
+			console.log("aaa")
 			continue;
 		}
 
@@ -353,22 +367,21 @@ export let traverse = (isIntersectWithInstance, rayPacketPoints, topLevelArr, bo
 			// firstActiveRayIndex = _findFirstActiveRayIndex(firstActiveRayIndex)
 			firstActiveRayIndex = firstActiveRayIndex + 1
 
-			// if(firstActiveRayIndex >= rayPacketPoints.length){
-			//     break;
-			// }
+			// TODO move to ensure check: should firstActiveRayIndex < rayPacketPoints.length
+			if (firstActiveRayIndex >= rayPacketPoints.length) {
+				throw new Error("error");
+			}
 
 			pointInScreen = rayPacketPoints[firstActiveRayIndex]
 		}
 
-		// TODO ensure check: should firstActiveRayIndex < rayPacketPoints.length
-		if (firstActiveRayIndex >= rayPacketPoints.length) {
-			throw new Error("error");
-		}
 
 		let leafInstanceCount = _getLeafInstanceCount(leafInstanceCountAndMaxLayer)
 
 
 		if (_isLeafNode(leafInstanceCount)) {
+			console.log("leaf", leafInstanceCount)
+
 			_handleIntersectWithLeafNode(
 				intersectResults,
 				rayPacketPoints,
@@ -376,7 +389,7 @@ export let traverse = (isIntersectWithInstance, rayPacketPoints, topLevelArr, bo
 				isIntersectWithInstance, leafInstanceCount, maxLayer, currentNode, bottomLevelArr)
 		}
 		else {
-			// log("judge child")
+			console.log("judge child")
 
 			// TODO perf: 如果Packet与两个子节点都相交则优先遍历相交Ray数目多的那个节点
 
