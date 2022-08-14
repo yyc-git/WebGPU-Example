@@ -357,80 +357,9 @@ while(localStackSize > 0){
 
 
 
-        // _buildRayPacketAABB(firstActiveRayIndex, pointInScreen, LocalInvocationIndex);
-
-// rayPacketPointInScreenForFindMin[LocalInvocationIndex] = pointInScreen;
-// rayPacketPointInScreenForFindMax[LocalInvocationIndex] = pointInScreen;
-
-// workgroupBarrier();
-
-// //TODO perf: unroll?
-
-// //paralle reduction to find min, max
-
-// for (var s: u32 = 1; s < 64; s = s * 2) {
-//   var index = 2 * s * LocalInvocationIndex;
-//   if(LocalInvocationIndex % (2 * s) == 0){
-//     rayPacketPointInScreenForFindMin[LocalInvocationIndex] = min(rayPacketPointInScreenForFindMin[LocalInvocationIndex], rayPacketPointInScreenForFindMin[LocalInvocationIndex + s]);
-//     rayPacketPointInScreenForFindMax[LocalInvocationIndex] = max(rayPacketPointInScreenForFindMax[LocalInvocationIndex], rayPacketPointInScreenForFindMax[LocalInvocationIndex + s]);
-//   }
-//   workgroupBarrier();
-// }
-
-
-
-
-//         if(LocalInvocationIndex == 0){
-// // var rayPacketAABB: AABB2D;
-// // rayPacketAABB.screenMin = rayPacketPointInScreenForFindMin[0];
-// // rayPacketAABB.screenMax = rayPacketPointInScreenForFindMax[0];
-
-
-
-
-
-// isRayPacketAABBIntersectWithTopLevelNode = _isRayPacketAABBIntersectWithTopLevelNode(rayPacketAABB, currentNode);
-//         }
-
-//         workgroupBarrier();
-
-// 		if (!isRayPacketAABBIntersectWithTopLevelNode) {
-// 			continue;
-// 		}
-
-
-
 if(LocalInvocationIndex == 0){
-  //pointInScreen is left-bottom conner pointInScreen of 8*8 region
-
-  // var resolution = vec2 < f32 > (screenDimension.resolution);
-  // var step = 2 / resolution;
-
-  // var rayPacketAABB:AABB2D;
-
-
-  // rayPacketAABB.screenMin = pointInScreen;
-  // // rayPacketAABB.screenMax = vec2<f32>(pointInScreen.x + 7.0 * step.x, pointInScreen.y + f32(7 - _getMultiplierForBuildRayPacketAABB(firstActiveRayIndex)) * step.y);
-  // rayPacketAABB.screenMax = vec2<f32>(pointInScreen.x + 7.0 * step.x, pointInScreen.y + 7.0 * step.y);
-
-
   isRayPacketAABBIntersectWithTopLevelNode = _isRayPacketAABBIntersectWithTopLevelNode(rayPacketAABB, currentNode);
 }
-// else {
-//       if(LocalInvocationIndex >= firstActiveRayIndex){
-//           rayPacketTempForFindFirstActiveRayIndex[LocalInvocationIndex - firstActiveRayIndex] = _isPointIntersectWithTopLevelNode(pointInScreen, currentNode);
-//       }
-//           // rayPacketTempForFindFirstActiveRayIndex[LocalInvocationIndex - firstActiveRayIndex] = _isPointIntersectWithTopLevelNode(pointInScreen, currentNode);
-// }
-
-    // if(firstActiveRayIndex == 0){
-    //       rayPacketTempForFindFirstActiveRayIndex[LocalInvocationIndex] = _isPointIntersectWithTopLevelNode(pointInScreen, currentNode);
-    // }
-    // else{
-    //   if(LocalInvocationIndex >= firstActiveRayIndex){
-    //       rayPacketTempForFindFirstActiveRayIndex[LocalInvocationIndex - firstActiveRayIndex] = _isPointIntersectWithTopLevelNode(pointInScreen, currentNode);
-    //   }
-    // }
 
         workgroupBarrier();
 
@@ -440,52 +369,48 @@ if(LocalInvocationIndex == 0){
 
 
 
-        // firstActiveRayIndex = _findFirstActiveRayIndex(firstActiveRayIndex,pointInScreen, LocalInvocationIndex , currentNode);
-
-        // TODO check: if(firstActiveRayIndex > 100), throw error
-        // if(firstActiveRayIndex > 100){
-        //   continue;
-        // }
-
-
         var leafInstanceCount = _getLeafInstanceCount(leafInstanceCountAndMaxLayer);
+
 
 
 			if (_isLeafNode(leafInstanceCount)) {
 				// _handleIntersectWithLeafNode(intersectResult, isIntersectWithInstance, pointInScreen, currentNode, bottomLevelArr);
 
-var leafInstanceOffset = u32(currentNode.leafInstanceOffset);
-// var leafInstanceCount = u32(currentNode.leafInstanceCount);
-// var leafInstanceOffset = 0;
-// var leafInstanceCount = 2;
+		if (_isPointIntersectWithTopLevelNode(pointInScreen, currentNode)) {
+      var leafInstanceOffset = u32(currentNode.leafInstanceOffset);
+      // var leafInstanceCount = u32(currentNode.leafInstanceCount);
+      // var leafInstanceOffset = 0;
+      // var leafInstanceCount = 2;
 
-while(leafInstanceCount > 0){
-var bottomLevel = bottomLevel.bottomLevels[leafInstanceOffset];
+      while(leafInstanceCount > 0){
+      var bottomLevel = bottomLevel.bottomLevels[leafInstanceOffset];
 
-if(_isPointIntersectWithAABB(pointInScreen, bottomLevel.screenMin, bottomLevel.screenMax)){
-var instance: Instance = sceneInstanceData.instances[u32(bottomLevel.instanceIndex)];
-var geometryIndex = u32(instance.geometryIndex);
- var geometry:Geometry = sceneGeometryData.geometrys[geometryIndex];
+      if(_isPointIntersectWithAABB(pointInScreen, bottomLevel.screenMin, bottomLevel.screenMax)){
+      var instance: Instance = sceneInstanceData.instances[u32(bottomLevel.instanceIndex)];
+      var geometryIndex = u32(instance.geometryIndex);
+      var geometry:Geometry = sceneGeometryData.geometrys[geometryIndex];
 
 
-      if (_isIntersectWithRing(pointInScreen,instance, geometry)) {
- var layer = u32(bottomLevel.layer);
+            if (_isIntersectWithRing(pointInScreen,instance, geometry)) {
+      var layer = u32(bottomLevel.layer);
 
-        if (!intersectResult.isClosestHit || layer > intersectResult.layer) {
-          intersectResult.isClosestHit = true;
-          intersectResult.layer = layer;
-          intersectResult.instanceIndex = bottomLevel.instanceIndex;
+              if (!intersectResult.isClosestHit || layer > intersectResult.layer) {
+                intersectResult.isClosestHit = true;
+                intersectResult.layer = layer;
+                intersectResult.instanceIndex = bottomLevel.instanceIndex;
 
-// if(layer == maxLayer){
-//   break;
-// }
-        }
+      // if(layer == maxLayer){
+      //   break;
+      // }
+              }
+            }
       }
-}
 
-leafInstanceCount = leafInstanceCount - 1;
-leafInstanceOffset = leafInstanceOffset + 1;
-}
+      leafInstanceCount = leafInstanceCount - 1;
+      leafInstanceOffset = leafInstanceOffset + 1;
+      }
+      }
+
 			}
         else {
             child1Index = u32(currentNode.child1Index);
@@ -508,6 +433,7 @@ leafInstanceOffset = leafInstanceOffset + 1;
                 localStackSize += 1;
             }
         }
+
 }
 
 return intersectResult;

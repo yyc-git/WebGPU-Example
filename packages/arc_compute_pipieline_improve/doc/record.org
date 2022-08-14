@@ -108,6 +108,10 @@ if(LocalInvocationIndex == 56){
 
 TODO perf: other local units to find first!(if firstActiveRayIndex > 0)
 
+
+
+TODO fix bug: bottom some lines
+
 *** TODO benchmark compare
 before: 10
 
