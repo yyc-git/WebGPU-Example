@@ -244,34 +244,34 @@ fn _getNegativeInfinity()->f32{
   return -1000000.0;
 }
 
-fn _getMultiplierForBuildRayPacketAABB(firstActiveRayIndex:u32) -> u32{
+fn _getMultiplierForBuildRayPacketAABB(firstActiveRayIndex:u32) -> f32{
 
  if(firstActiveRayIndex < 8){
-  return 0;
+  return 0.0;
  }
  if(firstActiveRayIndex < 16){
-  return 1;
+  return 1.0;
  }
  if(firstActiveRayIndex < 24){
-  return 2;
+  return 2.0;
  }
  if(firstActiveRayIndex < 32){
-  return 3;
+  return 3.0;
  }
  if(firstActiveRayIndex < 40){
-  return 4;
+  return 4.0;
  }
  if(firstActiveRayIndex < 48){
-  return 5;
+  return 5.0;
  }
  if(firstActiveRayIndex < 56){
-  return 6;
+  return 6.0;
  }
 //  if(firstActiveRayIndex < 64){
-//   return 7;
+//   return 7.0;
 //  }
 
-  return 7;
+  return 7.0;
 }
 
 // fn _convertStartFromLeftBottomToLeftTop(LocalInvocationIndex : u32) -> u32 {
@@ -400,12 +400,10 @@ if(LocalInvocationIndex == 0){
   var rayPacketAABB:AABB2D;
 
 
-  rayPacketAABB.screenMin = pointInScreen;
-  // TODO fix
-  rayPacketAABB.screenMax = vec2<f32>(pointInScreen.x + 7.0 * step.x, pointInScreen.y + f32(7 - _getMultiplierForBuildRayPacketAABB(firstActiveRayIndex)) * step.y);
-  // rayPacketAABB.screenMax = vec2<f32>(pointInScreen.x + 7.0 * step.x, pointInScreen.y + f32(7 ) * step.y);
+  rayPacketAABB.screenMin = vec2<f32>(pointInScreen.x, pointInScreen.y +  _getMultiplierForBuildRayPacketAABB(firstActiveRayIndex) * step.y);
+  rayPacketAABB.screenMax = vec2<f32>(pointInScreen.x + 7.0 * step.x, pointInScreen.y + 7.0 * step.y);
 
-
+  
   isRayPacketAABBIntersectWithTopLevelNode = _isRayPacketAABBIntersectWithTopLevelNode(rayPacketAABB, currentNode);
 }
 // else {
