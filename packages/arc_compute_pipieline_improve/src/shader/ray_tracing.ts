@@ -39,6 +39,7 @@ var<workgroup>bvhNodeFirstActiveRayIndexs: array <u32, 20>;
 // var<workgroup>rayPacketPointInScreenForFindMin: array<vec2<f32>, 64>;
 // var<workgroup>rayPacketPointInScreenForFindMax: array<vec2<f32>, 64>;
 var<workgroup>rayPacketTempForFindFirstActiveRayIndex: array<bool, 64>;
+var<workgroup>rayPacketTemp2ForFindFirstActiveRayIndex: u32;
 
 
 struct RayPayload {
@@ -206,7 +207,7 @@ fn _findFirstActiveRayIndex(firstActiveRayIndex:u32,pointInScreen: vec2<f32>, Lo
 
     workgroupBarrier();
 
-    // if(LocalInvocationIndex == 0){
+    if(LocalInvocationIndex == 0){
         var result:u32 = 100;
         for (var s: u32 = 0; s < 64; s +=1) {
             if(rayPacketTempForFindFirstActiveRayIndex[s]){
@@ -215,13 +216,14 @@ fn _findFirstActiveRayIndex(firstActiveRayIndex:u32,pointInScreen: vec2<f32>, Lo
             }
         }
 
-        // TODO how to check: result !== 100?
-    // }
+rayPacketTemp2ForFindFirstActiveRayIndex = result;
+    }
 
 
     workgroupBarrier();
 
-    return result + firstActiveRayIndex;
+    // return result + firstActiveRayIndex;
+    return rayPacketTemp2ForFindFirstActiveRayIndex + firstActiveRayIndex;
 }
 
 fn _getPositiveInfinity()->f32{
@@ -343,6 +345,10 @@ while(localStackSize > 0){
 // 			continue;
 // 		}
 
+
+TODO judge isRayPacketAABBIntersectWithTopLevelNode by simple build!
+
+// TODO perf: other local units to find first!(if firstActiveRayIndex > 0)
 
 
         firstActiveRayIndex = _findFirstActiveRayIndex(firstActiveRayIndex,pointInScreen, LocalInvocationIndex , currentNode);
