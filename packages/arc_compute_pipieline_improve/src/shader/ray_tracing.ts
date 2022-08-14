@@ -34,7 +34,7 @@ struct AABB2D {
 var<workgroup>stackContainer: array<TopLevel, 20>;
 // var<workgroup>stackSize: u32;
 // var<workgroup>bvhNodeFirstActiveRayIndexs: array <u32, 20>;
-// var<workgroup>rayPacketAABB: AABB2D;
+var<workgroup>rayPacketAABB: AABB2D;
 var<workgroup>isRayPacketAABBIntersectWithTopLevelNode: bool;
 // var<workgroup>rayPacketPointInScreenForFindMin: array<vec2<f32>, 64>;
 // var<workgroup>rayPacketPointInScreenForFindMax: array<vec2<f32>, 64>;
@@ -287,6 +287,8 @@ fn _intersectScene(ray: Ray, LocalInvocationIndex : u32) -> RingIntersect {
 
 var rootNode = topLevel.topLevels[0];
 
+var pointInScreen = ray.rayTarget;
+
 // // TODO use const
 // if(LocalInvocationIndex < 20){
 // bvhNodeFirstActiveRayIndexs[LocalInvocationIndex] = 0;
@@ -296,6 +298,15 @@ if(LocalInvocationIndex == 0){
 // stackSize = 1;
 
 stackContainer[0] = rootNode;
+
+
+  var resolution = vec2 < f32 > (screenDimension.resolution);
+  var step = 2 / resolution;
+
+
+  rayPacketAABB.screenMin = pointInScreen;
+  rayPacketAABB.screenMax = vec2<f32>(pointInScreen.x + 7.0 * step.x, pointInScreen.y + 7.0 * step.y);
+
 }
 
 
@@ -305,7 +316,6 @@ var child1Index: u32;
 var child2Index: u32;
 
 
-var pointInScreen = ray.rayTarget;
 
 // var localStackSize:u32;
 var localStackSize = 1;
@@ -391,17 +401,17 @@ while(localStackSize > 0){
 
 
 if(LocalInvocationIndex == 0){
-  //pointInScreen is left-bottom conner point of 8*8 region
+  //pointInScreen is left-bottom conner pointInScreen of 8*8 region
 
-  var resolution = vec2 < f32 > (screenDimension.resolution);
-  var step = 2 / resolution;
+  // var resolution = vec2 < f32 > (screenDimension.resolution);
+  // var step = 2 / resolution;
 
-  var rayPacketAABB:AABB2D;
+  // var rayPacketAABB:AABB2D;
 
 
-  rayPacketAABB.screenMin = pointInScreen;
-  // rayPacketAABB.screenMax = vec2<f32>(pointInScreen.x + 7.0 * step.x, pointInScreen.y + f32(7 - _getMultiplierForBuildRayPacketAABB(firstActiveRayIndex)) * step.y);
-  rayPacketAABB.screenMax = vec2<f32>(pointInScreen.x + 7.0 * step.x, pointInScreen.y + 7.0 * step.y);
+  // rayPacketAABB.screenMin = pointInScreen;
+  // // rayPacketAABB.screenMax = vec2<f32>(pointInScreen.x + 7.0 * step.x, pointInScreen.y + f32(7 - _getMultiplierForBuildRayPacketAABB(firstActiveRayIndex)) * step.y);
+  // rayPacketAABB.screenMax = vec2<f32>(pointInScreen.x + 7.0 * step.x, pointInScreen.y + 7.0 * step.y);
 
 
   isRayPacketAABBIntersectWithTopLevelNode = _isRayPacketAABBIntersectWithTopLevelNode(rayPacketAABB, currentNode);
@@ -441,41 +451,42 @@ if(LocalInvocationIndex == 0){
         var leafInstanceCount = _getLeafInstanceCount(leafInstanceCountAndMaxLayer);
 
 
-        if (_isLeafNode(leafInstanceCount)) {
-            // if(LocalInvocationIndex >= firstActiveRayIndex){
-                var leafInstanceOffset = u32(currentNode.leafInstanceOffset);
+			if (_isLeafNode(leafInstanceCount)) {
+				// _handleIntersectWithLeafNode(intersectResult, isIntersectWithInstance, pointInScreen, currentNode, bottomLevelArr);
 
-                // var intersectResult = rayPacketRingIntersects[LocalInvocationIndex];
+var leafInstanceOffset = u32(currentNode.leafInstanceOffset);
+// var leafInstanceCount = u32(currentNode.leafInstanceCount);
+// var leafInstanceOffset = 0;
+// var leafInstanceCount = 2;
 
-                while(leafInstanceCount > 0){
-                    var bottomLevel = bottomLevel.bottomLevels[leafInstanceOffset];
+while(leafInstanceCount > 0){
+var bottomLevel = bottomLevel.bottomLevels[leafInstanceOffset];
 
-                    if(_isPointIntersectWithAABB(pointInScreen, bottomLevel.screenMin, bottomLevel.screenMax)){
-                        var instance: Instance = sceneInstanceData.instances[u32(bottomLevel.instanceIndex)];
-                        var geometryIndex = u32(instance.geometryIndex);
-                        var geometry:Geometry = sceneGeometryData.geometrys[geometryIndex];
+if(_isPointIntersectWithAABB(pointInScreen, bottomLevel.screenMin, bottomLevel.screenMax)){
+var instance: Instance = sceneInstanceData.instances[u32(bottomLevel.instanceIndex)];
+var geometryIndex = u32(instance.geometryIndex);
+ var geometry:Geometry = sceneGeometryData.geometrys[geometryIndex];
 
-                        if (_isIntersectWithRing(pointInScreen,instance, geometry)) {
-                            var layer = u32(bottomLevel.layer);
 
-                            if (!intersectResult.isClosestHit || layer > intersectResult.layer) {
-                            intersectResult.isClosestHit = true;
-                            intersectResult.layer = layer;
-                            intersectResult.instanceIndex = bottomLevel.instanceIndex;
+      if (_isIntersectWithRing(pointInScreen,instance, geometry)) {
+ var layer = u32(bottomLevel.layer);
 
-                    // TODO restore
-                    // if(layer == maxLayer){
-                    //   break;
-                    // }
-                            }
-                        }
-                    }
+        if (!intersectResult.isClosestHit || layer > intersectResult.layer) {
+          intersectResult.isClosestHit = true;
+          intersectResult.layer = layer;
+          intersectResult.instanceIndex = bottomLevel.instanceIndex;
 
-                    leafInstanceCount = leafInstanceCount - 1;
-                    leafInstanceOffset = leafInstanceOffset + 1;
-                // }
-            }
+// if(layer == maxLayer){
+//   break;
+// }
         }
+      }
+}
+
+leafInstanceCount = leafInstanceCount - 1;
+leafInstanceOffset = leafInstanceOffset + 1;
+}
+			}
         else {
             child1Index = u32(currentNode.child1Index);
             child2Index = u32(currentNode.child2Index);
