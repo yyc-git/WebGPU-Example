@@ -392,6 +392,7 @@ while(localStackSize > 0){
 // 		}
 
 
+    var isPointIntersectWithTopLevelNode:bool;
 
 if(LocalInvocationIndex == 0){
   //pointInScreen is left-bottom conner point of 8*8 region
@@ -411,21 +412,10 @@ if(LocalInvocationIndex == 0){
   
   isRayPacketAABBIntersectWithTopLevelNode = _isRayPacketAABBIntersectWithTopLevelNode(rayPacketAABB, currentNode);
 }
-// else {
-//       if(LocalInvocationIndex >= firstActiveRayIndex){
-//           rayPacketTempForFindFirstActiveRayIndex[LocalInvocationIndex - firstActiveRayIndex] = _isPointIntersectWithTopLevelNode(pointInScreen, currentNode);
-//       }
-//           // rayPacketTempForFindFirstActiveRayIndex[LocalInvocationIndex - firstActiveRayIndex] = _isPointIntersectWithTopLevelNode(pointInScreen, currentNode);
-// }
-
-    // if(firstActiveRayIndex == 0){
-    //       rayPacketTempForFindFirstActiveRayIndex[LocalInvocationIndex] = _isPointIntersectWithTopLevelNode(pointInScreen, currentNode);
-    // }
-    // else{
-    //   if(LocalInvocationIndex >= firstActiveRayIndex){
-    //       rayPacketTempForFindFirstActiveRayIndex[LocalInvocationIndex - firstActiveRayIndex] = _isPointIntersectWithTopLevelNode(pointInScreen, currentNode);
-    //   }
-    // }
+else if(LocalInvocationIndex >= firstActiveRayIndex){
+  isPointIntersectWithTopLevelNode = _isPointIntersectWithTopLevelNode(pointInScreen, currentNode);
+  rayPacketTempForFindFirstActiveRayIndex[LocalInvocationIndex - firstActiveRayIndex] = isPointIntersectWithTopLevelNode;
+}
 
         workgroupBarrier();
 
@@ -433,14 +423,23 @@ if(LocalInvocationIndex == 0){
 			continue;
 		}
 
-    var isPointIntersectWithTopLevelNode:bool;
 
-    if(LocalInvocationIndex >= firstActiveRayIndex){
-isPointIntersectWithTopLevelNode = _isPointIntersectWithTopLevelNode(pointInScreen, currentNode);
-        rayPacketTempForFindFirstActiveRayIndex[LocalInvocationIndex - firstActiveRayIndex] = isPointIntersectWithTopLevelNode;
+    if(firstActiveRayIndex == 0){
+      if(LocalInvocationIndex ==0){
+  isPointIntersectWithTopLevelNode = _isPointIntersectWithTopLevelNode(pointInScreen, currentNode);
+            rayPacketTempForFindFirstActiveRayIndex[0] = isPointIntersectWithTopLevelNode;
+      }
+      workgroupBarrier();
     }
 
-    workgroupBarrier();
+//     var isPointIntersectWithTopLevelNode:bool;
+
+//     if(LocalInvocationIndex >= firstActiveRayIndex){
+// isPointIntersectWithTopLevelNode = _isPointIntersectWithTopLevelNode(pointInScreen, currentNode);
+//         rayPacketTempForFindFirstActiveRayIndex[LocalInvocationIndex - firstActiveRayIndex] = isPointIntersectWithTopLevelNode;
+//     }
+
+    // workgroupBarrier();
 
     var firstActiveRayIndexBefore = firstActiveRayIndex;
 
