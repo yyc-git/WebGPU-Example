@@ -201,11 +201,11 @@ fn _isRayPacketAABBIntersectWithTopLevelNode(aabb:AABB2D, node:TopLevel) ->bool 
 }
 
 fn _findFirstActiveRayIndex(firstActiveRayIndex:u32,pointInScreen: vec2<f32>, LocalInvocationIndex : u32, node: TopLevel) -> u32 {
-    if(LocalInvocationIndex >= firstActiveRayIndex && _isPointIntersectWithTopLevelNode(pointInScreen, node)){
-        rayPacketTempForFindFirstActiveRayIndex[LocalInvocationIndex - firstActiveRayIndex] = true;
-    }
+    // if(LocalInvocationIndex >= firstActiveRayIndex && _isPointIntersectWithTopLevelNode(pointInScreen, node)){
+    //     rayPacketTempForFindFirstActiveRayIndex[LocalInvocationIndex - firstActiveRayIndex] = true;
+    // }
 
-    workgroupBarrier();
+    // workgroupBarrier();
 
     if(LocalInvocationIndex == 0){
         var result:u32 = 100;
@@ -382,7 +382,6 @@ while(localStackSize > 0){
 
 
 if(LocalInvocationIndex == 0){
-// if(LocalInvocationIndex == 56){
   //pointInScreen is left-bottom conner point of 8*8 region
 
   var resolution = vec2 < f32 > (screenDimension.resolution);
@@ -398,8 +397,16 @@ if(LocalInvocationIndex == 0){
   isRayPacketAABBIntersectWithTopLevelNode = _isRayPacketAABBIntersectWithTopLevelNode(rayPacketAABB, currentNode);
 }
 
-
-// TODO perf: other local units to find first!(if firstActiveRayIndex > 0)
+    if(firstActiveRayIndex == 0){
+      if(_isPointIntersectWithTopLevelNode(pointInScreen, currentNode)){
+          rayPacketTempForFindFirstActiveRayIndex[LocalInvocationIndex] = true;
+      }
+    }
+    else{
+      if(LocalInvocationIndex >= firstActiveRayIndex && _isPointIntersectWithTopLevelNode(pointInScreen, currentNode)){
+          rayPacketTempForFindFirstActiveRayIndex[LocalInvocationIndex - firstActiveRayIndex] = true;
+      }
+    }
 
         workgroupBarrier();
 
