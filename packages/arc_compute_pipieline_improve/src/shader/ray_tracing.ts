@@ -33,13 +33,13 @@ struct AABB2D {
 // var<workgroup>rayPacketRingIntersects: array<RingIntersect, 64>;
 var<workgroup>stackContainer: array<TopLevel, 20>;
 // var<workgroup>stackSize: u32;
-var<workgroup>bvhNodeFirstActiveRayIndexs: array <u32, 20>;
+// var<workgroup>bvhNodeFirstActiveRayIndexs: array <u32, 20>;
 // var<workgroup>rayPacketAABB: AABB2D;
 var<workgroup>isRayPacketAABBIntersectWithTopLevelNode: bool;
 // var<workgroup>rayPacketPointInScreenForFindMin: array<vec2<f32>, 64>;
 // var<workgroup>rayPacketPointInScreenForFindMax: array<vec2<f32>, 64>;
-var<workgroup>rayPacketTempForFindFirstActiveRayIndex: array<bool, 64>;
-var<workgroup>rayPacketTemp2ForFindFirstActiveRayIndex: u32;
+// var<workgroup>rayPacketTempForFindFirstActiveRayIndex: array<bool, 64>;
+// var<workgroup>rayPacketTemp2ForFindFirstActiveRayIndex: u32;
 
 
 struct RayPayload {
@@ -200,31 +200,40 @@ fn _isRayPacketAABBIntersectWithTopLevelNode(aabb:AABB2D, node:TopLevel) ->bool 
 	return _isAABBIntersection(aabb, nodeAABB);
 }
 
-fn _findFirstActiveRayIndex(firstActiveRayIndex:u32,pointInScreen: vec2<f32>, LocalInvocationIndex : u32, node: TopLevel) -> u32 {
-    // if(LocalInvocationIndex >= firstActiveRayIndex && _isPointIntersectWithTopLevelNode(pointInScreen, node)){
-    //     rayPacketTempForFindFirstActiveRayIndex[LocalInvocationIndex - firstActiveRayIndex] = true;
-    // }
+// fn _findFirstActiveRayIndex(firstActiveRayIndex:u32,pointInScreen: vec2<f32>, LocalInvocationIndex : u32, node: TopLevel) -> u32 {
+//     // if(LocalInvocationIndex >= firstActiveRayIndex && _isPointIntersectWithTopLevelNode(pointInScreen, node)){
+//     //     rayPacketTempForFindFirstActiveRayIndex[LocalInvocationIndex - firstActiveRayIndex] = true;
+//     // }
 
-    // workgroupBarrier();
-
-    if(LocalInvocationIndex == 0){
-        var result:u32 = 100;
-        for (var s: u32 = 0; s < 64; s +=1) {
-            if(rayPacketTempForFindFirstActiveRayIndex[s]){
-                result = s;
-                break;
-            }
-        }
-
-rayPacketTemp2ForFindFirstActiveRayIndex = result;
-    }
+//     // workgroupBarrier();
 
 
-    workgroupBarrier();
 
-    // return result + firstActiveRayIndex;
-    return rayPacketTemp2ForFindFirstActiveRayIndex + firstActiveRayIndex;
-}
+//    if(LocalInvocationIndex == 0){
+//     if(firstActiveRayIndex == 0){
+//           rayPacketTempForFindFirstActiveRayIndex[0] = _isPointIntersectWithTopLevelNode(pointInScreen, node);
+//     }
+//   }
+
+// //     if(LocalInvocationIndex == 1){
+// //         var result:u32 = 100;
+// //         for (var s: u32 = 0; s < 64; s +=1) {
+// //             if(rayPacketTempForFindFirstActiveRayIndex[s]){
+// //                 result = s;
+// //                 break;
+// //             }
+// //         }
+
+// // rayPacketTemp2ForFindFirstActiveRayIndex = result;
+// //     }
+
+
+// //     workgroupBarrier();
+
+// //     // return result + firstActiveRayIndex;
+// //     return rayPacketTemp2ForFindFirstActiveRayIndex + firstActiveRayIndex;
+//     return  firstActiveRayIndex;
+// }
 
 fn _getPositiveInfinity()->f32{
   return 1000000.0;
@@ -278,10 +287,10 @@ fn _intersectScene(ray: Ray, LocalInvocationIndex : u32) -> RingIntersect {
 
 var rootNode = topLevel.topLevels[0];
 
-// TODO use const
-if(LocalInvocationIndex < 20){
-bvhNodeFirstActiveRayIndexs[LocalInvocationIndex] = 0;
-}
+// // TODO use const
+// if(LocalInvocationIndex < 20){
+// bvhNodeFirstActiveRayIndexs[LocalInvocationIndex] = 0;
+// }
 
 if(LocalInvocationIndex == 0){
 // stackSize = 1;
@@ -302,7 +311,7 @@ var pointInScreen = ray.rayTarget;
 var localStackSize = 1;
 
 while(localStackSize > 0){
-        rayPacketTempForFindFirstActiveRayIndex[LocalInvocationIndex] = false;
+        // rayPacketTempForFindFirstActiveRayIndex[LocalInvocationIndex] = false;
 
 //         if(LocalInvocationIndex == 0){
 //             // stackSize = localStackSize;
@@ -326,7 +335,7 @@ while(localStackSize > 0){
 
 		var leafInstanceCountAndMaxLayer = u32(currentNode.leafInstanceCountAndMaxLayer);
         
-		var firstActiveRayIndex = bvhNodeFirstActiveRayIndexs[localStackSize];
+		// var firstActiveRayIndex = bvhNodeFirstActiveRayIndexs[localStackSize];
 
         // var maxLayer =   _getMaxLayer(leafInstanceCountAndMaxLayer);
 
@@ -391,22 +400,27 @@ if(LocalInvocationIndex == 0){
 
 
   rayPacketAABB.screenMin = pointInScreen;
-  rayPacketAABB.screenMax = vec2<f32>(pointInScreen.x + 7.0 * step.x, pointInScreen.y + f32(7 - _getMultiplierForBuildRayPacketAABB(firstActiveRayIndex)) * step.y);
+  // rayPacketAABB.screenMax = vec2<f32>(pointInScreen.x + 7.0 * step.x, pointInScreen.y + f32(7 - _getMultiplierForBuildRayPacketAABB(firstActiveRayIndex)) * step.y);
+  rayPacketAABB.screenMax = vec2<f32>(pointInScreen.x + 7.0 * step.x, pointInScreen.y + 7.0 * step.y);
 
 
   isRayPacketAABBIntersectWithTopLevelNode = _isRayPacketAABBIntersectWithTopLevelNode(rayPacketAABB, currentNode);
 }
+// else {
+//       if(LocalInvocationIndex >= firstActiveRayIndex){
+//           rayPacketTempForFindFirstActiveRayIndex[LocalInvocationIndex - firstActiveRayIndex] = _isPointIntersectWithTopLevelNode(pointInScreen, currentNode);
+//       }
+//           // rayPacketTempForFindFirstActiveRayIndex[LocalInvocationIndex - firstActiveRayIndex] = _isPointIntersectWithTopLevelNode(pointInScreen, currentNode);
+// }
 
-    if(firstActiveRayIndex == 0){
-      if(_isPointIntersectWithTopLevelNode(pointInScreen, currentNode)){
-          rayPacketTempForFindFirstActiveRayIndex[LocalInvocationIndex] = true;
-      }
-    }
-    else{
-      if(LocalInvocationIndex >= firstActiveRayIndex && _isPointIntersectWithTopLevelNode(pointInScreen, currentNode)){
-          rayPacketTempForFindFirstActiveRayIndex[LocalInvocationIndex - firstActiveRayIndex] = true;
-      }
-    }
+    // if(firstActiveRayIndex == 0){
+    //       rayPacketTempForFindFirstActiveRayIndex[LocalInvocationIndex] = _isPointIntersectWithTopLevelNode(pointInScreen, currentNode);
+    // }
+    // else{
+    //   if(LocalInvocationIndex >= firstActiveRayIndex){
+    //       rayPacketTempForFindFirstActiveRayIndex[LocalInvocationIndex - firstActiveRayIndex] = _isPointIntersectWithTopLevelNode(pointInScreen, currentNode);
+    //   }
+    // }
 
         workgroupBarrier();
 
@@ -416,8 +430,7 @@ if(LocalInvocationIndex == 0){
 
 
 
-
-        firstActiveRayIndex = _findFirstActiveRayIndex(firstActiveRayIndex,pointInScreen, LocalInvocationIndex , currentNode);
+        // firstActiveRayIndex = _findFirstActiveRayIndex(firstActiveRayIndex,pointInScreen, LocalInvocationIndex , currentNode);
 
         // TODO check: if(firstActiveRayIndex > 100), throw error
         // if(firstActiveRayIndex > 100){
@@ -429,7 +442,7 @@ if(LocalInvocationIndex == 0){
 
 
         if (_isLeafNode(leafInstanceCount)) {
-            if(LocalInvocationIndex >= firstActiveRayIndex){
+            // if(LocalInvocationIndex >= firstActiveRayIndex){
                 var leafInstanceOffset = u32(currentNode.leafInstanceOffset);
 
                 // var intersectResult = rayPacketRingIntersects[LocalInvocationIndex];
@@ -460,7 +473,7 @@ if(LocalInvocationIndex == 0){
 
                     leafInstanceCount = leafInstanceCount - 1;
                     leafInstanceOffset = leafInstanceOffset + 1;
-                }
+                // }
             }
         }
         else {
@@ -472,14 +485,14 @@ if(LocalInvocationIndex == 0){
             if (_hasChild(child1Index)) {
                 if(LocalInvocationIndex == 0){
                     stackContainer[localStackSize] = topLevel.topLevels[child1Index];
-                    bvhNodeFirstActiveRayIndexs[localStackSize] = firstActiveRayIndex;
+                    // bvhNodeFirstActiveRayIndexs[localStackSize] = firstActiveRayIndex;
                 }
                 localStackSize += 1;
             }
             if (_hasChild(child2Index)) {
                 if(LocalInvocationIndex == 0){
                     stackContainer[localStackSize] = topLevel.topLevels[child2Index];
-                    bvhNodeFirstActiveRayIndexs[localStackSize] = firstActiveRayIndex;
+                    // bvhNodeFirstActiveRayIndexs[localStackSize] = firstActiveRayIndex;
                 }
                 localStackSize += 1;
             }
