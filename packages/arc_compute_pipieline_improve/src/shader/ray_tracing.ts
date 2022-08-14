@@ -35,7 +35,7 @@ struct AABB2D {
 var<workgroup>stackContainer: array<TopLevel, 20>;
 // var<workgroup>stackSize: u32;
 var<workgroup>bvhNodeFirstActiveRayIndexs: array <u32, 20>;
-// var<workgroup>rayPacketAABB: AABB2D;
+var<workgroup>rayPacketAABB: AABB2D;
 var<workgroup>isRayPacketAABBIntersectWithTopLevelNode: bool;
 // var<workgroup>rayPacketPointInScreenForFindMin: array<vec2<f32>, 64>;
 // var<workgroup>rayPacketPointInScreenForFindMax: array<vec2<f32>, 64>;
@@ -311,6 +311,8 @@ var pointInScreen = ray.rayTarget;
 // var localStackSize:u32;
 var localStackSize = 1;
 
+var isFirstActiveRayIndexsChange = true;
+
 while(localStackSize > 0){
         rayPacketTempForFindFirstActiveRayIndex[LocalInvocationIndex] = false;
 
@@ -394,14 +396,17 @@ while(localStackSize > 0){
 if(LocalInvocationIndex == 0){
   //pointInScreen is left-bottom conner point of 8*8 region
 
+
+  // var rayPacketAABB:AABB2D;
+
+
+  if(isFirstActiveRayIndexsChange){
   var resolution = vec2 < f32 > (screenDimension.resolution);
   var step = 2 / resolution;
 
-  var rayPacketAABB:AABB2D;
-
-
   rayPacketAABB.screenMin = vec2<f32>(pointInScreen.x, pointInScreen.y +  _getMultiplierForBuildRayPacketAABB(firstActiveRayIndex) * step.y);
   rayPacketAABB.screenMax = vec2<f32>(pointInScreen.x + 7.0 * step.x, pointInScreen.y + 7.0 * step.y);
+  }
 
   
   isRayPacketAABBIntersectWithTopLevelNode = _isRayPacketAABBIntersectWithTopLevelNode(rayPacketAABB, currentNode);
@@ -437,8 +442,17 @@ isPointIntersectWithTopLevelNode = _isPointIntersectWithTopLevelNode(pointInScre
 
     workgroupBarrier();
 
+    var firstActiveRayIndexBefore = firstActiveRayIndex;
 
         firstActiveRayIndex = _findFirstActiveRayIndex(firstActiveRayIndex,pointInScreen, LocalInvocationIndex , currentNode);
+
+        if(firstActiveRayIndex != firstActiveRayIndexBefore){
+isFirstActiveRayIndexsChange = true;
+        }
+        else{
+isFirstActiveRayIndexsChange = false;
+        }
+
 
         // TODO check: if(firstActiveRayIndex > 100), throw error
         // if(firstActiveRayIndex > 100){
@@ -494,7 +508,9 @@ isPointIntersectWithTopLevelNode = _isPointIntersectWithTopLevelNode(pointInScre
             if (_hasChild(child1Index)) {
                 if(LocalInvocationIndex == 0){
                     stackContainer[localStackSize] = topLevel.topLevels[child1Index];
+  // if(isFirstActiveRayIndexsChange){
                     bvhNodeFirstActiveRayIndexs[localStackSize] = firstActiveRayIndex;
+  // }
                 }
                 localStackSize += 1;
             }
