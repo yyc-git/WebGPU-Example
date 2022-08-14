@@ -37,6 +37,75 @@ rebuild aabb of first-
 test: increase r
 
 
+judge isRayPacketAABBIntersectWithTopLevelNode by simple build:
+
+fps from 40 to 55(10W rings)
+
+
+debug:
+change canvas size to 8*8(one workgroup)
+
+explain:
+
+- coordniate system is [-1.0,1.0]
+TODO give image
+
+
+verify:
+
+- point of (LocalInvocationIndex == 0) is left-bottom conner point of 8*8 region
+- point of (LocalInvocationIndex == 56) is left-top conner point of 8*8 region
+# so dispatch local unit(and workgroup?) is x first!
+so LocalInvocationIndex is increase toward right and top(start from left and bottom)!
+
+
+code:
+```
+// if(LocalInvocationIndex == 0){
+if(LocalInvocationIndex == 56){
+  //pointInScreen is left-bottom conner point of 8*8 region
+
+  var resolution = vec2 < f32 > (screenDimension.resolution);
+  var step = 2 / resolution;
+
+  var rayPacketAABB:AABB2D;
+
+
+
+  // rayPacketAABB.screenMin = vec2<f32>(pointInScreen.x, pointInScreen.y - 7 * step.y);
+  // rayPacketAABB.screenMax = vec2<f32>(pointInScreen.x + 7.0 * step.x, pointInScreen.y - f32(_getMultiplierForBuildRayPacketAABB(firstActiveRayIndex)) * step.y);
+
+  // rayPacketAABB.screenMin = pointInScreen;
+  // rayPacketAABB.screenMax = vec2<f32>(pointInScreen.x + 7 * step.x, pointInScreen.y + 7 * step.y);
+
+
+  rayPacketAABB.screenMin = vec2<f32>(pointInScreen.x + 6.2 * step.x, pointInScreen.y - 7 * step.y );
+  // rayPacketAABB.screenMin = vec2<f32>(pointInScreen.x, pointInScreen.y - 7 * step.y );
+  // rayPacketAABB.screenMax = vec2<f32>(pointInScreen.x + 7 * step.x, pointInScreen.y);
+  rayPacketAABB.screenMax = vec2<f32>(pointInScreen.x + 7 * step.x, pointInScreen.y - 6.3 * step.y);
+
+  // rayPacketAABB.screenMin = vec2<f32>(0.0, -1.0);
+  // rayPacketAABB.screenMax = vec2<f32>(0.0, -0.7);
+
+  isRayPacketAABBIntersectWithTopLevelNode = _isRayPacketAABBIntersectWithTopLevelNode(rayPacketAABB, currentNode);
+}
+
+
+// TODO perf: other local units to find first!(if firstActiveRayIndex > 0)
+
+        workgroupBarrier();
+
+		if (!isRayPacketAABBIntersectWithTopLevelNode) {
+			continue;
+		}
+```
+
+
+
+
+
+
+
 TODO perf: other local units to find first!(if firstActiveRayIndex > 0)
 
 *** TODO benchmark compare

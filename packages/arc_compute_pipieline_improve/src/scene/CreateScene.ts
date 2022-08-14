@@ -7,8 +7,10 @@ export let createTransformBuffer = (count): Float32Array => {
 	let data = []
 
 	for (let i = 0; i < count; i++) {
-		data.push(Math.random() * 2 - 1)
-		data.push(Math.random() * 2 - 1)
+		// data.push(Math.random() * 2 - 1)
+		// data.push(Math.random() * 2 - 1)
+		data.push(0)
+		data.push(0)
 
 		data.push(layers[Math.floor(Math.random() * 4)])
 	}
@@ -20,10 +22,12 @@ export let createGeometryBuffer = (count): Float32Array => {
 	let c = create(0, 0)
 	// let w = 2.0
 	// let r = 5.0
+	let w = 0.2
+	let r = 0.5
 	// let w = 0.02
 	// let r = 0.05
-	let w = 0.002
-	let r = 0.005
+	// let w = 0.002
+	// let r = 0.005
 	// let w = 0.008
 	// let r = 0.020
 	// let w = 0.001
