@@ -35,9 +35,9 @@ var<workgroup>stackContainer: array<TopLevel, 20>;
 // var<workgroup>stackSize: u32;
 var<workgroup>bvhNodeFirstActiveRayIndexs: array <u32, 20>;
 // var<workgroup>rayPacketAABB: AABB2D;
-var<workgroup>isRayPacketAABBIntersectWithTopLevelNode: bool;
-var<workgroup>rayPacketPointInScreenForFindMin: array<vec2<f32>, 64>;
-var<workgroup>rayPacketPointInScreenForFindMax: array<vec2<f32>, 64>;
+// var<workgroup>isRayPacketAABBIntersectWithTopLevelNode: bool;
+// var<workgroup>rayPacketPointInScreenForFindMin: array<vec2<f32>, 64>;
+// var<workgroup>rayPacketPointInScreenForFindMax: array<vec2<f32>, 64>;
 var<workgroup>rayPacketTempForFindFirstActiveRayIndex: array<bool, 64>;
 
 
@@ -218,6 +218,9 @@ fn _findFirstActiveRayIndex(firstActiveRayIndex:u32,pointInScreen: vec2<f32>, Lo
         // TODO how to check: result !== 100?
     // }
 
+
+    workgroupBarrier();
+
     return result + firstActiveRayIndex;
 }
 
@@ -265,16 +268,16 @@ var localStackSize = 1;
 while(localStackSize > 0){
         rayPacketTempForFindFirstActiveRayIndex[LocalInvocationIndex] = false;
 
-        if(LocalInvocationIndex == 0){
-            // stackSize = localStackSize;
+//         if(LocalInvocationIndex == 0){
+//             // stackSize = localStackSize;
 
 
-// rayPacketAABB.screenMin = vec2<f32>(_getPositiveInfinity(), _getPositiveInfinity());
-// rayPacketAABB.screenMax = vec2<f32>(_getNegativeInfinity(), _getNegativeInfinity());
+// // rayPacketAABB.screenMin = vec2<f32>(_getPositiveInfinity(), _getPositiveInfinity());
+// // rayPacketAABB.screenMax = vec2<f32>(_getNegativeInfinity(), _getNegativeInfinity());
 
 
-isRayPacketAABBIntersectWithTopLevelNode = false;
-        }
+// // isRayPacketAABBIntersectWithTopLevelNode = false;
+//         }
 
         workgroupBarrier();
 
@@ -298,55 +301,55 @@ isRayPacketAABBIntersectWithTopLevelNode = false;
 //  }
 
 
-    //     _buildRayPacketAABB(firstActiveRayIndex, pointInScreen, LocalInvocationIndex);
-
-    //     workgroupBarrier();
-
-		// if (!_isRayPacketAABBIntersectWithTopLevelNode(rayPacketAABB, currentNode)) {
-		// 	continue;
-		// }
-
 
         // _buildRayPacketAABB(firstActiveRayIndex, pointInScreen, LocalInvocationIndex);
 
-rayPacketPointInScreenForFindMin[LocalInvocationIndex] = pointInScreen;
-rayPacketPointInScreenForFindMax[LocalInvocationIndex] = pointInScreen;
+// rayPacketPointInScreenForFindMin[LocalInvocationIndex] = pointInScreen;
+// rayPacketPointInScreenForFindMax[LocalInvocationIndex] = pointInScreen;
 
-workgroupBarrier();
+// workgroupBarrier();
 
-//TODO perf: unroll?
+// //TODO perf: unroll?
 
-//paralle reduction to find min, max
+// //paralle reduction to find min, max
 
-for (var s: u32 = 1; s < 64; s = s * 2) {
-  if(LocalInvocationIndex % (2 * s) == 0){
-    rayPacketPointInScreenForFindMin[LocalInvocationIndex] = min(rayPacketPointInScreenForFindMin[LocalInvocationIndex], rayPacketPointInScreenForFindMin[LocalInvocationIndex + s]);
-    rayPacketPointInScreenForFindMax[LocalInvocationIndex] = max(rayPacketPointInScreenForFindMax[LocalInvocationIndex], rayPacketPointInScreenForFindMax[LocalInvocationIndex + s]);
-  }
-  workgroupBarrier();
-}
+// for (var s: u32 = 1; s < 64; s = s * 2) {
+//   var index = 2 * s * LocalInvocationIndex;
+//   if(LocalInvocationIndex % (2 * s) == 0){
+//     rayPacketPointInScreenForFindMin[LocalInvocationIndex] = min(rayPacketPointInScreenForFindMin[LocalInvocationIndex], rayPacketPointInScreenForFindMin[LocalInvocationIndex + s]);
+//     rayPacketPointInScreenForFindMax[LocalInvocationIndex] = max(rayPacketPointInScreenForFindMax[LocalInvocationIndex], rayPacketPointInScreenForFindMax[LocalInvocationIndex + s]);
+//   }
+//   workgroupBarrier();
+// }
 
 
 
 
-        if(LocalInvocationIndex == 0){
-var rayPacketAABB: AABB2D;
-rayPacketAABB.screenMin = rayPacketPointInScreenForFindMin[0];
-rayPacketAABB.screenMax = rayPacketPointInScreenForFindMax[0];
+//         if(LocalInvocationIndex == 0){
+// // var rayPacketAABB: AABB2D;
+// // rayPacketAABB.screenMin = rayPacketPointInScreenForFindMin[0];
+// // rayPacketAABB.screenMax = rayPacketPointInScreenForFindMax[0];
 
-isRayPacketAABBIntersectWithTopLevelNode = _isRayPacketAABBIntersectWithTopLevelNode(rayPacketAABB, currentNode);
-        }
 
-        workgroupBarrier();
 
-		if (!isRayPacketAABBIntersectWithTopLevelNode) {
-			continue;
-		}
 
+
+// isRayPacketAABBIntersectWithTopLevelNode = _isRayPacketAABBIntersectWithTopLevelNode(rayPacketAABB, currentNode);
+//         }
+
+//         workgroupBarrier();
+
+// 		if (!isRayPacketAABBIntersectWithTopLevelNode) {
+// 			continue;
+// 		}
 
 
 
         firstActiveRayIndex = _findFirstActiveRayIndex(firstActiveRayIndex,pointInScreen, LocalInvocationIndex , currentNode);
+
+        if(firstActiveRayIndex > 100){
+          continue;
+        }
 
 
         var leafInstanceCount = _getLeafInstanceCount(leafInstanceCountAndMaxLayer);

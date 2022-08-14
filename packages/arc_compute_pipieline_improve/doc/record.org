@@ -36,7 +36,13 @@ rebuild aabb of first-
 
 test: increase r
 
+
+TODO perf: other local units to find first!(if firstActiveRayIndex > 0)
+
 *** TODO benchmark compare
+before: 10
+
+after: ?
 
 
 *** TODO gpu draft: perf: judge maxLayer
