@@ -1,4 +1,3 @@
-
 export var computeShader = `
 struct Ray {
 rayTarget: vec2<f32>,
@@ -41,7 +40,9 @@ var<workgroup>isRayPacketAABBIntersectWithTopLevelNode: bool;
 // var<workgroup>rayPacketPointInScreenForFindMax: array<vec2<f32>, 64>;
 var<workgroup>rayPacketTempForFindFirstActiveRayIndex: array<bool, 64>;
 var<workgroup>rayPacketTemp2ForFindFirstActiveRayIndex: u32;
-var<workgroup>rayPacketRingIntersectMinLayer: atomic<u32>;
+var<workgroup>rayPacketRingIntersectLayer: array<u32, 64>;
+var<workgroup>rayPacketHasNotIntersectRay: bool;
+var<workgroup>rayPacketRingIntersectMinLayer: u32;
 
 
 struct RayPayload {
@@ -314,8 +315,6 @@ var localStackSize = 1;
 
 var isFirstActiveRayIndexsChange = true;
 
-atomicStore(&rayPacketRingIntersectMinLayer, 0);
-
 while(localStackSize > 0){
         rayPacketTempForFindFirstActiveRayIndex[LocalInvocationIndex] = false;
 
@@ -345,9 +344,141 @@ while(localStackSize > 0){
 
         var maxLayer =   _getMaxLayer(leafInstanceCountAndMaxLayer);
 
- if(maxLayer <= atomicLoad(&rayPacketRingIntersectMinLayer)){
+
+        if(LocalInvocationIndex >= firstActiveRayIndex){
+rayPacketRingIntersectLayer[LocalInvocationIndex] = intersectResult.layer;
+        }
+        else{
+rayPacketRingIntersectLayer[LocalInvocationIndex] = 0;
+        }
+
+workgroupBarrier();
+
+//paralle reduction to find min
+
+// for (var s: u32 = 1; s < 64; s = s * 2) {
+//   var index = 2 * s * LocalInvocationIndex;
+//   if(index < 64){
+//     rayPacketRingIntersectLayer[index] = min(rayPacketRingIntersectLayer[index], rayPacketRingIntersectLayer[index + s]);
+//   }
+//   workgroupBarrier();
+// }
+
+
+//     if(LocalInvocationIndex == 0){
+//         var result = false;
+//         for (var s: u32 = firstActiveRayIndex; s < 64; s +=1) {
+//             if(rayPacketRingIntersectLayer[s] == 0){
+//                 result = true;
+//                 break;
+//             }
+//         }
+
+// rayPacketHasNotIntersectRay = result;
+//     }
+
+// workgroupBarrier();
+
+// if(!rayPacketHasNotIntersectRay){
+// for (var s: u32 = firstActiveRayIndex; s < 64; s +=1) {
+//   var index = 2 * s * LocalInvocationIndex;
+//   if(index < 64){
+//     rayPacketRingIntersectLayer[index] = min(rayPacketRingIntersectLayer[index], rayPacketRingIntersectLayer[index + s]);
+//   }
+//   workgroupBarrier();
+// }
+
+
+
+//     if(LocalInvocationIndex == 0){
+//         var result:u32 = 0;
+//         for (var s: u32 = firstActiveRayIndex; s < 64; s +=1) {
+//           var layer = rayPacketRingIntersectLayer[s];
+//             if(layer == 0){
+//                 result = 0;
+//                 break;
+//             }
+
+//           result = min(result, layer);
+// //           if(result > rayPacketRingIntersectLayer[s]){
+// // result = rayPacketRingIntersectLayer[s];
+// //           }
+//         }
+
+// rayPacketRingIntersectMinLayer = result;
+//     }
+
+// workgroupBarrier();
+
+// if(maxLayer <= rayPacketRingIntersectMinLayer){
+//    continue;
+//  }
+
+
+
+
+// for (var s: u32 = 1; s < 64; s = s * 2) {
+//   if(LocalInvocationIndex % (2 * s) == 0){
+//     rayPacketRingIntersectLayer[LocalInvocationIndex] = min(rayPacketRingIntersectLayer[LocalInvocationIndex], rayPacketRingIntersectLayer[LocalInvocationIndex + s]);
+//   }
+
+//   workgroupBarrier();
+// }
+
+
+
+
+// for (var s: u32 = 1; s < 64; s = s * 2) {
+//   var index = 2 * s * LocalInvocationIndex;
+//   if(index < 64){
+//     rayPacketRingIntersectLayer[index] = min(rayPacketRingIntersectLayer[index], rayPacketRingIntersectLayer[index + s]);
+//   }
+
+//   workgroupBarrier();
+// }
+
+
+
+
+// for (var s: u32 = 32; s > 0; s >>= 1) {
+//   if(LocalInvocationIndex < s){
+//     rayPacketRingIntersectLayer[LocalInvocationIndex] = min(rayPacketRingIntersectLayer[LocalInvocationIndex], rayPacketRingIntersectLayer[LocalInvocationIndex + s]);
+//   }
+
+//   workgroupBarrier();
+// }
+
+
+
+
+
+
+      if (LocalInvocationIndex < 32){
+        rayPacketRingIntersectLayer[LocalInvocationIndex] = min(rayPacketRingIntersectLayer[LocalInvocationIndex], rayPacketRingIntersectLayer[LocalInvocationIndex + 32]);};
+      workgroupBarrier();
+      if (LocalInvocationIndex < 16){
+        rayPacketRingIntersectLayer[LocalInvocationIndex] = min(rayPacketRingIntersectLayer[LocalInvocationIndex], rayPacketRingIntersectLayer[LocalInvocationIndex + 16]);};
+      workgroupBarrier();
+      if (LocalInvocationIndex < 8){
+        rayPacketRingIntersectLayer[LocalInvocationIndex] = min(rayPacketRingIntersectLayer[LocalInvocationIndex], rayPacketRingIntersectLayer[LocalInvocationIndex + 8]);};
+      workgroupBarrier();
+      if (LocalInvocationIndex < 4){
+        rayPacketRingIntersectLayer[LocalInvocationIndex] = min(rayPacketRingIntersectLayer[LocalInvocationIndex], rayPacketRingIntersectLayer[LocalInvocationIndex + 4]);};
+      workgroupBarrier();
+      if (LocalInvocationIndex < 2){
+        rayPacketRingIntersectLayer[LocalInvocationIndex] = min(rayPacketRingIntersectLayer[LocalInvocationIndex], rayPacketRingIntersectLayer[LocalInvocationIndex + 2]);};
+      workgroupBarrier();
+
+
+
+if(maxLayer <= rayPacketRingIntersectLayer[0]){
    continue;
  }
+
+
+
+
+
 
 
         // _buildRayPacketAABB(firstActiveRayIndex, pointInScreen, LocalInvocationIndex);
@@ -468,7 +599,6 @@ isFirstActiveRayIndexsChange = false;
 
                 // var intersectResult = rayPacketRingIntersects[LocalInvocationIndex];
 
-                var isSetLayer = false;
                 var isBreak =false;
                 while(leafInstanceCount > 0){
                     var bottomLevel = bottomLevel.bottomLevels[leafInstanceOffset];
@@ -486,8 +616,6 @@ isFirstActiveRayIndexsChange = false;
                             intersectResult.layer = layer;
                             intersectResult.instanceIndex = bottomLevel.instanceIndex;
 
-isSetLayer = true;
-
                     if(layer == maxLayer){
                       isBreak = true;
                     }
@@ -498,11 +626,7 @@ isSetLayer = true;
                     leafInstanceCount = leafInstanceCount - 1;
                     leafInstanceOffset = leafInstanceOffset + 1;
                 }
-if(isSetLayer){
-var _originLayer = atomicMin(
-  &rayPacketRingIntersectMinLayer,
-   intersectResult.layer);
-}
+
           }
         }
         else {
