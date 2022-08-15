@@ -112,13 +112,13 @@ TODO perf: other local units to find first!(if firstActiveRayIndex > 0)
 
 TODO fix bug: bottom some lines
 
-*** TODO benchmark compare
+*** DONE benchmark compare
 before: 10
 
 after: ?
 
 
-*** TODO gpu draft: perf: judge maxLayer
+*** DONE gpu draft: perf: judge maxLayer
 
 TODO fix: why break decrease fps?:
 https://stackoverflow.com/questions/30256579/is-early-exit-of-loops-on-gpu-worth-doing
@@ -157,9 +157,26 @@ TODO why "if(maxLayer <=rayPacketRingIntersectMinLayer){" slow????
 TODO perf: optimize if(share)
 
 
-*** TODO pass gpu run test
+*** DONE pass gpu run test
 
-*** TODO benchmark compare
+*** DONE benchmark compare
+
+*** TODO add last
+
+update:
+build ray packet aabb;
+isNodeBehindRayPacket->get min layer;
+
+
+
+*** TODO perf: get min layer: change to parallel
+
+unroll?
+
+
+*** TODO perf: split to two aabb
+
+
 
 
 ** TODO perf: N branch BVH tree
