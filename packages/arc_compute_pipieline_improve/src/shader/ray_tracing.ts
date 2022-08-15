@@ -303,41 +303,42 @@ while(stackSize > 0){
         if(LocalInvocationIndex >= firstActiveRayIndex){
 rayPacketRingIntersectLayer[LocalInvocationIndex] = intersectResult.layer;
         }
-        else{
-rayPacketRingIntersectLayer[LocalInvocationIndex] = 0;
-        }
+//         else{
+// rayPacketRingIntersectLayer[LocalInvocationIndex] = 0;
+//         }
 
 workgroupBarrier();
 
-
-      if (LocalInvocationIndex < 32){
+// TODO fix: fix black lines in the bottom when draw 20W rings
+      if (LocalInvocationIndex >= firstActiveRayIndex && LocalInvocationIndex < 32){
         // rayPacketRingIntersectLayer[LocalInvocationIndex] = min(rayPacketRingIntersectLayer[LocalInvocationIndex], rayPacketRingIntersectLayer[LocalInvocationIndex + 32]);};
 _minForRayPacketRingIntersectLayer(LocalInvocationIndex, LocalInvocationIndex + 32);
       }
       workgroupBarrier();
-      if (LocalInvocationIndex < 16){
+      if (LocalInvocationIndex >= firstActiveRayIndex && LocalInvocationIndex < 16){
         // rayPacketRingIntersectLayer[LocalInvocationIndex] = min(rayPacketRingIntersectLayer[LocalInvocationIndex], rayPacketRingIntersectLayer[LocalInvocationIndex + 16]);};
 _minForRayPacketRingIntersectLayer(LocalInvocationIndex, LocalInvocationIndex + 16);
       }
       workgroupBarrier();
-      if (LocalInvocationIndex < 8){
+      if (LocalInvocationIndex >= firstActiveRayIndex && LocalInvocationIndex < 8){
         // rayPacketRingIntersectLayer[LocalInvocationIndex] = min(rayPacketRingIntersectLayer[LocalInvocationIndex], rayPacketRingIntersectLayer[LocalInvocationIndex + 8]);};
 _minForRayPacketRingIntersectLayer(LocalInvocationIndex, LocalInvocationIndex + 8);
       }
       workgroupBarrier();
-      if (LocalInvocationIndex < 4){
+      if (LocalInvocationIndex >= firstActiveRayIndex && LocalInvocationIndex < 4){
         // rayPacketRingIntersectLayer[LocalInvocationIndex] = min(rayPacketRingIntersectLayer[LocalInvocationIndex], rayPacketRingIntersectLayer[LocalInvocationIndex + 4]);};
 _minForRayPacketRingIntersectLayer(LocalInvocationIndex, LocalInvocationIndex + 4);
       }
       workgroupBarrier();
-      if (LocalInvocationIndex < 2){
+      if (LocalInvocationIndex >= firstActiveRayIndex && LocalInvocationIndex < 2){
         // rayPacketRingIntersectLayer[LocalInvocationIndex] = min(rayPacketRingIntersectLayer[LocalInvocationIndex], rayPacketRingIntersectLayer[LocalInvocationIndex + 2]);};
 _minForRayPacketRingIntersectLayer(LocalInvocationIndex, LocalInvocationIndex + 2);
       }
       workgroupBarrier();
 
+
       if(LocalInvocationIndex == 0){
-        isNodeBehindRayPacket = maxLayer<= rayPacketRingIntersectLayer[0];
+        isNodeBehindRayPacket = maxLayer<= rayPacketRingIntersectLayer[firstActiveRayIndex];
       }
       workgroupBarrier();
 
@@ -361,6 +362,7 @@ if(LocalInvocationIndex == 0){
   var resolution = vec2 < f32 > (screenDimension.resolution);
   var step = 2 / resolution;
 
+  // TODO perf: split to two aabb
   rayPacketAABB.screenMin = vec2<f32>(pointInScreen.x, pointInScreen.y +  _getMultiplierForBuildRayPacketAABB(firstActiveRayIndex) * step.y);
   rayPacketAABB.screenMax = vec2<f32>(pointInScreen.x + 7.0 * step.x, pointInScreen.y + 7.0 * step.y);
   }
