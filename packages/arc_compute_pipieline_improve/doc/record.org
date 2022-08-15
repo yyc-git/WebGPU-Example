@@ -129,8 +129,32 @@ should use flag!
 
 
 
+before: 43
+
+atomic:33
 
 
+
+
+
+31.2
+
+31.2
+
+31.2
+
+First Add During Load:?
+
+unroll:31.8
+
+
+TODO why "if(maxLayer <=rayPacketRingIntersectMinLayer){" slow????
+
+
+
+
+
+TODO perf: optimize if(share)
 
 
 *** TODO pass gpu run test

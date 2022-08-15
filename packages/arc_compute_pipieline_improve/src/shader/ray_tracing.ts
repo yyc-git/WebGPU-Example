@@ -38,6 +38,11 @@ var<workgroup>rayPacketTempForFindFirstActiveRayIndex: array<bool, 64>;
 var<workgroup>rayPacketTemp2ForFindFirstActiveRayIndex: u32;
 var<workgroup>rayPacketRingIntersectLayer: array<u32, 64>;
 var<workgroup>isNodeBehindRayPacket: bool;
+// var<workgroup>hasChild1: bool;
+// var<workgroup>hasChild2: bool;
+var<workgroup>stackSize: u32;
+// var<workgroup>child1Index: u32;
+// var<workgroup>child2Index: u32;
 
 
 struct RayPayload {
@@ -248,7 +253,7 @@ bvhNodeFirstActiveRayIndexs[LocalInvocationIndex] = 0;
 }
 
 if(LocalInvocationIndex == 0){
-// stackSize = 1;
+stackSize = 1;
 
 stackContainer[0] = rootNode;
 }
@@ -256,30 +261,34 @@ stackContainer[0] = rootNode;
 
 workgroupBarrier();
 
-var child1Index: u32;
-var child2Index: u32;
+// var child1Index: u32;
+// var child2Index: u32;
 
 
 var pointInScreen = ray.rayTarget;
 
-// var localStackSize:u32;
-var localStackSize = 1;
-
 var isFirstActiveRayIndexsChange = true;
 
-while(localStackSize > 0){
+while(stackSize > 0){
+        workgroupBarrier();
+
         rayPacketTempForFindFirstActiveRayIndex[LocalInvocationIndex] = false;
+
+        if(LocalInvocationIndex ==0){
+        stackSize -= 1;
+        }
 
         workgroupBarrier();
 
 
 
-		let currentNode = stackContainer[localStackSize - 1];
-        localStackSize -= 1;
+		// let currentNode = stackContainer[localStackSize - 1];
+		let currentNode = stackContainer[stackSize ];
+        // localStackSize -= 1;
 
 		var leafInstanceCountAndMaxLayer = u32(currentNode.leafInstanceCountAndMaxLayer);
         
-		var firstActiveRayIndex = bvhNodeFirstActiveRayIndexs[localStackSize];
+		var firstActiveRayIndex = bvhNodeFirstActiveRayIndexs[stackSize];
 
         var maxLayer =   _getMaxLayer(leafInstanceCountAndMaxLayer);
 
@@ -414,31 +423,81 @@ isFirstActiveRayIndexsChange = false;
                     leafInstanceCount = leafInstanceCount - 1;
                     leafInstanceOffset = leafInstanceOffset + 1;
                 }
-
           }
         }
         else {
-            child1Index = u32(currentNode.child1Index);
-            child2Index = u32(currentNode.child2Index);
+          // TODO perf: 如果Packet与两个子节点都相交则优先遍历相交Ray数目多的那个节点
 
-			// TODO perf: 如果Packet与两个子节点都相交则优先遍历相交Ray数目多的那个节点
+          // TODO perf: maxLayer big perfer
 
-            if (_hasChild(child1Index)) {
-                if(LocalInvocationIndex == 0){
-                    stackContainer[localStackSize] = topLevel.topLevels[child1Index];
-  // if(isFirstActiveRayIndexsChange){
-                    bvhNodeFirstActiveRayIndexs[localStackSize] = firstActiveRayIndex;
-  // }
-                }
-                localStackSize += 1;
-            }
-            if (_hasChild(child2Index)) {
-                if(LocalInvocationIndex == 0){
-                    stackContainer[localStackSize] = topLevel.topLevels[child2Index];
-                    bvhNodeFirstActiveRayIndexs[localStackSize] = firstActiveRayIndex;
-                }
-                localStackSize += 1;
-            }
+
+          // if (LocalInvocationIndex == 0) {
+          //     child1Index = u32(currentNode.child1Index);
+          // }
+          // if (LocalInvocationIndex == 1) {
+          //     child2Index = u32(currentNode.child2Index);
+          // }
+          // workgroupBarrier();
+
+
+          // if(LocalInvocationIndex == 0){
+          //   if( _hasChild(child1Index)){
+          //     stackContainer[stackSize] = topLevel.topLevels[child1Index];
+          //     bvhNodeFirstActiveRayIndexs[stackSize] = firstActiveRayIndex;
+          //   }
+          // }
+          // if(LocalInvocationIndex == 1){
+          //   if( _hasChild(child2Index)){
+          //     var localStackSize = stackSize;
+
+          //   if( _hasChild(child1Index)){
+          //       localStackSize +=1;
+          //   }
+
+          //     stackContainer[localStackSize] = topLevel.topLevels[child1Index];
+          //     bvhNodeFirstActiveRayIndexs[localStackSize] = firstActiveRayIndex;
+          //   }
+          // }
+
+          // workgroupBarrier();
+
+
+          // if(LocalInvocationIndex == 0){
+          //   if( _hasChild(child1Index)){
+          //       stackSize +=1;
+          //   }
+
+          //   if( _hasChild(child2Index)){
+          //       stackSize +=1;
+          //   }
+          // }
+          // workgroupBarrier();
+
+
+
+
+
+
+          if (LocalInvocationIndex == 0) {
+              var child1Index = u32(currentNode.child1Index);
+              var child2Index = u32(currentNode.child2Index);
+
+              if (_hasChild(child1Index)) {
+                  stackContainer[stackSize] = topLevel.topLevels[child1Index];
+                  // if(isFirstActiveRayIndexsChange){
+                  bvhNodeFirstActiveRayIndexs[stackSize] = firstActiveRayIndex;
+                  // }
+
+                  stackSize += 1;
+              }
+              if (_hasChild(child2Index)) {
+                  stackContainer[stackSize] = topLevel.topLevels[child2Index];
+                  bvhNodeFirstActiveRayIndexs[stackSize] = firstActiveRayIndex;
+
+                  stackSize += 1;
+              }
+          }
+          workgroupBarrier();
         }
 
 
