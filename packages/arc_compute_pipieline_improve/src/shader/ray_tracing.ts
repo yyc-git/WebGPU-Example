@@ -340,7 +340,7 @@ while(localStackSize > 0){
         
 		var firstActiveRayIndex = bvhNodeFirstActiveRayIndexs[localStackSize];
 
-        // var maxLayer =   _getMaxLayer(leafInstanceCountAndMaxLayer);
+        var maxLayer =   _getMaxLayer(leafInstanceCountAndMaxLayer);
 
 
 // TODO restore
@@ -468,10 +468,11 @@ isFirstActiveRayIndexsChange = false;
 
                 // var intersectResult = rayPacketRingIntersects[LocalInvocationIndex];
 
+                var isBreak =false;
                 while(leafInstanceCount > 0){
                     var bottomLevel = bottomLevel.bottomLevels[leafInstanceOffset];
 
-                    if(_isPointIntersectWithAABB(pointInScreen, bottomLevel.screenMin, bottomLevel.screenMax)){
+                    if(!isBreak && _isPointIntersectWithAABB(pointInScreen, bottomLevel.screenMin, bottomLevel.screenMax)){
                         var instance: Instance = sceneInstanceData.instances[u32(bottomLevel.instanceIndex)];
                         var geometryIndex = u32(instance.geometryIndex);
                         var geometry:Geometry = sceneGeometryData.geometrys[geometryIndex];
@@ -484,10 +485,9 @@ isFirstActiveRayIndexsChange = false;
                             intersectResult.layer = layer;
                             intersectResult.instanceIndex = bottomLevel.instanceIndex;
 
-                    // TODO restore
-                    // if(layer == maxLayer){
-                    //   break;
-                    // }
+                    if(layer == maxLayer){
+                      isBreak = true;
+                    }
                             }
                         }
                     }
