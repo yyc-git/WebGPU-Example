@@ -239,6 +239,13 @@ fn _getMultiplierForBuildRayPacketAABB(firstActiveRayIndex:u32) -> f32{
   return 7.0;
 }
 
+fn _minForRayPacketRingIntersectLayer(index1:u32, index2:u32) {
+  var layer2 = rayPacketRingIntersectLayer[index2];
+  if(rayPacketRingIntersectLayer[index1] > layer2){
+rayPacketRingIntersectLayer[index1] = layer2;
+  }
+}
+
 fn _intersectScene(ray: Ray, LocalInvocationIndex : u32) -> RingIntersect {
   var intersectResult: RingIntersect;
 
@@ -309,19 +316,29 @@ rayPacketRingIntersectLayer[LocalInvocationIndex] = intersectResult.layer;
 
 
       if (LocalInvocationIndex < 32){
-        rayPacketRingIntersectLayer[LocalInvocationIndex] = min(rayPacketRingIntersectLayer[LocalInvocationIndex], rayPacketRingIntersectLayer[LocalInvocationIndex + 32]);};
+        // rayPacketRingIntersectLayer[LocalInvocationIndex] = min(rayPacketRingIntersectLayer[LocalInvocationIndex], rayPacketRingIntersectLayer[LocalInvocationIndex + 32]);};
+_minForRayPacketRingIntersectLayer(LocalInvocationIndex, LocalInvocationIndex + 32);
+      }
       workgroupBarrier();
       if (LocalInvocationIndex < 16){
-        rayPacketRingIntersectLayer[LocalInvocationIndex] = min(rayPacketRingIntersectLayer[LocalInvocationIndex], rayPacketRingIntersectLayer[LocalInvocationIndex + 16]);};
+        // rayPacketRingIntersectLayer[LocalInvocationIndex] = min(rayPacketRingIntersectLayer[LocalInvocationIndex], rayPacketRingIntersectLayer[LocalInvocationIndex + 16]);};
+_minForRayPacketRingIntersectLayer(LocalInvocationIndex, LocalInvocationIndex + 16);
+      }
       workgroupBarrier();
       if (LocalInvocationIndex < 8){
-        rayPacketRingIntersectLayer[LocalInvocationIndex] = min(rayPacketRingIntersectLayer[LocalInvocationIndex], rayPacketRingIntersectLayer[LocalInvocationIndex + 8]);};
+        // rayPacketRingIntersectLayer[LocalInvocationIndex] = min(rayPacketRingIntersectLayer[LocalInvocationIndex], rayPacketRingIntersectLayer[LocalInvocationIndex + 8]);};
+_minForRayPacketRingIntersectLayer(LocalInvocationIndex, LocalInvocationIndex + 8);
+      }
       workgroupBarrier();
       if (LocalInvocationIndex < 4){
-        rayPacketRingIntersectLayer[LocalInvocationIndex] = min(rayPacketRingIntersectLayer[LocalInvocationIndex], rayPacketRingIntersectLayer[LocalInvocationIndex + 4]);};
+        // rayPacketRingIntersectLayer[LocalInvocationIndex] = min(rayPacketRingIntersectLayer[LocalInvocationIndex], rayPacketRingIntersectLayer[LocalInvocationIndex + 4]);};
+_minForRayPacketRingIntersectLayer(LocalInvocationIndex, LocalInvocationIndex + 4);
+      }
       workgroupBarrier();
       if (LocalInvocationIndex < 2){
-        rayPacketRingIntersectLayer[LocalInvocationIndex] = min(rayPacketRingIntersectLayer[LocalInvocationIndex], rayPacketRingIntersectLayer[LocalInvocationIndex + 2]);};
+        // rayPacketRingIntersectLayer[LocalInvocationIndex] = min(rayPacketRingIntersectLayer[LocalInvocationIndex], rayPacketRingIntersectLayer[LocalInvocationIndex + 2]);};
+_minForRayPacketRingIntersectLayer(LocalInvocationIndex, LocalInvocationIndex + 2);
+      }
       workgroupBarrier();
 
       if(LocalInvocationIndex == 0){
