@@ -355,6 +355,7 @@ workgroupBarrier();
 //       workgroupBarrier();
 //       }
 
+// TODO fix bug after add last: only min exclude 0 layer
 if(firstActiveRayIndex == 0){
       if (LocalInvocationIndex >= firstActiveRayIndex && LocalInvocationIndex < 32){
         // rayPacketRingIntersectLayer[LocalInvocationIndex] = min(rayPacketRingIntersectLayer[LocalInvocationIndex], rayPacketRingIntersectLayer[LocalInvocationIndex + 32]);};
