@@ -314,9 +314,17 @@ let _isRayPacketAABBIntersectWithTopLevelNode = (aabb, node: topLevelNodeData) =
 }
 
 let _getMinLayerOfActiveIntersectResults = (intersectResults, firstActiveRayIndex) => {
-	return intersectResults.slice(firstActiveRayIndex).reduce((result, { layer }) => {
-		return Math.min(result, layer)
+	let minLayer = intersectResults.slice(firstActiveRayIndex).reduce((result, { layer }) => {
+		if(result > layer && layer!== 0){
+			return layer
+		}
+
+		return result
 	}, +Infinity)
+
+	if(minLayer == +Infinity){
+		return 0
+	}
 }
 
 export let traverse = (isIntersectWithInstance, rayPacketPoints, topLevelArr, bottomLevelArr: bottomLevelArr): Array<traverseResult> => {

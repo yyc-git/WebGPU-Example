@@ -57,11 +57,11 @@ defineFeature(feature, test => {
 				{
 					"wholeAABBData": {
 						"aabb": {
-							"worldMin": [
+							"screenMin": [
 								-0.5,
 								0.2
 							],
-							"worldMax": [
+							"screenMax": [
 								0.5,
 								0.5
 							]
@@ -72,11 +72,11 @@ defineFeature(feature, test => {
 					"child1": {
 						"wholeAABBData": {
 							"aabb": {
-								"worldMin": [
+								"screenMin": [
 									-0.5,
 									0.2
 								],
-								"worldMax": [
+								"screenMax": [
 									0.1,
 									0.3
 								]
@@ -86,11 +86,11 @@ defineFeature(feature, test => {
 						"leafAllAABBData": [
 							{
 								"aabb": {
-									"worldMin": [
+									"screenMin": [
 										-0.5,
 										0.2
 									],
-									"worldMax": [
+									"screenMax": [
 										0.1,
 										0.3
 									]
@@ -105,11 +105,11 @@ defineFeature(feature, test => {
 					"child2": {
 						"wholeAABBData": {
 							"aabb": {
-								"worldMin": [
+								"screenMin": [
 									0.1,
 									0.2
 								],
-								"worldMax": [
+								"screenMax": [
 									0.5,
 									0.5
 								]
@@ -120,11 +120,11 @@ defineFeature(feature, test => {
 						"child1": {
 							"wholeAABBData": {
 								"aabb": {
-									"worldMin": [
+									"screenMin": [
 										0.3,
 										0.3
 									],
-									"worldMax": [
+									"screenMax": [
 										0.31,
 										0.31
 									]
@@ -134,11 +134,11 @@ defineFeature(feature, test => {
 							"leafAllAABBData": [
 								{
 									"aabb": {
-										"worldMin": [
+										"screenMin": [
 											0.3,
 											0.3
 										],
-										"worldMax": [
+										"screenMax": [
 											0.31,
 											0.31
 										]
@@ -153,11 +153,11 @@ defineFeature(feature, test => {
 						"child2": {
 							"wholeAABBData": {
 								"aabb": {
-									"worldMin": [
+									"screenMin": [
 										0.1,
 										0.2
 									],
-									"worldMax": [
+									"screenMax": [
 										0.5,
 										0.5
 									]
@@ -167,11 +167,11 @@ defineFeature(feature, test => {
 							"leafAllAABBData": [
 								{
 									"aabb": {
-										"worldMin": [
+										"screenMin": [
 											0.1,
 											0.2
 										],
-										"worldMax": [
+										"screenMax": [
 											0.5,
 											0.5
 										]
@@ -213,11 +213,11 @@ defineFeature(feature, test => {
 				{
 					"wholeAABBData": {
 						"aabb": {
-							"worldMin": [
+							"screenMin": [
 								-0.5,
 								0.2
 							],
-							"worldMax": [
+							"screenMax": [
 								0.31,
 								0.31
 							]
@@ -228,11 +228,11 @@ defineFeature(feature, test => {
 					"child1": {
 						"wholeAABBData": {
 							"aabb": {
-								"worldMin": [
+								"screenMin": [
 									-0.5,
 									0.2
 								],
-								"worldMax": [
+								"screenMax": [
 									0.1,
 									0.3
 								]
@@ -242,11 +242,11 @@ defineFeature(feature, test => {
 						"leafAllAABBData": [
 							{
 								"aabb": {
-									"worldMin": [
+									"screenMin": [
 										-0.5,
 										0.2
 									],
-									"worldMax": [
+									"screenMax": [
 										0.1,
 										0.3
 									]
@@ -261,11 +261,11 @@ defineFeature(feature, test => {
 					"child2": {
 						"wholeAABBData": {
 							"aabb": {
-								"worldMin": [
+								"screenMin": [
 									0.3,
 									0.3
 								],
-								"worldMax": [
+								"screenMax": [
 									0.31,
 									0.31
 								]
@@ -275,11 +275,11 @@ defineFeature(feature, test => {
 						"leafAllAABBData": [
 							{
 								"aabb": {
-									"worldMin": [
+									"screenMin": [
 										0.3,
 										0.3
 									],
-									"worldMax": [
+									"screenMax": [
 										0.31,
 										0.31
 									]
@@ -289,11 +289,11 @@ defineFeature(feature, test => {
 							},
 							{
 								"aabb": {
-									"worldMin": [
+									"screenMin": [
 										0.3,
 										0.3
 									],
-									"worldMax": [
+									"screenMax": [
 										0.31,
 										0.31
 									]

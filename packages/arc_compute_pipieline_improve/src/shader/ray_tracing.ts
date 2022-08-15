@@ -239,12 +239,12 @@ fn _getMultiplierForBuildRayPacketAABB(firstActiveRayIndex:u32) -> f32{
   return 7.0;
 }
 
-fn _minForRayPacketRingIntersectLayer(index1:u32, index2:u32) {
-  var layer2 = rayPacketRingIntersectLayer[index2];
-  if(rayPacketRingIntersectLayer[index1] > layer2){
-rayPacketRingIntersectLayer[index1] = layer2;
-  }
-}
+// fn _minForRayPacketRingIntersectLayer(index1:u32, index2:u32) {
+//   var layer2 = rayPacketRingIntersectLayer[index2];
+//   if(rayPacketRingIntersectLayer[index1] > layer2){
+// rayPacketRingIntersectLayer[index1] = layer2;
+//   }
+// }
 
 fn _intersectScene(ray: Ray, LocalInvocationIndex : u32) -> RingIntersect {
   var intersectResult: RingIntersect;
@@ -355,52 +355,46 @@ workgroupBarrier();
 //       workgroupBarrier();
 //       }
 
-// TODO fix bug after add last: only min exclude 0 layer
-if(firstActiveRayIndex == 0){
-      if (LocalInvocationIndex >= firstActiveRayIndex && LocalInvocationIndex < 32){
-        // rayPacketRingIntersectLayer[LocalInvocationIndex] = min(rayPacketRingIntersectLayer[LocalInvocationIndex], rayPacketRingIntersectLayer[LocalInvocationIndex + 32]);};
-_minForRayPacketRingIntersectLayer(LocalInvocationIndex, LocalInvocationIndex + 32);
-      }
-      workgroupBarrier();
-      if (LocalInvocationIndex >= firstActiveRayIndex && LocalInvocationIndex < 16){
-        // rayPacketRingIntersectLayer[LocalInvocationIndex] = min(rayPacketRingIntersectLayer[LocalInvocationIndex], rayPacketRingIntersectLayer[LocalInvocationIndex + 16]);};
-_minForRayPacketRingIntersectLayer(LocalInvocationIndex, LocalInvocationIndex + 16);
-      }
-      workgroupBarrier();
-      if (LocalInvocationIndex >= firstActiveRayIndex && LocalInvocationIndex < 8){
-        // rayPacketRingIntersectLayer[LocalInvocationIndex] = min(rayPacketRingIntersectLayer[LocalInvocationIndex], rayPacketRingIntersectLayer[LocalInvocationIndex + 8]);};
-_minForRayPacketRingIntersectLayer(LocalInvocationIndex, LocalInvocationIndex + 8);
-      }
-      workgroupBarrier();
-      if (LocalInvocationIndex >= firstActiveRayIndex && LocalInvocationIndex < 4){
-        // rayPacketRingIntersectLayer[LocalInvocationIndex] = min(rayPacketRingIntersectLayer[LocalInvocationIndex], rayPacketRingIntersectLayer[LocalInvocationIndex + 4]);};
-_minForRayPacketRingIntersectLayer(LocalInvocationIndex, LocalInvocationIndex + 4);
-      }
-      workgroupBarrier();
-      if (LocalInvocationIndex >= firstActiveRayIndex && LocalInvocationIndex < 2){
-        // rayPacketRingIntersectLayer[LocalInvocationIndex] = min(rayPacketRingIntersectLayer[LocalInvocationIndex], rayPacketRingIntersectLayer[LocalInvocationIndex + 2]);};
-_minForRayPacketRingIntersectLayer(LocalInvocationIndex, LocalInvocationIndex + 2);
-      }
-      workgroupBarrier();
+// if(firstActiveRayIndex == 0){
+// }
+// else{
+//   // TODO perf: change to parallel
+//     if(LocalInvocationIndex == 0){
+//         var result:u32 = _getPositiveInfinity();
+//         for (var s: u32 = firstActiveRayIndex; s < 64; s +=1) {
+//           result = min(result, rayPacketRingIntersectLayer[s]);
+//         }
 
+//         isNodeBehindRayPacket = maxLayer<= result;
+//     }
+// }
 
-      if(LocalInvocationIndex == 0){
-        isNodeBehindRayPacket = maxLayer<= rayPacketRingIntersectLayer[firstActiveRayIndex];
-      }
-      workgroupBarrier();
-}
-else{
-  // TODO perf: change to parallel
     if(LocalInvocationIndex == 0){
         var result:u32 = _getPositiveInfinity();
+        // var isSwap = false;
+
         for (var s: u32 = firstActiveRayIndex; s < 64; s +=1) {
-          result = min(result, rayPacketRingIntersectLayer[s]);
+          var layer2 = rayPacketRingIntersectLayer[s];
+
+          // if(result > layer2 && layer2 != 0){
+            if(layer2 == 0){
+              result = 0;
+              break;
+            }
+          if(result > layer2){
+            result = layer2;
+// isSwap = true;
+          }
         }
 
-        isNodeBehindRayPacket = maxLayer<= result;
+// if(result == _getPositiveInfinity()){
+// if(!isSwap){
+// isNodeBehindRayPacket = false;
+// }
+// else{
+isNodeBehindRayPacket = maxLayer<= result;
+// }
     }
-}
-
 
       workgroupBarrier();
 
