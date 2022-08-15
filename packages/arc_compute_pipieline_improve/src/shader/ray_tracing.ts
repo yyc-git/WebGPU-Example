@@ -428,8 +428,6 @@ isFirstActiveRayIndexsChange = false;
         else {
           // TODO perf: 如果Packet与两个子节点都相交则优先遍历相交Ray数目多的那个节点
 
-          // TODO perf: maxLayer big perfer
-
 
           // if (LocalInvocationIndex == 0) {
           //     child1Index = u32(currentNode.child1Index);
@@ -482,6 +480,32 @@ isFirstActiveRayIndexsChange = false;
               var child1Index = u32(currentNode.child1Index);
               var child2Index = u32(currentNode.child2Index);
 
+
+
+
+              if (_hasChild(child1Index) && _hasChild(child2Index)) {
+                var child1 = topLevel.topLevels[child1Index];
+		var leafInstanceCountAndMaxLayer = u32(child1.leafInstanceCountAndMaxLayer);
+        var child1MaxLayer =   _getMaxLayer(leafInstanceCountAndMaxLayer);
+
+                var child2 = topLevel.topLevels[child2Index];
+		leafInstanceCountAndMaxLayer = u32(child2.leafInstanceCountAndMaxLayer);
+        var child2MaxLayer =   _getMaxLayer(leafInstanceCountAndMaxLayer);
+
+                  bvhNodeFirstActiveRayIndexs[stackSize] = firstActiveRayIndex;
+                  bvhNodeFirstActiveRayIndexs[stackSize+1] = firstActiveRayIndex;
+        if(child1MaxLayer > child2MaxLayer){
+                  stackContainer[stackSize] = child1;
+                  stackContainer[stackSize+1] = child2;
+        }
+        else{
+                  stackContainer[stackSize] = child2;
+                  stackContainer[stackSize+1] = child1;
+        }
+
+stackSize += 2;
+              }
+              else{
               if (_hasChild(child1Index)) {
                   stackContainer[stackSize] = topLevel.topLevels[child1Index];
                   // if(isFirstActiveRayIndexsChange){
@@ -496,6 +520,8 @@ isFirstActiveRayIndexsChange = false;
 
                   stackSize += 1;
               }
+              }
+
           }
           workgroupBarrier();
         }
