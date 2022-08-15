@@ -41,8 +41,9 @@ var<workgroup>isRayPacketAABBIntersectWithTopLevelNode: bool;
 var<workgroup>rayPacketTempForFindFirstActiveRayIndex: array<bool, 64>;
 var<workgroup>rayPacketTemp2ForFindFirstActiveRayIndex: u32;
 var<workgroup>rayPacketRingIntersectLayer: array<u32, 64>;
-var<workgroup>rayPacketHasNotIntersectRay: bool;
-var<workgroup>rayPacketRingIntersectMinLayer: u32;
+// var<workgroup>rayPacketHasNotIntersectRay: bool;
+// var<workgroup>rayPacketRingIntersectMinLayer: u32;
+var<workgroup>isNodeBehindRayPacket: bool;
 
 
 struct RayPayload {
@@ -326,7 +327,7 @@ while(localStackSize > 0){
 // // rayPacketAABB.screenMax = vec2<f32>(_getNegativeInfinity(), _getNegativeInfinity());
 
 
-// // isRayPacketAABBIntersectWithTopLevelNode = false;
+// isRayPacketAABBIntersectWithTopLevelNode = false;
 //         }
 
         workgroupBarrier();
@@ -469,12 +470,18 @@ workgroupBarrier();
         rayPacketRingIntersectLayer[LocalInvocationIndex] = min(rayPacketRingIntersectLayer[LocalInvocationIndex], rayPacketRingIntersectLayer[LocalInvocationIndex + 2]);};
       workgroupBarrier();
 
+      if(LocalInvocationIndex == 0){
+        isNodeBehindRayPacket = maxLayer<= rayPacketRingIntersectLayer[0];
+      }
+      workgroupBarrier();
 
+// if(maxLayer <= rayPacketRingIntersectLayer[0]){
+//    continue;
+//  }
 
-if(maxLayer <= rayPacketRingIntersectLayer[0]){
+if(isNodeBehindRayPacket){
    continue;
  }
-
 
 
 
@@ -652,6 +659,8 @@ isFirstActiveRayIndexsChange = false;
                 localStackSize += 1;
             }
         }
+
+
 }
 
 return intersectResult;
