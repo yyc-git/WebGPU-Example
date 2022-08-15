@@ -31,7 +31,7 @@ rebuild aabb of first-
 
 *** DONE gpu draft
 
-*** TODO pass gpu run test
+*** DONE pass gpu run test
 
 
 test: increase r
@@ -119,6 +119,17 @@ after: ?
 
 
 *** TODO gpu draft: perf: judge maxLayer
+
+TODO fix: why break decrease fps?:
+https://stackoverflow.com/questions/30256579/is-early-exit-of-loops-on-gpu-worth-doing
+
+https://forums.developer.nvidia.com/t/issue-while-using-break-statement-in-cuda-kernel/19929/12
+
+should use flag!
+
+
+
+
 
 
 
