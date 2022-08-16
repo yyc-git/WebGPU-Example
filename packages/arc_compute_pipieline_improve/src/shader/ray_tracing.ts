@@ -32,7 +32,8 @@ struct AABB2D {
 
 var<workgroup>stackContainer: array<TopLevel, 20>;
 var<workgroup>bvhNodeFirstActiveRayIndexs: array <u32, 20>;
-var<workgroup>rayPacketAABB: AABB2D;
+// var<workgroup>rayPacketAABB: AABB2D;
+var<workgroup>rayPacketAABBData: array<f32, 4>;
 var<workgroup>isRayPacketAABBIntersectWithTopLevelNode: bool;
 var<workgroup>rayPacketTempForFindFirstActiveRayIndex: array<bool, 64>;
 var<workgroup>rayPacketTemp2ForFindFirstActiveRayIndex: u32;
@@ -165,21 +166,46 @@ fn _getLeafInstanceCount(leafInstanceCountAndMaxLayer: u32) -> u32 {
   return (leafInstanceCountAndMaxLayer >> 8) & 0xffffff;
 }
 
-fn _isAABBIntersection(aabb1:AABB2D, aabb2:AABB2D) ->bool {
-	if(aabb2.screenMax.x < aabb1.screenMin.x || aabb2.screenMin.x > aabb1.screenMax.x ||
-		aabb2.screenMax.y < aabb1.screenMin.y || aabb2.screenMin.y > aabb1.screenMax.y ){
+// fn _isAABBIntersection(aabb1:AABB2D, aabb2:AABB2D) ->bool {
+// 	if(aabb2.screenMax.x < aabb1.screenMin.x || aabb2.screenMin.x > aabb1.screenMax.x ||
+// 		aabb2.screenMax.y < aabb1.screenMin.y || aabb2.screenMin.y > aabb1.screenMax.y ){
+//       return false;
+//     } 
+
+//     return true;
+// }
+
+// fn _isAABBIntersection(minX1:f32, minY1:f32, maxX1:f32, maxY1:f32, 
+//   minX2:f32, minY2:f32, maxX2:f32, maxY2:f32
+//   ) ->bool {
+// 	if(maxX2 < minX1 || minX2 > maxX1 ||
+// 		maxY2 < minY1 || minY2 > maxY1 ){
+//       return false;
+//     } 
+
+//     return true;
+// }
+
+
+fn _isAABBIntersection(aabbData1:array<f32, 4>, 
+screenMin2:vec2<f32>,
+screenMax2:vec2<f32>,
+  ) ->bool {
+	if(screenMax2.x < aabbData1[0] || screenMin2.x > aabbData1[2] ||
+		screenMax2.y < aabbData1[1] || screenMin2.y > aabbData1[3] ){
       return false;
     } 
 
     return true;
 }
 
-fn _isRayPacketAABBIntersectWithTopLevelNode(aabb:AABB2D, node:TopLevel) ->bool {
-    var nodeAABB:AABB2D;
-    nodeAABB.screenMin = node.screenMin;
-    nodeAABB.screenMax = node.screenMax;
 
-	return _isAABBIntersection(aabb, nodeAABB);
+fn _isRayPacketAABBIntersectWithTopLevelNode(aabbData:array<f32, 4>, node:TopLevel) ->bool {
+    // var nodeAABB:AABB2D;
+    // nodeAABB.screenMin = node.screenMin;
+    // nodeAABB.screenMax = node.screenMax;
+
+	return _isAABBIntersection(aabbData, node.screenMin, node.screenMax);
 }
 
 fn _findFirstActiveRayIndex(firstActiveRayIndex:u32,pointInScreen: vec2<f32>, LocalInvocationIndex : u32, node: TopLevel) -> u32 {
@@ -254,6 +280,12 @@ fn _intersectScene(ray: Ray, LocalInvocationIndex : u32) -> RingIntersect {
 
 var rootNode = topLevel.topLevels[0];
 
+
+  var resolution = vec2 < f32 > (screenDimension.resolution);
+  var step = 2 / resolution;
+
+var pointInScreen = ray.rayTarget;
+
 // TODO use const
 if(LocalInvocationIndex < 20){
 bvhNodeFirstActiveRayIndexs[LocalInvocationIndex] = 0;
@@ -263,6 +295,11 @@ if(LocalInvocationIndex == 0){
 stackSize = 1;
 
 stackContainer[0] = rootNode;
+
+
+rayPacketAABBData[0] = pointInScreen.x;
+rayPacketAABBData[2] = pointInScreen.x + 7.0 * step.x;
+rayPacketAABBData[3] = pointInScreen.y + 7.0 * step.y;
 }
 
 
@@ -272,9 +309,10 @@ workgroupBarrier();
 // var child2Index: u32;
 
 
-var pointInScreen = ray.rayTarget;
 
-var isFirstActiveRayIndexsChange = true;
+// var isFirstActiveRayIndexsChange = true;
+
+
 
 while(stackSize > 0){
         workgroupBarrier();
@@ -410,17 +448,22 @@ if(LocalInvocationIndex == 0){
   //pointInScreen is left-bottom conner point of 8*8 region
 
 
-  if(isFirstActiveRayIndexsChange){
-  var resolution = vec2 < f32 > (screenDimension.resolution);
-  var step = 2 / resolution;
+  // if(isFirstActiveRayIndexsChange){
 
   // TODO perf: split to two aabb
-  rayPacketAABB.screenMin = vec2<f32>(pointInScreen.x, pointInScreen.y +  _getMultiplierForBuildRayPacketAABB(firstActiveRayIndex) * step.y);
-  rayPacketAABB.screenMax = vec2<f32>(pointInScreen.x + 7.0 * step.x, pointInScreen.y + 7.0 * step.y);
-  }
+  // rayPacketAABB.screenMin = vec2<f32>(pointInScreen.x, pointInScreen.y +  _getMultiplierForBuildRayPacketAABB(firstActiveRayIndex) * step.y);
+  // rayPacketAABB.screenMax = vec2<f32>(pointInScreen.x + 7.0 * step.x, pointInScreen.y + 7.0 * step.y);
+
+
+// rayPacketAABBData[0] = pointInScreen.x;
+rayPacketAABBData[1] = pointInScreen.y +  _getMultiplierForBuildRayPacketAABB(firstActiveRayIndex) * step.y;
+// rayPacketAABBData[2] = pointInScreen.x + 7.0 * step.x;
+// rayPacketAABBData[3] = pointInScreen.y + 7.0 * step.y;
+
+  // }
 
   
-  isRayPacketAABBIntersectWithTopLevelNode = _isRayPacketAABBIntersectWithTopLevelNode(rayPacketAABB, currentNode);
+  isRayPacketAABBIntersectWithTopLevelNode = _isRayPacketAABBIntersectWithTopLevelNode(rayPacketAABBData, currentNode);
 }
 else if(LocalInvocationIndex >= firstActiveRayIndex){
   isPointIntersectWithTopLevelNode = _isPointIntersectWithTopLevelNode(pointInScreen, currentNode);
@@ -444,14 +487,15 @@ else if(LocalInvocationIndex >= firstActiveRayIndex){
 
     var firstActiveRayIndexBefore = firstActiveRayIndex;
 
+    // TODO perf: for non leaf node
         firstActiveRayIndex = _findFirstActiveRayIndex(firstActiveRayIndex,pointInScreen, LocalInvocationIndex , currentNode);
 
-        if(firstActiveRayIndex != firstActiveRayIndexBefore){
-isFirstActiveRayIndexsChange = true;
-        }
-        else{
-isFirstActiveRayIndexsChange = false;
-        }
+//         if(firstActiveRayIndex != firstActiveRayIndexBefore){
+// isFirstActiveRayIndexsChange = true;
+//         }
+//         else{
+// isFirstActiveRayIndexsChange = false;
+//         }
 
 
         // TODO check: if(firstActiveRayIndex > 100), throw error
