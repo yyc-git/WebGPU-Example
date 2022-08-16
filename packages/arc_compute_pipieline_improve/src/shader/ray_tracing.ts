@@ -44,6 +44,7 @@ var<workgroup>isNodeBehindRayPacket: bool;
 var<workgroup>stackSize: u32;
 // var<workgroup>child1Index: u32;
 // var<workgroup>child2Index: u32;
+var<workgroup>lastFirstActiveRayIndex: u32;
 
 
 struct RayPayload {
@@ -297,6 +298,8 @@ stackSize = 1;
 stackContainer[0] = rootNode;
 
 
+lastFirstActiveRayIndex = 100;
+
 rayPacketAABBData[0] = pointInScreen.x;
 rayPacketAABBData[2] = pointInScreen.x + 7.0 * step.x;
 rayPacketAABBData[3] = pointInScreen.y + 7.0 * step.y;
@@ -450,6 +453,7 @@ if(LocalInvocationIndex == 0){
 
   // if(isFirstActiveRayIndexsChange){
 
+  if(lastFirstActiveRayIndex != firstActiveRayIndex){
   // TODO perf: split to two aabb
   // rayPacketAABB.screenMin = vec2<f32>(pointInScreen.x, pointInScreen.y +  _getMultiplierForBuildRayPacketAABB(firstActiveRayIndex) * step.y);
   // rayPacketAABB.screenMax = vec2<f32>(pointInScreen.x + 7.0 * step.x, pointInScreen.y + 7.0 * step.y);
@@ -460,7 +464,10 @@ rayPacketAABBData[1] = pointInScreen.y +  _getMultiplierForBuildRayPacketAABB(fi
 // rayPacketAABBData[2] = pointInScreen.x + 7.0 * step.x;
 // rayPacketAABBData[3] = pointInScreen.y + 7.0 * step.y;
 
-  // }
+  }
+
+
+lastFirstActiveRayIndex = firstActiveRayIndex;
 
   
   isRayPacketAABBIntersectWithTopLevelNode = _isRayPacketAABBIntersectWithTopLevelNode(rayPacketAABBData, currentNode);
