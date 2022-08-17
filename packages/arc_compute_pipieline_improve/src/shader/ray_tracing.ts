@@ -38,7 +38,7 @@ var<workgroup>isRayPacketAABBIntersectWithTopLevelNode: bool;
 // var<workgroup>rayPacketTempForFindFirstActiveRayIndex: array<bool, 64>;
 // var<workgroup>rayPacketTemp2ForFindFirstActiveRayIndex: u32;
 var<workgroup>rayPacketRingIntersectLayer: array<u32, 64>;
-var<workgroup>isNodeBehindRayPacket: bool;
+// var<workgroup>isNodeBehindRayPacket: bool;
 // var<workgroup>hasChild1: bool;
 // var<workgroup>hasChild2: bool;
 var<workgroup>stackSize: u32;
@@ -362,12 +362,12 @@ fn _intersectScene(ray: Ray, LocalInvocationIndex : u32) -> RingIntersect {
         }
         workgroupBarrier();
 
-        if (LocalInvocationIndex == 0) {
-            isNodeBehindRayPacket = maxLayer <= rayPacketRingIntersectLayer[0];
-        }
-        workgroupBarrier();
+        // if (LocalInvocationIndex == 0) {
+        //     isNodeBehindRayPacket = maxLayer <= rayPacketRingIntersectLayer[0];
+        // }
+        // workgroupBarrier();
 
-        if (isNodeBehindRayPacket) {
+        if (maxLayer <= rayPacketRingIntersectLayer[0]) {
             continue;
         }
 
