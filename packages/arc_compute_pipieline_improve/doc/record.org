@@ -167,8 +167,25 @@ TODO perf: optimize if(share)
 TODO ensure: one node always has two children!
 
 
+*** TODO why fps drop???
+
+bank conflict???
 
 
+*** TODO why "if (LocalInvocationIndex == 16) {" bug???
+
+
+*** TODO perf: optimize memory use
+
+
+
+
+*** TODO perf: switch to 4*8 or 8*4?
+
+
+*** TODO perf: share intersectResult ?
+
+for store in shared memory instead of local memory?
 
 
 *** TODO add last
