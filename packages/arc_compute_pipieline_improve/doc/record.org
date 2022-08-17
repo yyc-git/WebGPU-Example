@@ -167,7 +167,52 @@ TODO perf: optimize if(share)
 TODO ensure: one node always has two children!
 
 
+*** DONE why fps drop???
 
+
+bank conflict???
+broadcast?
+
+not change in RTX
+
+
+
+reason:
+mac may not support 广播机制 but RTX support
+
+
+*** TODO why "if (LocalInvocationIndex == 16) {" bug???
+why "if (LocalInvocationIndex == 32) {" bug??? in RTX card
+
+half-wrap in mac?
+
+wrap schedule?
+
+
+
+**** TODO fix == 63 before while?
+
+
+*** TODO perf: latten hidden optimize?
+
+
+*** TODO perf: share intersectResult ?
+
+for store in shared memory instead of local memory?
+
+
+
+*** TODO perf: optimize memory use
+
+
+
+
+*** TODO why rtx change from 45 to 33?
+
+
+
+
+*** TODO perf: switch to 4*8 or 8*4?
 
 
 
