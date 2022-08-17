@@ -315,6 +315,7 @@ let _buildByLBVH = (node, minCount, maxDepth, depth, searchBitIndex, sortedAllAA
 	}
 }
 
+// TODO test: one not leaf node always has two children!
 export let build = (allAABBData: Array<aabbData>, minCount = 5, maxDepth = 10): tree => {
 	let wholeAABBData = _computeWholeAABBData(allAABBData, 0,
 		allAABBData.length

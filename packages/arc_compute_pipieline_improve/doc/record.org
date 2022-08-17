@@ -161,6 +161,16 @@ TODO perf: optimize if(share)
 
 *** DONE benchmark compare
 
+
+*** DONE perf: handle children
+
+TODO ensure: one node always has two children!
+
+
+
+
+
+
 *** TODO add last
 
 update:
