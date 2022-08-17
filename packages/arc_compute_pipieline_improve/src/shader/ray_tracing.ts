@@ -287,24 +287,25 @@ var rootNode = topLevel.topLevels[0];
 
 var pointInScreen = ray.rayTarget;
 
-// TODO use const
-if(LocalInvocationIndex < 20){
-bvhNodeFirstActiveRayIndexs[LocalInvocationIndex] = 0;
-}
 
 if(LocalInvocationIndex == 0){
-stackSize = 1;
-
-stackContainer[0] = rootNode;
-
-
-lastFirstActiveRayIndex = 100;
-
 rayPacketAABBData[0] = pointInScreen.x;
 rayPacketAABBData[2] = pointInScreen.x + 7.0 * step.x;
 rayPacketAABBData[3] = pointInScreen.y + 7.0 * step.y;
 }
 
+// TODO use const
+if(LocalInvocationIndex > 0 && LocalInvocationIndex < 21){
+bvhNodeFirstActiveRayIndexs[LocalInvocationIndex - 1] = 0;
+}
+
+if(LocalInvocationIndex == 21){
+stackSize = 1;
+
+stackContainer[0] = rootNode;
+
+lastFirstActiveRayIndex = 100;
+}
 
 workgroupBarrier();
 
