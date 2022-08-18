@@ -231,38 +231,10 @@ global memory perf
 
 because 合并, the two ways both only has one memory request, but with different transactions
 
-*** TODO why move get bottomLevel into isBreak not affect fps?
+*** DONE remove isBreak
 
-# compiler optimize?
+wrap diverse
 
-
-        while (leafInstanceCount > 0) {
-          var bottomLevel = bottomLevel.bottomLevels[leafInstanceOffset];
-          if (!isBreak) {
-
-          if (_isPointIntersectWithAABB(pointInScreen, bottomLevel.screenMin, bottomLevel.screenMax)) {
-            var instance: Instance = sceneInstanceData.instances[u32(bottomLevel.instanceIndex)];
-            var geometry: Geometry = sceneGeometryData.geometrys[u32(instance.geometryIndex)];
-
-            if (_isIntersectWithRing(pointInScreen, instance, geometry)) {
-              var layer = u32(bottomLevel.layer);
-
-              if (!intersectResult.isClosestHit || layer > intersectResult.layer) {
-                intersectResult.isClosestHit = true;
-                intersectResult.layer = layer;
-                intersectResult.instanceIndex = bottomLevel.instanceIndex;
-
-                if (layer == maxLayer) {
-                  isBreak = true;
-                }
-              }
-            }
-          }
-          }
-
-          leafInstanceCount = leafInstanceCount - 1;
-          leafInstanceOffset = leafInstanceOffset + 1;
-        }
 
 
 *** TODO perf: optimize memory use

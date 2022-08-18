@@ -323,11 +323,32 @@ fn _intersectScene(ray: Ray, LocalInvocationIndex : u32) -> RingIntersect {
 
         var maxLayer = _getMaxLayer(u32(currentNode.leafInstanceCountAndMaxLayer));
 
-        var isBreak = false;
+        // var isBreak = false;
         while (leafInstanceCount > 0) {
-          var bottomLevel = bottomLevel.bottomLevels[leafInstanceOffset];
+          // var bottomLevel = bottomLevel.bottomLevels[leafInstanceOffset];
 
-          if (!isBreak && _isPointIntersectWithAABB(pointInScreen, bottomLevel.screenMin, bottomLevel.screenMax)) {
+          // if (!isBreak && _isPointIntersectWithAABB(pointInScreen, bottomLevel.screenMin, bottomLevel.screenMax)) {
+          //   var instance: Instance = sceneInstanceData.instances[u32(bottomLevel.instanceIndex)];
+          //   var geometry: Geometry = sceneGeometryData.geometrys[u32(instance.geometryIndex)];
+
+          //   if (_isIntersectWithRing(pointInScreen, instance, geometry)) {
+          //     var layer = u32(bottomLevel.layer);
+
+          //     if (!intersectResult.isClosestHit || layer > intersectResult.layer) {
+          //       intersectResult.isClosestHit = true;
+          //       intersectResult.layer = layer;
+          //       intersectResult.instanceIndex = bottomLevel.instanceIndex;
+
+          //       if (layer == maxLayer) {
+          //         isBreak = true;
+          //       }
+          //     }
+          //   }
+          // }
+
+
+          var bottomLevel = bottomLevel.bottomLevels[leafInstanceOffset];
+          if (_isPointIntersectWithAABB(pointInScreen, bottomLevel.screenMin, bottomLevel.screenMax)) {
             var instance: Instance = sceneInstanceData.instances[u32(bottomLevel.instanceIndex)];
             var geometry: Geometry = sceneGeometryData.geometrys[u32(instance.geometryIndex)];
 
@@ -338,13 +359,10 @@ fn _intersectScene(ray: Ray, LocalInvocationIndex : u32) -> RingIntersect {
                 intersectResult.isClosestHit = true;
                 intersectResult.layer = layer;
                 intersectResult.instanceIndex = bottomLevel.instanceIndex;
-
-                if (layer == maxLayer) {
-                  isBreak = true;
-                }
               }
             }
           }
+
 
 
           leafInstanceCount = leafInstanceCount - 1;
