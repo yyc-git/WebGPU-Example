@@ -281,10 +281,6 @@ fn _intersectScene(ray: Ray, LocalInvocationIndex : u32) -> RingIntersect {
 
   var rootNode = topLevel.topLevels[0];
 
-
-  var resolution = vec2 < f32 > (screenDimension.resolution);
-  var step = 2 / resolution;
-
   var pointInScreen = ray.rayTarget;
 
   if (LocalInvocationIndex == 0) {
@@ -333,8 +329,7 @@ fn _intersectScene(ray: Ray, LocalInvocationIndex : u32) -> RingIntersect {
 
           if (!isBreak && _isPointIntersectWithAABB(pointInScreen, bottomLevel.screenMin, bottomLevel.screenMax)) {
             var instance: Instance = sceneInstanceData.instances[u32(bottomLevel.instanceIndex)];
-            var geometryIndex = u32(instance.geometryIndex);
-            var geometry: Geometry = sceneGeometryData.geometrys[geometryIndex];
+            var geometry: Geometry = sceneGeometryData.geometrys[u32(instance.geometryIndex)];
 
             if (_isIntersectWithRing(pointInScreen, instance, geometry)) {
               var layer = u32(bottomLevel.layer);
@@ -350,6 +345,7 @@ fn _intersectScene(ray: Ray, LocalInvocationIndex : u32) -> RingIntersect {
               }
             }
           }
+
 
           leafInstanceCount = leafInstanceCount - 1;
           leafInstanceOffset = leafInstanceOffset + 1;
