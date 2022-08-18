@@ -292,12 +292,10 @@ fn _intersectScene(ray: Ray, LocalInvocationIndex : u32) -> RingIntersect {
     rayPacketAABBData[3] = pointInScreen.y;
   }
 
-  if (LocalInvocationIndex == 21) {
+  if (LocalInvocationIndex == 1) {
     stackSize = 1;
 
     stackContainer[0] = rootNode;
-
-    // lastFirstActiveRayIndex = 100;
   }
 
   workgroupBarrier();
@@ -363,8 +361,6 @@ fn _intersectScene(ray: Ray, LocalInvocationIndex : u32) -> RingIntersect {
             }
           }
 
-
-
           leafInstanceCount = leafInstanceCount - 1;
           leafInstanceOffset = leafInstanceOffset + 1;
         }
@@ -420,13 +416,13 @@ fn _intersectScene(ray: Ray, LocalInvocationIndex : u32) -> RingIntersect {
 
       if (LocalInvocationIndex == 0) {
         if (isAddChild1) {
-          stackContainer[stackSize ] = child1Node;
+          stackContainer[stackSize] = child1Node;
 
           stackSize += 1;
         }
 
         if (isAddChild2) {
-          stackContainer[stackSize ] = child2Node;
+          stackContainer[stackSize] = child2Node;
 
           stackSize += 1;
         }
