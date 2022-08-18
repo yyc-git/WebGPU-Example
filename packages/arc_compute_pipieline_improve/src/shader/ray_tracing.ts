@@ -46,6 +46,8 @@ var<workgroup>stackSize: u32;
 // var<workgroup>child1Index: u32;
 // var<workgroup>child2Index: u32;
 // var<workgroup>lastFirstActiveRayIndex: u32;
+var<workgroup>isAddChild1: bool;
+var<workgroup>isAddChild2: bool;
 
 
 struct RayPayload {
@@ -392,16 +394,25 @@ fn _intersectScene(ray: Ray, LocalInvocationIndex : u32) -> RingIntersect {
       // }
       // workgroupBarrier();
 
+
       if (LocalInvocationIndex == 0) {
-        if (child1NodeMaxLayer > rayPacketRingIntersectLayer[0] && _isRayPacketAABBIntersectWithTopLevelNode(rayPacketAABBData, child1Node)) {
-          stackContainer[stackSize] = child1Node;
+        isAddChild1 = child1NodeMaxLayer > rayPacketRingIntersectLayer[0] && _isRayPacketAABBIntersectWithTopLevelNode(rayPacketAABBData, child1Node); 
+      }
+      if (LocalInvocationIndex == 1) {
+        isAddChild2 = child2NodeMaxLayer > rayPacketRingIntersectLayer[0] && _isRayPacketAABBIntersectWithTopLevelNode(rayPacketAABBData, child2Node);
+      }
+
+      workgroupBarrier();
+
+      if (LocalInvocationIndex == 0) {
+        if (isAddChild1) {
+          stackContainer[stackSize ] = child1Node;
 
           stackSize += 1;
         }
-      }
-      if (LocalInvocationIndex == 1) {
-        if (child2NodeMaxLayer > rayPacketRingIntersectLayer[0] && _isRayPacketAABBIntersectWithTopLevelNode(rayPacketAABBData, child2Node)) {
-          stackContainer[stackSize] = child2Node;
+
+        if (isAddChild2) {
+          stackContainer[stackSize ] = child2Node;
 
           stackSize += 1;
         }

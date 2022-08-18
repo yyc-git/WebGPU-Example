@@ -181,7 +181,7 @@ reason:
 mac may not support 广播机制 but RTX support
 
 
-*** TODO why "if (LocalInvocationIndex == 16) {" bug???
+*** DONE why "if (LocalInvocationIndex == 16) {" bug???
 why "if (LocalInvocationIndex == 32) {" bug??? in RTX card
 
 half-wrap in mac?
@@ -189,8 +189,17 @@ half-wrap in mac?
 wrap schedule?
 
 
+switch exectute wrap 
+visit memory
 
-**** TODO fix == 63 before while?
+
+
+reason:
+because bug: if add both children, will overlap!
+
+
+
+*** TODO fix == 63 before while?
 
 
 *** TODO perf: latten hidden optimize?
