@@ -1,5 +1,5 @@
 {
-    "name": "webgpu-example-arc_compute_pipieline_improve",
+    "name": "webgpu-example-arc_ray_packet",
     "version": "0.0.1",
     "license": "MIT",
     "scripts": {
